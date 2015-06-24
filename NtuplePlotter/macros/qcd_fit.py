@@ -96,15 +96,17 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 bkgfname = 'background total'
                 qcdfname = ' qcd total'
 		otherMCfname = 'other MC total'
-        signalVar = RooRealVar(sfname,sfname, 231430.,100000.,300000.)
-        bkgVar = RooRealVar(bkgfname,bkgfname, 119903.,50000.,200000.)
-        qcdVar = RooRealVar(qcdfname,qcdfname, 15218.,.7*15218.,1.7*15218.)
-        otherMCVar = RooRealVar(otherMCfname, otherMCfname,33318.,.3*33318.,1.3*33318.) 
+	signalIntegral   = signalHist.Integral()
+	bkgIntegral      = bkgHist.Integral()
+	qcdIntegral      = qcdHist.Integral()
+	otherMCIntegral  = otherMCHist.Integral()
+        signalVar = RooRealVar(sfname,sfname, signalIntegral,0.,3.*signalIntegral)
+        bkgVar = RooRealVar(bkgfname,bkgfname, bkgIntegral,0.,3.*bkgIntegral)
+        qcdVar = RooRealVar(qcdfname,qcdfname, qcdIntegral,0.3*qcdIntegral,1.7*qcdIntegral)
+        otherMCVar = RooRealVar(otherMCfname, otherMCfname,otherMCIntegral,.3*otherMCIntegral,1.7*otherMCIntegral) 
 	#constraints:
-	qcdIntegral = qcdHist.Integral()
         #qcdVar.setVal(qcd)
         #qcdVar.setConstant(True)
-        otherMCIntegral = otherMCHist.Integral()
         print "Integral of otherMC= "+str(otherMCIntegral)
 	#otherMCVar.setVal(otherMC)
 	#otherMCVar.setConstant(True)
