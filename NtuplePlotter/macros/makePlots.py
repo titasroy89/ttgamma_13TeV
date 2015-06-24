@@ -84,8 +84,15 @@ else:
 WJetsSF = 1.0
 TopSF = 1.0
 QCDSF = 1.0
-ZJetsSF = 1.0 #1.20 
-ZJetsSFErr = 0.06
+ZJetsSF = 1.0
+ZJetsSFErr = 0.0
+if isElectron:	
+	ZJetsSF = 1.20  
+	ZJetsSFErr = 0.06
+if isMuon:
+	ZJetsSF = 1.14 
+	ZJetsSFErr = 0.06
+
 if systematic == 'ZJetsSF_up':
 	ZJetsSF += ZJetsSFErr
 if systematic == 'ZJetsSF_down':
@@ -93,7 +100,6 @@ if systematic == 'ZJetsSF_down':
 if systematic == 'zeroB':
 	ZJetsSF = 1.0
 
-VgammaSF = 1.0 
 otherMCSF = 1.0
 #import array
 #binarray = array.array('d')
