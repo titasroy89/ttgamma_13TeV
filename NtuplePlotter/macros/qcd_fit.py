@@ -309,12 +309,13 @@ def doM3fit():
 	WJetsSFerror = m3WjetsErr / WJInt
 	otherMCSF = m3otherMC/otherMCInt 
 	otherMCSFerror = m3otherMCerr/otherMCInt
-	QCDSF_m3 = m3QCD/QCDInt
-        QCDSFerror_m3 = m3QCDerr/QCDInt
+	QCDSF = m3QCD/QCDInt
+        QCDSFerror = m3QCDerr/QCDInt
 	#QCDSF = (1-m3Wjets-m3TopFrac)*dataInt/QCDInt
         #QCDSFErr = (1-m3WjetsErr-m3TopFracErr)*dataInt/QCDInt 
 	print 'Correction to WJets scale factor: ', WJetsSF, ' +-',WJetsSFerror,'(fit error only)'
+	print 'Correction to QCD scale factor: ', QCDSF, ' +-',QCDSFerror,'(fit error only)'
 	print 'Correction to OtherMC scale factor: ', otherMCSF, ' +-',otherMCSFerror,'(fit error only)'
 	print '#'*80
-	return (TopSF, TopSFerror, WJetsSF, WJetsSFerror, otherMCSF, otherMCSFerror, QCDSF_m3, QCDSFerror_m3)
+	return (TopSF, TopSFerror, WJetsSF, WJetsSFerror, otherMCSF, otherMCSFerror, QCDSF, QCDSFerror)
 

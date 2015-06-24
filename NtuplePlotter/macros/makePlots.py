@@ -42,7 +42,7 @@ isSyst = False
 systematic = ''
 if len(sys.argv) > 1:
 	print sys.argv
-	if sys.argv[1]=='e' or 'elec' in sys.argv[1]:
+	if sys.argv[1]=='e' or 'ele' in sys.argv[1]:
 		isElectron = True
 		lep = 'ele'
 	elif sys.argv[1]=='mu' or 'muon' in sys.argv[1]:
@@ -451,9 +451,9 @@ if systematic in ['Btag_down','Btag_up','EleEff_down','EleEff_up','JEC_down','JE
 else:
 	outSuffix = ''
 
-InputHist = '../../hist_bins'+outSuffix+'/'
-QCDHist = '../../QCD_bins/'
-DataHist = '../../hist_bins/'
+InputHist = '../../hist_bin'+outSuffix+'/'
+QCDHist = '../../QCD_bin/'
+DataHist = '../../hist_bin/'
 
 ######## Added in a printout of histogram locations, for easier tracking later on ######## 
 

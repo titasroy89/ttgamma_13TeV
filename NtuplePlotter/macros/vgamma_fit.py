@@ -269,15 +269,15 @@ def doM3fit_photon():
 	otherMCSF = m3otherMC/otherMCInt
 	otherMCSFerror = m3otherMCerr/otherMCInt
         #QCDSF = (1-m3Wjets-m3TopFrac)*dataInt/QCDInt
-	print 'the top fraction after photon selection :',m3TopFrac
-	print 'the top fraction error after photon selection:', m3TopFracErr 	
+	totMC = m3Top + m3Wjets + m3otherMC + m3qcd
+	m3_topFrac = m3Top/totMC
+	m3_topFracErr = m3TopErr/totMC	
+	print 'the top fraction after photon selection :',m3_topFrac
+	print 'the top fraction error after photon selection:', m3_topFracErr 	
 	print 'Correction to WJets scale factor: ', WJetsSF, ' +-',WJetsSFerror,'(fit error only)'
 	print 'Correction to otherMC scale factor: ', otherMCSF, ' +-',otherMCSFerror,'(fit error only)'
         print '#'*80
 	######## Calculate the top fraction (topEvents over total MC events) and return it as well ########
-	totMC = m3Top + m3Wjets + m3otherMC + m3qcd
-	m3_topFrac = m3Top/totMC
-	m3_topFracErr = m3TopErr/totMC	
         return (TopSF, TopSFerror, WJetsSF, WJetsSFerror,otherMCSF, otherMCSFerror, m3_topFrac, m3_topFracErr) 
 
 	
