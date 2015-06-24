@@ -73,7 +73,7 @@ def getInt_Err(hist):
 
 
 def addEle_Pho_contributions(sample, all, ele, pho):
-	fileName = 'templates_barrel_scaled.root'
+	fileName = 'templates_barrel_scaled_zeroB.root'
 	
 	allHist = get1DHist(fileName, sample+'_MET')
 	eleHist = get1DHist(fileName, sample+'_electron_MET')
@@ -98,11 +98,11 @@ def addEle_Pho_contributions(sample, all, ele, pho):
 
 
 def getEleMass_template(sample):
-	fileName = 'templates_barrel_scaled.root'
+	fileName = 'templates_barrel_scaled_zeroB.root'
 	#allHist = get1DHist(fileName, sample+'_ele1pho1Mass')
 	eleHist = get1DHist(fileName, sample+'_electron_ele1pho1Mass')
 	
-	#normHist = get1DHist('templates_barrel_scaled.root', sample+'_ele1pho1Mass')
+	#normHist = get1DHist('templates_barrel_scaled_zeroB.root', sample+'_ele1pho1Mass')
 	
 	#eleHist.Scale( normHist.Integral() / allHist.Integral() )
 	return eleHist
@@ -125,7 +125,7 @@ bg_all, bg_ele, bg_pho = addEle_Pho_contributions('ZJets', bg_all, bg_ele, bg_ph
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Vgamma', bg_all, bg_ele, bg_pho)
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('SingleTop', bg_all, bg_ele, bg_pho)
 # QCD has no MC information, expect no real photon and no electron
-qcdInt,qcdErr = getInt_Err(get1DHist('templates_barrel_scaled.root', 'QCD_MET'))
+qcdInt,qcdErr = getInt_Err(get1DHist('templates_barrel_scaled_zeroB.root', 'QCD_MET'))
 print 'zero b-tag selection'
 print 'QCD total: ',qcdInt,qcdErr
 bg_all = (bg_all[0] + qcdInt, ((bg_all[1])**2 + qcdErr**2)**0.5 )
@@ -143,7 +143,7 @@ print 'bg ele and pho fractions',bg_ele[0]/bg_all[0], '  ', bg_pho[0]/bg_all[0]
 electronTempl = getEleMass_template('ZJets')
 electronTempl.Add( getEleMass_template('Vgamma') )
 
-fileName = 'templates_barrel_scaled.root'
+fileName = 'templates_barrel_scaled_zeroB.root'
 otherTempl = get1DHist(fileName, 'TTJets' + '_ele1pho1Mass')
 otherTempl.Add( get1DHist(fileName, 'TTGamma' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'WJets' + '_ele1pho1Mass') )
