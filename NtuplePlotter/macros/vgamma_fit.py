@@ -197,7 +197,7 @@ def doNjetsfit_photon():
 	topInt,topIntErr = integral_bins(TopHist,lowfitBin,highfitBin)
 	bgInt,bgIntErr = integral_bins(BGHist,lowfitBin,highfitBin)
 	
-	(nJetsTopFrac, nJetsTopFracErr) = makeFit(varToFit+', photon selection', 2.5, 8.5, TopHist, BGHist, DataHist, varToFit+'_photon_fit.png')
+	(nJetsTopFrac, nJetsTopFracErr) = makeFit(varToFit+', photon selection', 2.5, 8.5, TopHist, BGHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
 
 	bgSF = (1.0 - nJetsTopFrac) * dataInt / bgInt
 	bgSFerror = bgSF * ( (nJetsTopFracErr / (1.0 - nJetsTopFrac))**2 + (bgIntErr/bgInt)**2 + (dataIntErr/dataInt)**2 )**0.5
@@ -251,7 +251,7 @@ def doM3fit_photon():
         otherMCHist.Rebin(2)
 	QCDHist.Rebin(2)
 
-	(m3Top, m3TopErr,m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr, m3qcd, m3qcdErr) = makenewFit(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, WJetsHist,otherMCHist, QCDHist, DataHist, varToFit+'_photon_fit.png')
+	(m3Top, m3TopErr,m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr, m3qcd, m3qcdErr) = makenewFit(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, WJetsHist,otherMCHist, QCDHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
         lowfitBin = DataHist.FindBin(0.01)
         highfitBin = DataHist.FindBin(799.99)
 
@@ -317,7 +317,7 @@ def doQCDfit_photon():
 
 
 
-        (metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, QCDHist, MCHist, DataHist, varToFit+'_QCD_fit_photon.png')
+        (metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, QCDHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_fit_photon.png')
         # recalculate data-driven QCD normalization
         lowbin = DataHist.FindBin(0.01)
         highbin = DataHist.GetNbinsX()+1# overflow bin included
@@ -380,7 +380,7 @@ def doQCDlowfit_photon():
         MCHist.Add(TopHist)
         MCHist.Add(SingleTopHist)
         MCHist.Add(VgHist)
-        (metFrac, metFracErr) = makeFit(varToFit, 0., 20.0, QCDHist, MCHist, DataHist, varToFit+'_QCD_fit_photon.png')
+        (metFrac, metFracErr) = makeFit(varToFit, 0., 20.0, QCDHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_fit_photon.png')
         # recalculate data-driven QCD normalization
         lowbin = DataHist.FindBin(0.01)
         highbin = DataHist.FindBin(19.99)# overflow bin included

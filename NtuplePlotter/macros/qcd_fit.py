@@ -195,7 +195,7 @@ def doQCD_lowfit():
         MCHist.Add(get1DHist(normMETfile, 'ZJets_'+varToFit))
         MCHist.Add(get1DHist(normMETfile, 'SingleTop_'+varToFit))
 
-        (metFrac, metFracErr) = makeFit(varToFit, 0., 20.0, qcdDataHist, MCHist, DataHist, varToFit+'_QCD_fit.png')
+        (metFrac, metFracErr) = makeFit(varToFit, 0., 20.0, qcdDataHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_fit.png')
         # recalculate data-driven QCD normalization
         lowbin = DataHist.FindBin(0.01)
         highbin =  DataHist.FindBin(19.99)# overflow bin included
@@ -238,7 +238,7 @@ def doQCDfit():
 	MCHist.Add(get1DHist(normMETfile, 'ZJets_'+varToFit))
 	MCHist.Add(get1DHist(normMETfile, 'SingleTop_'+varToFit))
 
-	(metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, qcdDataHist, MCHist, DataHist, varToFit+'_QCD_fit.png')
+	(metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, qcdDataHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_fit.png')
 	# recalculate data-driven QCD normalization
 	lowbin = DataHist.FindBin(0.01)
 	highbin =   DataHist.GetNbinsX()+1 # overflow bin included
@@ -293,7 +293,7 @@ def doM3fit():
 	
 	QCDHist = get1DHist(M3file, 'QCD_'+varToFit)
 
-	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 0.0, 800.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, varToFit+'_fit.png')
+	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 0.0, 800.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, 'plots/'+varToFit+'_fit.png')
 	lowfitBin = DataHist.FindBin(0.01)
 	highfitBin = DataHist.FindBin(799.99)
 			
