@@ -97,7 +97,7 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 qcdfname = ' qcd total'
 		otherMCfname = 'other MC total'
 	signalIntegral   = signalHist.Integral()
-	bkgIntegral      = bkgHist.Integral()
+	bkgIntegral      = backgroundHist.Integral()
 	qcdIntegral      = qcdHist.Integral()
 	otherMCIntegral  = otherMCHist.Integral()
         signalVar = RooRealVar(sfname,sfname, signalIntegral,0.,3.*signalIntegral)
