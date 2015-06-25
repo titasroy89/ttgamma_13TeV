@@ -457,9 +457,14 @@ if systematic in ['Btag_down','Btag_up','EleEff_down','EleEff_up','JEC_down','JE
 else:
 	outSuffix = ''
 
-InputHist = '../../hist_bin'+outSuffix+'/'
-QCDHist = '../../QCD_bin/'
-DataHist = '../../hist_bin/'
+if isElectron:
+	InputHist = '../../EleHists/hist_bin'+outSuffix+'/'
+	QCDHist = '../../EleHists/QCD_bin/'
+	DataHist = '../../EleHists/hist_bin/'
+if isMuon:
+	InputHist = '../../MuonHists/hist_bins'+outSuffix+'/'
+	QCDHist = '../../MuonHists/QCD_bins/'
+	DataHist = '../../MuonHists/hist_bins/'
 
 ######## Added in a printout of histogram locations, for easier tracking later on ######## 
 
