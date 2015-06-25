@@ -1,5 +1,13 @@
 import ROOT
+import sys
 
+
+useDiboson = False
+if len(sys.argv) > 1:
+	if 'Diboson' in sys.argv[1]:
+		useDiboson = True
+
+ROOT.gROOT.SetBatch()
 openfiles = {}
 
 def get1DHist(filename, histname):
@@ -121,7 +129,7 @@ ttbar_all, ttbar_ele, ttbar_pho = addEle_Pho_contributions('TTGamma', ttbar_all,
 
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('WJets', bg_all, bg_ele, bg_pho)
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('ZJets', bg_all, bg_ele, bg_pho)
-#bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Diboson', bg_all, bg_ele, bg_pho)
+if useDiboson: bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Diboson', bg_all, bg_ele, bg_pho)
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Vgamma', bg_all, bg_ele, bg_pho)
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('SingleTop', bg_all, bg_ele, bg_pho)
 # QCD has no MC information, expect no real photon and no electron
@@ -148,7 +156,7 @@ otherTempl = get1DHist(fileName, 'TTJets' + '_ele1pho1Mass')
 otherTempl.Add( get1DHist(fileName, 'TTGamma' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'WJets' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'ZJets' + '_ele1pho1Mass') )
-otherTempl.Add( get1DHist(fileName, 'Diboson' + '_ele1pho1Mass') )
+if useDiboson: otherTempl.Add( get1DHist(fileName, 'Diboson' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'Vgamma' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'SingleTop' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'QCD' + '_ele1pho1Mass') )

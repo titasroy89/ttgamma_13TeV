@@ -336,7 +336,7 @@ def saveNoMETTemplates(inputDir, inputData, outFileName):
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
-	MCTempl.append(MCTemplDict['Other'])
+#	MCTempl.append(MCTemplDict['Other'])
 	saveTemplatesToFile([DataTempl] + MCTempl, varList, outFileName)
 
 def saveBarrelFitTemplates(inputDir, inputData,  outFileName):
@@ -371,7 +371,7 @@ def savePreselTemplates(inputDir, qcdDir, inputData, outFileName):
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
-	MCTempl.append(MCTemplDict['Other'])
+#	MCTempl.append(MCTemplDict['Other'])
 	if QCDSF > 0.0001:
 		MCTempl.append(QCDTempl)
 	saveTemplatesToFile([DataTempl] + MCTempl, varList, outFileName)
@@ -386,7 +386,7 @@ def makeQCDPlots(varList,qcdDir,outDir):
         MCTempl.append(MCTemplDict['SingleTop'])
         MCTempl.append(MCTemplDict['WJets'])
         MCTempl.append(MCTemplDict['ZJets'])
-	MCTempl.append(MCTemplDict['Other'])
+#	MCTempl.append(MCTemplDict['Other'])
 	if WJetsSF == 1.0 and TopSF == 1.0:
                 pass
         else:
@@ -408,7 +408,7 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
-	MCTempl.append(MCTemplDict['Other'])
+#	MCTempl.append(MCTemplDict['Other'])
 	if QCDSF > 0.0001:
 		MCTempl.append(QCDTempl)
 	
@@ -438,7 +438,7 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl_b.append(MCTemplDict_b['SingleTop'])
 	MCTempl_b.append(MCTemplDict_b['WJets'])
 	MCTempl_b.append(MCTemplDict_b['ZJets'])
-	MCTempl_b.append(MCTemplDict_b['Other'])
+#	MCTempl_b.append(MCTemplDict_b['Other'])
 	if QCDSF > 0.0001:
 		MCTempl_b.append(QCDTempl_b)
 	
