@@ -49,15 +49,17 @@ isSyst = False
 systematic = ''
 if len(sys.argv) > 1:
 	print sys.argv
-	if sys.argv[1]=='e' or 'ele' in sys.argv[1]:
+	if sys.argv[1]=='e' or 'ele' in sys.argv[1].lower():
 		isElectron = True
 		lep = 'ele'
-	elif sys.argv[1]=='mu' or 'muon' in sys.argv[1]:
+	elif sys.argv[1]=='mu' or 'muon' in sys.argv[1].lower():
 		isMuon = True
 		lep = 'mu'
 	else:
 		print '#'*30
 		print 'First argument must specify either electron or muon'
+		print 'Allowed arguments:'
+		print '   e, electron, mu, muons'
 		print '#'*30
 		sys.exit(1)
 	if len(sys.argv) > 2:
@@ -407,7 +409,7 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	else:	
 	# save final templates, exactly as they are on the plots
 		saveTemplatesToFile([DataTempl] + MCTempl, ['MET','MET_low','M3','WtransMass','genPhoRegionWeight','MCcategory'], 'templates_presel_scaled.root')
-        print "SF used : ", TopSF, WJetsSF, QCDSF, otherMCSF	
+ 	print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
 	plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
 	
 	
@@ -434,7 +436,7 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl_rs_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_rs_barrel_top_', '_signal', 1001)
 	MCTempl_fe_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_fe_barrel_top_', '_electron', 3005)
 	MCTempl_fjrb_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_fjrb_barrel_top_', '_fake', 3005)
- 	print "SF after photon selection :", TopSF ,WJetsSF, QCDSF	
+ 	print "SF after photon selection :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
 	# save final templates, exactly as they are on the plots and by categories
 	saveTemplatesToFile([DataTempl_b] + MCTempl_b + MCTempl_rs_b.values() + MCTempl_fe_b.values() + MCTempl_fjrb_b.values(), 
 		['MET','MET_low','M3','WtransMass','MCcategory','nJets'], 
@@ -471,9 +473,9 @@ else:
 	outSuffix = ''
 
 if isElectron:
-	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/EleHists/hist_bin'+outSuffix+'/'
-	QCDHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/EleHists/QCD_bin/'
-	DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/EleHists/hist_bin/'
+	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin'+outSuffix+'/'
+	QCDHist =   '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/QCD_bin/'
+	DataHist =  '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin/'
 if isMuon:
 	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins'+outSuffix+'/'
 	QCDHist = '/uscms_data/d3/troy2012/ANALYSIS_2/QCD_bins/'
@@ -525,7 +527,8 @@ qcd_fit.M3file = 'templates_presel.root'
 TopSF, TopSFerror, WJetsSF, WJetsSFerror,otherMCSF,otherMCSFerror, QCDSF_m3, QCDSFerror_m3 = qcd_fit.doM3fit()
 QCDSF = QCDSF *QCDSF_m3
 
-print TopSF, WJetsSF,otherMCSF, QCDSF
+print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
+
 #QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
 #TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon = vgamma_fit.doM3fit_photon()
 makeAllPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
