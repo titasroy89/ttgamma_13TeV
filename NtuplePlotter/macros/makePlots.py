@@ -105,7 +105,7 @@ if isElectron:
 	ZJetsSF = 1.20  
 	ZJetsSFErr = 0.06
 if isMuon:
-	ZJetsSF = 1.0#1.14 
+	ZJetsSF = 1.14 
 	ZJetsSFErr = 0.06
 
 if systematic == 'ZJetsSF_up':
