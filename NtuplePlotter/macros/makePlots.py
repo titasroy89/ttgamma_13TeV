@@ -33,9 +33,16 @@ if not HasCMSStyle:
 ROOT.gROOT.ForceStyle()
  #############
 
+#Flags to get which lepton channel is being used
 isElectron = False
 isMuon = False
 lep = ''
+
+#Add a couple of flags for stopping at various points in the code
+skipPhoton = False #stops before the photon fitting
+skipCalc = False #stops before the calc_the_answer step
+
+
 
  ######## Add an argument to determine if running on electrons or muons ######## 
 isSyst = False
@@ -55,7 +62,13 @@ if len(sys.argv) > 1:
 		sys.exit(1)
 	if len(sys.argv) > 2:
 		systematic = sys.argv[2]
-		if systematic != 'zeroB':
+		if systematic == 'zeroB':
+			print 'zeroB'
+		elif systematic == 'skipPhoton':
+			skipPhoton = True
+		elif systematic == 'skipCalc':
+			skipCalc = True
+		else:
 			isSyst = True
 			sys.stdout = open('ratio_'+systematic+'.txt','w')
 else:
@@ -90,7 +103,7 @@ if isElectron:
 	ZJetsSF = 1.20  
 	ZJetsSFErr = 0.06
 if isMuon:
-	ZJetsSF = 1.14 
+	ZJetsSF = 1.0#1.14 
 	ZJetsSFErr = 0.06
 
 if systematic == 'ZJetsSF_up':
@@ -458,13 +471,13 @@ else:
 	outSuffix = ''
 
 if isElectron:
-	InputHist = '../../EleHists/hist_bin'+outSuffix+'/'
-	QCDHist = '../../EleHists/QCD_bin/'
-	DataHist = '../../EleHists/hist_bin/'
+	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/EleHists/hist_bin'+outSuffix+'/'
+	QCDHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/EleHists/QCD_bin/'
+	DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/EleHists/hist_bin/'
 if isMuon:
-	InputHist = '../../MuonHists/hist_bins'+outSuffix+'/'
-	QCDHist = '../../MuonHists/QCD_bins/'
-	DataHist = '../../MuonHists/hist_bins/'
+	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins'+outSuffix+'/'
+	QCDHist = '/uscms_data/d3/troy2012/ANALYSIS_2/QCD_bins/'
+	DataHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins/'
 
 ######## Added in a printout of histogram locations, for easier tracking later on ######## 
 
@@ -517,12 +530,23 @@ print TopSF, WJetsSF,otherMCSF, QCDSF
 #TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon = vgamma_fit.doM3fit_photon()
 makeAllPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
 makeQCDPlots(varList_all, QCDHist, 'QCD_plots')
+
+if skipPhoton:
+	print '*'*80
+	print 'Stopping code before the photon fit'
+	sys.exit(0)
+
 ######## Change the vgamma fit to return also the top fraction for use in the likelihood fit ######## 
 TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
 print '*'*80
 QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
 #exit()
+
+if skipCalc:
+	print '*'*80
+	print 'Stopping code before the likelihood fit (calc_the_answer)'
+	sys.exit(0)
 
 calc_the_answer.TTJets1l_num = TTJets1l_num
 calc_the_answer.TTJets2l_num = TTJets2l_num
