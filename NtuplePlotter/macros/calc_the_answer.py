@@ -191,5 +191,10 @@ def doTheCalculation():
  	print "TTGamma_topEffAcc = ", TTGamma_topEffAcc 
  	print "topPreselInt      = ", topPreselInt     
  	print "TTJets_topEffAcc  = ", TTJets_topEffAcc 
- 
+
+	print
+	print '*'*80
+	print 'phoRecoEff        = ', phoRecoEff
+	print 'TTGammaVis_topAcc = ', TTGammaVis_topAcc
+
 	return (xsRatio, xsRatio*xsRatioRelErr)
