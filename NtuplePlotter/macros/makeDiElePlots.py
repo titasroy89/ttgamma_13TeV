@@ -196,7 +196,7 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
-	MCTempl.append(MCTemplDict['Other'])
+#	MCTempl.append(MCTemplDict['Other'])
 	
 	saveTemplatesToFile([DataTempl] + MCTempl, ['MET','ele1ele2Mass'], outDirName+'/templates_presel.root')
 	
@@ -228,11 +228,12 @@ varList_all = ['nVtx',
 			]
 # main part ##############################################################################################
 
-InputHist = '/Users/makouski/dis/plotting_trees/new_hist/hist_zeroB_twoEle/'
-DataHist = '/Users/makouski/dis/plotting_trees/new_hist/hist_zeroB_twoEle/'
-
-#InputHist = '/Users/makouski/dis/plotting_trees/new_hist/hist_twoEle/'
-#DataHist = '/Users/makouski/dis/plotting_trees/new_hist/hist_twoEle/'
-
+InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
+DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
 
 makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/plots')
+
+InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
+DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
+
+makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check_zeroB/plots')
