@@ -94,8 +94,8 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 	otherMCIntegral  = otherMCHist.Integral()
         signalVar = RooRealVar(sfname,sfname, signalIntegral,0.,5.*signalIntegral)
         bkgVar = RooRealVar(bkgfname,bkgfname, bkgIntegral,0.,5.*bkgIntegral)
-        qcdVar = RooRealVar(qcdfname,qcdfname, qcdIntegral,0.*qcdIntegral,5.*qcdIntegral)
-        otherMCVar = RooRealVar(otherMCfname, otherMCfname,otherMCIntegral,0.*otherMCIntegral,5.*otherMCIntegral) 
+        qcdVar = RooRealVar(qcdfname,qcdfname, qcdIntegral,0.5*qcdIntegral,1.5*qcdIntegral)
+        otherMCVar = RooRealVar(otherMCfname, otherMCfname,otherMCIntegral,0.8*otherMCIntegral,1.2*otherMCIntegral) 
 
 	Gauss_QCD = RooGaussian("gauss_QCD","gauss_QCD",qcdVar,RooFit.RooConst(qcdIntegral),RooFit.RooConst(0.5*qcdIntegral))
         Gauss_otherMC =  RooGaussian("gauss_otherMC","gauss_otherMC",otherMCVar,RooFit.RooConst(otherMCIntegral),RooFit.RooConst(.2*otherMCIntegral))
