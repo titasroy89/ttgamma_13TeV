@@ -106,8 +106,8 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
         otherMCVar = RooRealVar(otherMCfname, otherMCfname,otherMCIntegral,0.*otherMCIntegral,5.*otherMCIntegral) 
 	#constraints:
         #qcdVar.setVal(qcd)
-        #qcdVar.setConstant(True)
-        print "Integral of otherMC= "+str(otherMCIntegral)
+        qcdVar.setConstant(True)
+        otherMCVar.setConstant(True)
 	#otherMCVar.setVal(otherMC)
 	#otherMCVar.setConstant(True)
         #setting QCD and otherMC with a gaussian constraint:
@@ -222,6 +222,11 @@ def doQCD_lowfit():
 	return (QCD_low_SF, QCD_low_SFerror)
 
 def doQCDfit():
+	print
+	print '#'*80
+	print 'now do MET fit, preselection'
+	print '#'*80
+	print
 	varToFit = 'MET'
 
 	qcdDataHist = get1DHist(qcdMETfile, 'Data_'+varToFit)
@@ -273,7 +278,12 @@ def doQCDfit():
 
 
 def doM3fit():
-	print 'now do M3 fit'
+
+	print
+	print '#'*80
+	print 'now do M3 fit, preselection'
+	print '#'*80
+	print
 
 	varToFit = 'M3'
 
@@ -305,6 +315,16 @@ def doM3fit():
 	TopSF = m3Top/ topInt
 	TopSFerror = m3TopErr/ topInt
 	
+	print
+	print '#'*80
+	print 'Total amount of Top events in fit:', m3Top, '+-', m3TopErr
+	print 'Total amount of WJets events in fit:', m3WJets, '+-', m3WJetsErr
+	print 'Total amount of QCD events in fit:', m3QCD, '+-', m3QCDerr
+	print 'Total amount of Other MC events in fit:', m3otherMC, '+-', m3otherMCerr
+	print '#'*80
+
+	print
+
 	print '#'*80
 	print 'Correction to the Top scale factor: ', TopSF, ' +-', TopSFerror, '(fit error only)'
 	WJetsSF = m3Wjets / WJInt
