@@ -318,7 +318,7 @@ def doM3fit():
 	print
 	print '#'*80
 	print 'Total amount of Top events in fit:', m3Top, '+-', m3TopErr
-	print 'Total amount of WJets events in fit:', m3WJets, '+-', m3WJetsErr
+	print 'Total amount of WJets events in fit:', m3Wjets, '+-', m3WjetsErr
 	print 'Total amount of QCD events in fit:', m3QCD, '+-', m3QCDerr
 	print 'Total amount of Other MC events in fit:', m3otherMC, '+-', m3otherMCerr
 	print '#'*80
