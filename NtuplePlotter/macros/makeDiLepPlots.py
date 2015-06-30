@@ -1,5 +1,6 @@
 from distribution_mod import distribution
 import ROOT
+import sys
 
 ROOT.gROOT.SetBatch()
 
@@ -7,6 +8,41 @@ ROOT.gROOT.SetBatch()
 WJetsSF = 0.0
 TopSF = 1.0
 QCDSF = 0.0
+
+isElectron = False
+isMuon = False
+lep = ''
+
+if len(sys.argv) > 1:
+	print sys.argv
+	if sys.argv[1]=='e' or 'ele' in sys.argv[1].lower():
+		isElectron = True
+		lep = 'ele'
+	elif sys.argv[1]=='mu' or 'muon' in sys.argv[1].lower():
+		isMuon = True
+		lep = 'mu'
+	else:
+		print '#'*30
+		print 'First argument must specify either electron or muon'
+		print 'Allowed arguments:'
+		print '   e, electron, mu, muons'
+		print '#'*30
+		sys.exit(1)
+
+if isElectron and isMuon:
+	print 'Error: trying to run on both electron and muon channel'
+	sys.exit(1)
+elif isElectron and lep =='ele':
+	print 'Running on the e+jets channel'
+elif isMuon and lep =='mu':
+	print 'Running on the mu+jets channel'
+elif lep == '':
+	print 'No lepton channel specified'
+	sys.exit(1)
+else:
+	print 'Lepton channel not properly specified'
+	sys.exit(1)
+
 
 #import array
 #binarray = array.array('d')
@@ -198,7 +234,7 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 	MCTempl.append(MCTemplDict['ZJets'])
 #	MCTempl.append(MCTemplDict['Other'])
 	
-	saveTemplatesToFile([DataTempl] + MCTempl, ['MET','ele1ele2Mass'], outDirName+'/templates_presel.root')
+	saveTemplatesToFile([DataTempl] + MCTempl, ['MET',lep+'1'+lep+'2Mass'], outDirName+'/templates_presel.root')
 	
 	plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
 	
@@ -207,12 +243,12 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 varList_all = ['nVtx',
 			'MET','Ht','WtransMass','M3','M3first','minM3','M3pho','dRpho3j','M3phoMulti', 
 			#'M3_0_30', 'M3_30_100', 'M3_100_200', 'M3_200_300', 'M3_300_up', #'M3minPt',
-			'ele1Pt','ele1Eta','ele1RelIso',
-			'ele1D0','ele1MVA','ele1Dz',
-			'ele2Pt','ele2RelIso',
-			'ele1ele2Mass',
-			'ele1sigmaIetaIeta','ele1EoverP',
-			'ele1DrJet','ele1pho1Mass',
+			lep+'1Pt',lep+'1Eta',lep+'1RelIso',
+			lep+'1D0',lep+'1MVA',lep+'1Dz',
+			lep+'2Pt',lep+'2RelIso',
+			lep+'1'+lep+'2Mass',
+			lep+'1sigmaIetaIeta',lep+'1EoverP',
+			lep+'1DrJet',lep+'1pho1Mass',
 			'looseEleDrGenPho',
 			'cut_flow',
 			'genPhoRegionWeight',
@@ -228,12 +264,22 @@ varList_all = ['nVtx',
 			]
 # main part ##############################################################################################
 
-InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
-DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
 
-makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/plots')
 
-InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
-DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
+if isElectron:
+	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
+	DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
 
-makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check_zeroB/plots')
+	makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/plots')
+
+	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
+	DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
+
+	makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check_zeroB/plots')
+
+if isMuon:
+	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins_twoMu'
+	DataHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins_twoMu'
+
+	makeAllPlots(varList_all, InputHist, DataHist, 'di_mu_cross_check/plots')
+
