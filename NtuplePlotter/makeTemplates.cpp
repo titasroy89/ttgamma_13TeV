@@ -112,6 +112,22 @@ int main(int ac, char** av){
 	//evtPickLoose->Njet_ge = 4;
 	//evtPickLoose->NBjet_ge = 2;
 	
+
+	if( outDirName.find("zeroB") != std::string::npos){
+		evtPickLoose->NBjet_ge = 0;
+		evtPickLooseNoMET->NBjet_ge = 0;
+	}
+	
+	if( outDirName.find("twoMu") != std::string::npos){
+		evtPickLoose->Nmu_eq = 2;
+		evtPickLooseNoMET->Nmu_eq = 2;
+	}
+
+	if( outDirName.find("twoEle") != std::string::npos){
+		evtPickLoose->Nele_eq = 2;
+		evtPickLooseNoMET->Nele_eq = 2;
+	}
+
 	bool WHIZARD = false;
 	if( std::string(av[1]).find("WHIZARD") != std::string::npos) WHIZARD = true;
 

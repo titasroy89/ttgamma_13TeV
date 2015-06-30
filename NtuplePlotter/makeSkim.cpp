@@ -27,8 +27,19 @@ int main(int ac, char** av){
         evtPick->MET_cut = -1.0;	
 	// antiselection for QCD fit
 	std::string outDirName(av[1]);
+
+	evtPick->NBjet_ge = 0;
 	
-	
+	if( outDirName.find("twoEle") != std::string::npos){
+	        std::cout << "selecting events with 2 electrons" << std::endl;
+	        evtPick->Nele_eq = 2;
+	}
+
+	if( outDirName.find("twoMu") != std::string::npos){
+	        std::cout << "selecting events with 2 muons" << std::endl;
+	        evtPick->Nmu_eq = 2;
+	}
+
 		
 	// add more branches to be saved
 	//tree->chain->SetBranchStatus("*",1);
