@@ -41,6 +41,7 @@ lep = ''
 #Add a couple of flags for stopping at various points in the code
 skipPhoton = False #stops before the photon fitting
 skipCalc = False #stops before the calc_the_answer step
+skipMET = False #stops before the MET fitting, just does the photon purity
 
 
 
@@ -66,6 +67,8 @@ if len(sys.argv) > 1:
 		systematic = sys.argv[2]
 		if systematic == 'zeroB':
 			print 'zeroB'
+		elif systematic == 'skipMET':
+			skipMET = True
 		elif systematic == 'skipPhoton':
 			skipPhoton = True
 		elif systematic == 'skipCalc':
@@ -492,15 +495,25 @@ print 'Data Histogram location:', DataHist
 saveAccTemplates(InputHist, 'ttbar_acceptance.root')
 
 ### templates for data driven fit or closure test. No rescaling necessary
-saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
-templateFits.InputFilename = 'templates_barrel.root'
-templateFits.fitData = False ## to do closure test
-##templateFits.NpseudoExp = 3000
+#saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
+#templateFits.InputFilename = 'templates_barrel.root'
+#templateFits.fitData = True ## to do closure test
+#templateFits.NpseudoExp = 3000
 
-######## Why is this fit not run? ######## 
 #phoPurity,phoPurityError = 0.657, 0.0564 #0.506, 0.078  #0.564, 0.063 #### 0.556427532887, 0.0616417156454 ## auto binsize: 0.561220079533, 0.0529980243576
-phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
-#exit()
+#phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
+if isElectron:
+	phoPurity, phoPurityError = 0.564158170272, 0.651263076828*0.0991985847174
+if isMuon:
+	phoPurity, phoPurityError = 0.531874490818, 0.624274264056*0.0921075417519
+
+
+if skipMET:
+	print '*'*80
+	print 'Stopping code before the MET fit'
+	exit()
+
+
 # for MET fit. No rescaling
 if WJetsSF == 1.0 and TopSF == 1.0:
 	saveNoMETTemplates(InputHist, DataHist, 'templates_presel_nomet.root')
@@ -508,6 +521,9 @@ if WJetsSF == 1.0 and TopSF == 1.0:
 
 qcd_fit.qcdMETfile = 'templates_presel_nomet_qcd.root'
 qcd_fit.normMETfile = 'templates_presel_nomet.root'
+
+qcd_fit.setQCDconstantM3 = True
+qcd_fit.setOtherMCconstantM3 = True
 
 QCDSF,QCDSFerror_met = qcd_fit.doQCDfit()
 
@@ -540,6 +556,9 @@ if skipPhoton:
 	sys.exit(0)
 
 ######## Change the vgamma fit to return also the top fraction for use in the likelihood fit ######## 
+vgamma_fit.setQCDconstantM3 = True
+vgamma_fit.setOtherMCconstantM3 = True
+
 TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
 print '*'*80
 QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
