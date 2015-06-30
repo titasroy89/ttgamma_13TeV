@@ -134,7 +134,7 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	passPreSel = true;
 	if(passPreSel && tree->IsVtxGood_>=0 && (no_trigger || tree->HLT_[tree->HLTIndex_[18]])) {cutFlow->Fill(1); cutFlowWeight->Fill(1,weight);}
 	else passPreSel = false;
-	if(passPreSel && Muons.size() >= Nmu_eq) {cutFlow->Fill(2); cutFlowWeight->Fill(2,weight);}
+	if(passPreSel && Muons.size() == Nmu_eq) {cutFlow->Fill(2); cutFlowWeight->Fill(2,weight);}
 	else passPreSel = false;
 	if(passPreSel && selector->MuonsLoose.size() <= NlooseMuVeto_le) {cutFlow->Fill(3); cutFlowWeight->Fill(3,weight);}
 	else passPreSel = false;
