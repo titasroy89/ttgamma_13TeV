@@ -6,6 +6,8 @@ import os
 import math
 import re
 
+setQCDconstantM3 = False
+setOtherMCconstantM3 = False
 
 def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName):
 	# RooFit variables
@@ -100,8 +102,9 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 	Gauss_QCD = RooGaussian("gauss_QCD","gauss_QCD",qcdVar,RooFit.RooConst(qcdIntegral),RooFit.RooConst(0.5*qcdIntegral))
         Gauss_otherMC =  RooGaussian("gauss_otherMC","gauss_otherMC",otherMCVar,RooFit.RooConst(otherMCIntegral),RooFit.RooConst(.2*otherMCIntegral))
 
-        # qcdVar.setConstant(True)
-        # otherMCVar.setConstant(True)
+        qcdVar.setConstant(setQCDconstantM3)
+        otherMCVar.setConstant(setOtherMCconstantM3)
+
         constraints = RooArgSet(Gauss_QCD,Gauss_otherMC)
 
         listPdfs = RooArgList(signalPdf,\

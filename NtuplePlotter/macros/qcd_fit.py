@@ -6,6 +6,9 @@ import os
 import math
 import re
 
+setQCDconstantM3 = False
+setOtherMCconstantM3 = False
+
 def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName):
 	# RooFit variables
 	sihihVar = RooRealVar(varname, varname, varmin, varmax)
@@ -106,8 +109,8 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
         otherMCVar = RooRealVar(otherMCfname, otherMCfname,otherMCIntegral,0.8*otherMCIntegral,1.2*otherMCIntegral) 
 	#constraints:
         #qcdVar.setVal(qcd)
-        #qcdVar.setConstant(True)
-        #otherMCVar.setConstant(True)
+        qcdVar.setConstant(setQCDconstantM3)
+        otherMCVar.setConstant(setOtherMCconstantM3)
 	#otherMCVar.setVal(otherMC)
 	#otherMCVar.setConstant(True)
         #setting QCD and otherMC with a gaussian constraint:
