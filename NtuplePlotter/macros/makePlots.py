@@ -453,6 +453,46 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	############################
 
 
+def makePhotonSelectionPlots(varList, inputDir, qcdDir, dataDir, outDirName):
+ 	print "SF used after photon M3 fit :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
+
+	shortVarList = varList[:]
+	shortVarList.remove('cut_flow')
+	shortVarList.remove('genPhoRegionWeight')
+	
+	region = 'barrel'
+	# load templates
+	DataTempl_b = loadDataTemplate(shortVarList, dataDir, 'hist_1pho_'+region+'_top_') #change
+	if QCDSF > 0.0001:
+		QCDTempl_b = loadQCDTemplate(shortVarList, qcdDir, 'hist_1pho_'+region+'_top_') #change
+	MCTemplDict_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_'+region+'_top_','',1001)#change
+	MCTempl_b = []
+	MCTempl_b.append(MCTemplDict_b['WHIZARD'])
+	MCTempl_b.append(MCTemplDict_b['TTJets'])
+	MCTempl_b.append(MCTemplDict_b['Vgamma'])
+	MCTempl_b.append(MCTemplDict_b['SingleTop'])
+	MCTempl_b.append(MCTemplDict_b['WJets'])
+	MCTempl_b.append(MCTemplDict_b['ZJets'])
+	if QCDSF > 0.0001:
+		MCTempl_b.append(QCDTempl_b)
+	
+	MCTempl_rs_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_rs_barrel_top_', '_signal', 1001)
+	MCTempl_fe_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_fe_barrel_top_', '_electron', 3005)
+	MCTempl_fjrb_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_fjrb_barrel_top_', '_fake', 3005)
+ 	print "SF after photon selection :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
+	# save final templates, exactly as they are on the plots and by categories
+	saveTemplatesToFile([DataTempl_b] + MCTempl_b + MCTempl_rs_b.values() + MCTempl_fe_b.values() + MCTempl_fjrb_b.values(), 
+		['MET','MET_low','M3','WtransMass','MCcategory','nJets'], 
+		'templates_barrel_scaled_afterPhotonM3.root'
+		)
+	
+	plotTemplates( DataTempl_b, MCTempl_b, [], shortVarList, outDirName+'/'+region+'_samples')
+	
+	############################
+	return
+	############################
+
+
 varList_all = ['nVtx',
 			'MET','MET_low','Ht','WtransMass','M3', 
 			#'M3_0_30', 'M3_30_100', 'M3_100_200', 'M3_200_300', 'M3_300_up', #'M3minPt',
@@ -559,7 +599,22 @@ if skipPhoton:
 vgamma_fit.setQCDconstantM3 = True
 vgamma_fit.setOtherMCconstantM3 = True
 
-TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
+######TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
+
+
+TopSF_tmp, TopSFerror_tmp, WJetsSF_tmp, WJetsSFerror_tmp, QCDSF_tmp, QCDSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
+
+TopSF_presel = TopSF
+TopSF_presel_error = TopSFerror
+
+TopSF *= TopSF_tmp
+WJetsSF *= WJetsSF_tmp
+QCDSF *= QCDSF_tmp
+otherMCSF *= otherMCSF_tmp
+
+
+makePhotonSelectionPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
+
 print '*'*80
 QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
@@ -583,12 +638,14 @@ if systematic == 'EleFakeSF_up':
 if systematic == 'EleFakeSF_down':
 	calc_the_answer.eleFakeSF = 1.5 - 0.2
 
-calc_the_answer.M3TopSF = TopSF
-calc_the_answer.M3TopSFErr = TopSFerror
+calc_the_answer.M3TopSF = TopSF_presel
+calc_the_answer.M3TopSFErr = TopSF_presel_error
 calc_the_answer.M3WJetsSF = WJetsSF
 calc_the_answer.M3WJetsSFErr = WJetsSFerror
 calc_the_answer.M3_photon_topFrac = m3_topFrac
 calc_the_answer.M3_photon_topFracErr = m3_topFracErr
+
+calc_the_answer.barrelFileName = 'templates_barrel_scaled_afterPhotonM3.root'
 
 calc_the_answer.doTheCalculation()
 
