@@ -119,6 +119,9 @@ if systematic == 'zeroB':
 	ZJetsSF = 1.0
 
 otherMCSF = 1.0
+
+WgammaSF = 1.0
+
 #import array
 #binarray = array.array('d')
 #binarray.fromlist([0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,300])
@@ -277,8 +280,16 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 		
 	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, [
         (templPrefix+'Zgamma.root', otherMCSF*gSF*Zgamma_xs/Zgamma_num),
-        (templPrefix+'Wgamma.root', otherMCSF*gSF*Wgamma_xs/Wgamma_num),
+        (templPrefix+'Wgamma.root', otherMCSF*WgammaSF*gSF*Wgamma_xs/Wgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
+        ], varList, ROOT.kGray, fillStyle)
+
+	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, [
+        (templPrefix+'Zgamma.root', otherMCSF*gSF*Zgamma_xs/Zgamma_num),
+        ], varList, ROOT.kGray, fillStyle)
+
+	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, [
+        (templPrefix+'Wgamma.root', otherMCSF*WgammaSF*gSF*Wgamma_xs/Wgamma_num),
         ], varList, ROOT.kGray, fillStyle)
 
 	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, [
@@ -401,6 +412,8 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl.append(MCTemplDict['WHIZARD'])
 	MCTempl.append(MCTemplDict['TTJets'])
 	MCTempl.append(MCTemplDict['Vgamma'])
+	MCTempl.append(MCTemplDict['Wgamma'])
+	MCTempl.append(MCTemplDict['Zgamma'])
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
@@ -430,6 +443,8 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl_b.append(MCTemplDict_b['WHIZARD'])
 	MCTempl_b.append(MCTemplDict_b['TTJets'])
 	MCTempl_b.append(MCTemplDict_b['Vgamma'])
+	MCTempl_b.append(MCTemplDict_b['Wgamma'])
+	MCTempl_b.append(MCTemplDict_b['Zgamma'])
 	MCTempl_b.append(MCTemplDict_b['SingleTop'])
 	MCTempl_b.append(MCTemplDict_b['WJets'])
 	MCTempl_b.append(MCTemplDict_b['ZJets'])
@@ -602,21 +617,21 @@ vgamma_fit.setOtherMCconstantM3 = True
 ######TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
 
 
-TopSF_tmp, TopSFerror_tmp, WJetsSF_tmp, WJetsSFerror_tmp, QCDSF_tmp, QCDSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
+TopSF_tmp, TopSFerror_tmp, WgammaSF_tmp, WgammaSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_New()
 
 TopSF_presel = TopSF
 TopSF_presel_error = TopSFerror
 
 TopSF *= TopSF_tmp
-WJetsSF *= WJetsSF_tmp
-QCDSF *= QCDSF_tmp
+WgammaSF *= WgammaSF_tmp
 otherMCSF *= otherMCSF_tmp
-
+if otherMCSF_tmp != 1.0:
+	WJetsSF *= otherMCSF_tmp
 
 makePhotonSelectionPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
 
-print '*'*80
-QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
+# print '*'*80
+# QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
 #exit()
 

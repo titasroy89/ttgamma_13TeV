@@ -59,6 +59,8 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 		c1.SaveAs(plotName)
 	print 'fit returned value ',signalFractionVar.getVal(),' +- ',signalFractionVar.getError()
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
+
+
 def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist, qcdHist, dataHist, plotName):
         # RooFit variables
         sihihVar = RooRealVar(varname, varname, varmin, varmax)
@@ -146,6 +148,85 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 c1.SaveAs(plotName)
         print 'fit returned value ',signalVar.getVal(),' +- ',signalVar.getError()
         return (signalVar.getVal(),signalVar.getError(),   bkgVar.getVal(),bkgVar.getError(), otherMCVar.getVal(),otherMCVar.getError(), qcdVar.getVal(), qcdVar.getError())
+
+
+def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist, dataHist, plotName):
+        # RooFit variables
+        sihihVar = RooRealVar(varname, varname, varmin, varmax)
+        sihihArgList = RooArgList()
+        sihihArgList.add(sihihVar)
+        sihihArgSet = RooArgSet()
+        sihihArgSet.add(sihihVar)
+        # create PDFs
+        signalDataHist = RooDataHist('signalDataHist','signal RooDataHist', sihihArgList, signalHist)
+        signalPdf = RooHistPdf('signalPdf',varname+' of signal', sihihArgSet, signalDataHist)
+
+        backgroundDataHist = RooDataHist('backgroundDataHist','background RooDataHist', sihihArgList, backgroundHist)
+        bkgPdf = RooHistPdf('backgroundPdf',varname+' of background', sihihArgSet, backgroundDataHist)
+
+        otherMCDataHist = RooDataHist('otherMCDataHist','otherMC RooDataHist', sihihArgList, otherMCHist)
+        otherMCPdf = RooHistPdf('otherMCPdf',varname+' of otherMC', sihihArgSet, otherMCDataHist)        
+
+        # data
+        dataDataHist = RooDataHist('data '+varname, varname+' in Data', sihihArgList, dataHist)
+        # signal fraction parameter
+        sfname = 'signal fraction'
+        if 'MET' in varname:
+                sfname = 'multijet fraction'
+        if 'M3' in varname:
+                sfname = 'ttbar total'
+                bkgfname = 'wgamma total'
+                otherMCfname = 'other MC total'
+
+	signalIntegral   = signalHist.Integral()
+	bkgIntegral      = backgroundHist.Integral()
+	otherMCIntegral  = otherMCHist.Integral()
+
+        signalVar = RooRealVar(sfname,sfname, signalIntegral,0.,5.*signalIntegral)
+        bkgVar = RooRealVar(bkgfname,bkgfname, bkgIntegral,0.,5.*bkgIntegral)
+        otherMCVar = RooRealVar(otherMCfname, otherMCfname,otherMCIntegral,0.8*otherMCIntegral,1.2*otherMCIntegral) 
+
+        Gauss_otherMC =  RooGaussian("gauss_otherMC","gauss_otherMC",otherMCVar,RooFit.RooConst(otherMCIntegral),RooFit.RooConst(.2*otherMCIntegral))
+
+        otherMCVar.setConstant(setOtherMCconstantM3)
+
+        constraints = RooArgSet(Gauss_otherMC)
+
+        listPdfs = RooArgList(signalPdf,\
+                                   bkgPdf,\
+                                   otherMCPdf)
+
+        listcoeff = RooArgList(signalVar,\
+                                  bkgVar,\
+                                  otherMCVar)
+
+        sumPdf = RooAddPdf('totalPdf','signal+background+other', listPdfs, listcoeff )
+
+        # fit
+        sumPdf.fitTo( dataDataHist, RooFit.Extended(True), RooFit.SumW2Error(kFALSE), RooFit.PrintLevel(-1) )
+
+        if plotName!='':
+                # plot results
+                c1 = TCanvas('c1', 'c1', 800, 600)
+                plotter = RooPlot('myplot','',sihihVar,varmin,varmax,20) # nBins is dummy
+                dataDataHist.plotOn(plotter, RooFit.Name('data'))
+                sumPdf.plotOn(plotter, RooFit.Name('sum'), RooFit.LineColor(kRed))
+                sumPdf.plotOn(plotter, RooFit.Components('signalPdf'), RooFit.Name('signal'),
+                    RooFit.LineColor(kGreen))
+                sumPdf.plotOn(plotter, RooFit.Components('backgroundPdf'), RooFit.Name('background'),
+                    RooFit.LineColor(kBlue))
+                sumPdf.plotOn(plotter, RooFit.Components('otherMCPdf'), RooFit.Name('otherMC'),
+                    RooFit.LineColor(6))
+
+                sumPdf.paramOn(plotter) # fix
+
+                plotter.Draw()
+                plotter.GetYaxis().SetTitleOffset(1.4)
+		plotter.GetXaxis().SetTitle("GeV")
+                c1.SaveAs(plotName)
+
+        print 'fit returned value ',signalVar.getVal(),' +- ',signalVar.getError()
+        return (signalVar.getVal(),signalVar.getError(),   bkgVar.getVal(),bkgVar.getError(), otherMCVar.getVal(),otherMCVar.getError())
 
                                                                             
 openfiles = {}
@@ -304,10 +385,104 @@ def doM3fit_photon():
 	print 'the top fraction error after photon selection:', m3_topFracErr 	
 	print 'Correction to WJets scale factor: ', WJetsSF, ' +-',WJetsSFerror,'(fit error only)'
 	print 'Correction to otherMC scale factor: ', otherMCSF, ' +-',otherMCSFerror,'(fit error only)'
-	print 'Correction to otherMC scale factor: ', QCDSF, ' +-',QCDSFerror,'(fit error only)'
+	print 'Correction to QCD scale factor: ', QCDSF, ' +-',QCDSFerror,'(fit error only)'
         print '#'*80
 	######## Calculate the top fraction (topEvents over total MC events) and return it as well ########
         return (TopSF, TopSFerror, WJetsSF, WJetsSFerror, QCDSF, QCDSFerror, otherMCSF, otherMCSFerror, m3_topFrac, m3_topFracErr) 
+
+def doM3fit_photon_New():
+	print
+	print '#'*80
+	print 'now do the New M3 fit, after photon selection'
+	print 'Uses 3 templates: Top, W, otherMC'
+	print '#'*80
+	print
+
+	varToFit = 'M3'
+	DataHist = get1DHist(M3file_photon, 'Data_'+varToFit)
+
+	
+	# ttjets and ttgamma shapes after photon selection
+	TopHist = get1DHist(M3file_photon, 'TTJets_'+varToFit)
+	#TopHist = get1DHist(M3file_presel_scaled, 'TTJets_'+varToFit)
+	TopHist.Add(get1DHist(M3file_photon, 'TTGamma_'+varToFit))
+
+	WgHist = get1DHist(M3file_presel_scaled, 'Wgamma_'+varToFit)
+	WgHist.Scale(get1DHist(M3file_photon, 'Wgamma_'+varToFit).Integral() / WgHist.Integral())
+
+	WJetsHist = get1DHist(M3file_presel_scaled, 'WJets_'+varToFit)
+	WJetsHist.Scale(get1DHist(M3file_photon, 'WJets_'+varToFit).Integral() / WJetsHist.Integral())
+		
+	ZJetsHist = get1DHist(M3file_presel_scaled, 'ZJets_'+varToFit)
+	ZJetsHist.Scale(get1DHist(M3file_photon, 'ZJets_'+varToFit).Integral() / ZJetsHist.Integral())
+		
+	SingleTopHist = get1DHist(M3file_presel_scaled, 'SingleTop_'+varToFit)
+	SingleTopHist.Scale(get1DHist(M3file_photon, 'SingleTop_'+varToFit).Integral() / SingleTopHist.Integral())
+
+	QCDHist = get1DHist(M3file_presel_scaled, 'QCD_'+varToFit)
+	QCDHist.Scale(get1DHist(M3file_photon, 'QCD_'+varToFit).Integral() / QCDHist.Integral())
+	
+	ZgHist = get1DHist(M3file_presel_scaled, 'Zgamma_'+varToFit)
+	ZgHist.Scale(get1DHist(M3file_photon, 'Zgamma_'+varToFit).Integral() / ZgHist.Integral())
+	
+
+	WHist = WgHist
+	WHist.Add(WJetsHist)
+
+	# add all backgrounds
+	otherMCHist = ZJetsHist
+#	otherMCHist.Add(WJetsHist)
+	otherMCHist.Add(SingleTopHist)
+	otherMCHist.Add(ZgHist)
+	
+	# DataHist.Rebin(2)
+	# TopHist.Rebin(2)
+	# WgHist.Rebin(2)
+        # otherMCHist.Rebin(2)
+
+	(m3Top, m3TopErr,m3Wgamma, m3WgammaErr, m3otherMC, m3otherMCerr) = makenewFit(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, WHist,otherMCHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
+
+        lowfitBin = DataHist.FindBin(0.01)
+        highfitBin = DataHist.FindBin(799.99)
+
+        dataInt = DataHist.Integral(lowfitBin,highfitBin)
+        topInt = TopHist.Integral(lowfitBin,highfitBin)
+        WgInt = WgHist.Integral(lowfitBin,highfitBin)
+	otherMCInt = otherMCHist.Integral(lowfitBin, highfitBin)
+
+        TopSF = m3Top/ topInt
+        TopSFerror = m3TopErr/ topInt
+
+        WgammaSF = m3Wgamma / WgInt
+        WgammaSFerror = m3WgammaErr / WgInt
+
+	otherMCSF = m3otherMC/otherMCInt
+	otherMCSFerror = m3otherMCerr/otherMCInt
+
+	totMC = m3Top + m3Wgamma + m3otherMC
+
+	m3_topFrac = m3Top/totMC
+	m3_topFracErr = m3TopErr/totMC	
+
+	print
+	print '#'*80
+	print 'Total amount of Top events in fit:', m3Top, '+-', m3TopErr
+	print 'Total amount of Wgamma events in fit:', m3Wgamma, '+-', m3WgammaErr
+	print 'Total amount of Other MC events in fit:', m3otherMC, '+-', m3otherMCerr
+	print '#'*80
+
+	print
+
+        print '#'*80
+	print 'the top fraction after photon selection :',m3_topFrac
+	print 'the top fraction error after photon selection:', m3_topFracErr 	
+	print
+        print 'Correction to the Top scale factor: ', TopSF, ' +-', TopSFerror, '(fit error only)'
+	print 'Correction to Wgamma scale factor: ', WgammaSF, ' +-',WgammaSFerror,'(fit error only)'
+	print 'Correction to otherMC scale factor: ', otherMCSF, ' +-',otherMCSFerror,'(fit error only)'
+        print '#'*80
+	######## Calculate the top fraction (topEvents over total MC events) and return it as well ########
+        return (TopSF, TopSFerror, WgammaSF, WgammaSFerror, otherMCSF, otherMCSFerror, m3_topFrac, m3_topFracErr) 
 
 	
 def doQCDfit_photon():
