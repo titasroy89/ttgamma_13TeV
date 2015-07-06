@@ -624,9 +624,8 @@ TopSF_presel_error = TopSFerror
 
 TopSF *= TopSF_tmp
 WgammaSF *= WgammaSF_tmp
+WJetsSF *= WgammaSF_tmp
 otherMCSF *= otherMCSF_tmp
-if otherMCSF_tmp != 1.0:
-	WJetsSF *= otherMCSF_tmp
 
 makePhotonSelectionPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
 
