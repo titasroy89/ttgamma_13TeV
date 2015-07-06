@@ -47,6 +47,7 @@ M3_photon_topFracErr = 0.089
 
 preselFileName = 'templates_presel_scaled.root'
 barrelFileName = 'templates_barrel_scaled.root'
+barrelFileName_M3fitscaled = 'templates_barrel_scaled.root'
 
 def doTheCalculation():
 	print '#$'*50
@@ -137,7 +138,7 @@ def doTheCalculation():
 	
 	
 	# here we need a procedure to find NttgammaSignal
-	signal_finder.barrelFileName = barrelFileName
+	signal_finder.barrelFileName = barrelFileName_M3fitscaled
 
 	signal_finder.eleFakeSF = eleFakeSF
 	signal_finder.eleFakeSFErr = eleFakeSFErr

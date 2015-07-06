@@ -659,7 +659,7 @@ calc_the_answer.M3WJetsSFErr = WJetsSFerror
 calc_the_answer.M3_photon_topFrac = m3_topFrac
 calc_the_answer.M3_photon_topFracErr = m3_topFracErr
 
-calc_the_answer.barrelFileName = 'templates_barrel_scaled_afterPhotonM3.root'
+calc_the_answer.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
 
 calc_the_answer.doTheCalculation()
 
