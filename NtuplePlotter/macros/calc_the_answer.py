@@ -137,6 +137,8 @@ def doTheCalculation():
 	
 	
 	# here we need a procedure to find NttgammaSignal
+	signal_finder.barrelFileName = barrelFileName
+
 	signal_finder.eleFakeSF = eleFakeSF
 	signal_finder.eleFakeSFErr = eleFakeSFErr
 	signal_finder.photnPurity = photnPurity
