@@ -222,12 +222,13 @@ def calculateTTGamma():
 	
 	ROOT.gStyle.SetOptFit(111)
 	ccc = ROOT.TCanvas('ccc','ccc',800,800)
+
 	ttghist.Draw()
-	ttghist.GetXaxis().SetTitle('TTGamma Scale Factor')
-	ttghist.Fit('gaus')
-	ccc.SaveAs('TTGamma_SF_Lkhood.png')
-	fit = ttghist.GetFunction('gaus')
-	bestttgSFErr = fit.GetParameter(2)
+	# ttghist.GetXaxis().SetTitle('TTGamma Scale Factor')
+	# ttghist.Fit('gaus')
+	# ccc.SaveAs('TTGamma_SF_Lkhood.png')
+	# fit = ttghist.GetFunction('gaus')
+	# bestttgSFErr = fit.GetParameter(2)
 	
 	vghist.Draw()
 	vghist.GetXaxis().SetTitle('Vgamma Scale Factor')
@@ -239,16 +240,23 @@ def calculateTTGamma():
 	jghist.GetXaxis().SetTitle('Jet to Photon Scale Factor')
 	jghist.Fit('gaus')
 	ccc.SaveAs('jet_gamma_SF_Lkhood.png')
+
+	ttghist.Draw()
+	ttghist.GetXaxis().SetTitle('TTGamma Scale Factor')
+	ttghist.Fit('gaus')
+	ccc.SaveAs('TTGamma_SF_Lkhood.png')
+	fit = ttghist.GetFunction('gaus')
+	bestttgSFErr = fit.GetParameter(2)
 	
 	ttgammaSig = bestttgSF*(e_pho['TTGamma'][0]+mu_pho['TTGamma'][0])
 	ttgammaSigErr = bestttgSFErr*(e_pho['TTGamma'][0]+mu_pho['TTGamma'][0])
 	print 'number of signal events', ttgammaSig, ' +/-',ttgammaSigErr
 	return ttgammaSig,ttgammaSigErr
 
-combined_ttgammaSig, combined_ttgammaSigErr = calculateTTGamma()
+#combined_ttgammaSig, combined_ttgammaSigErr = calculateTTGamma()
 
 
-#combined_ttgammaSig, combined_ttgammaSigErr = 762.213858252, 118.341451818
+combined_ttgammaSig, combined_ttgammaSigErr = 762.213858252, 118.341451818
 	
 mu_phoAcc 	     =  0.13477462661
 mu_TTGamma_topEffAcc =  0.079146136607
@@ -324,3 +332,36 @@ print '*'*80
 print 'visible cross section ratio:'
 print vis_xsRatio,' +-',vis_xsRatio*vis_xsRatioRelErr
 print '*'*80
+
+
+print 'Inputs:'
+print 'Electrons:'
+print '    Photon Purity:',e_photnPurity, '+-', e_photnPurityErr 
+print '    Top Fraction: ',e_M3_photon_topFrac, '+-', e_M3_photon_topFracErr 
+print '    Ndata Evts:   ',e_Ndata, '+-', e_NdataErr
+print 'Muons:'
+print '    Photon Purity:',mu_photnPurity, '+-', mu_photnPurityErr 
+print '    Top Fraction: ',mu_M3_photon_topFrac, '+-', mu_M3_photon_topFracErr 
+print '    Ndata Evts:   ',mu_Ndata, '+-', mu_NdataErr
+
+print 'Other Inputs:'
+print 'Electrons:'
+print '    TTgamma Pho Eff&Acc:    ', e_phoAcc           ,'+-',e_phoAccErr 	    
+print '    TTgamma Top Eff&Acc:    ', e_TTGamma_topEffAcc,'+-',e_TTGamma_topEffAccErr
+print '    TTJets Presel Evts:     ', e_topPreselInt     ,'+-',e_topPreselErr     
+print '    TTJets Eff&Acc:         ', e_TTJets_topEffAcc ,'+-',e_TTJets_topEffAccErr 
+print '    TTgamma Vis Pho Eff&Acc:', e_phoRecoEff       ,'+-',e_phoRecoEffErr       
+print '    TTgamma Vis Top Eff&Acc:', e_TTGammaVis_topAcc,'+-',e_TTGammaVis_topAccErr
+print 'Muons:'
+print '    TTgamma Pho Eff&Acc:    ', mu_phoAcc           ,'+-',mu_phoAccErr 	    
+print '    TTgamma Top Eff&Acc:    ', mu_TTGamma_topEffAcc,'+-',mu_TTGamma_topEffAccErr
+print '    TTJets Presel Evts:     ', mu_topPreselInt     ,'+-',mu_topPreselErr     
+print '    TTJets Eff&Acc:         ', mu_TTJets_topEffAcc ,'+-',mu_TTJets_topEffAccErr 
+print '    TTgamma Vis Pho Eff&Acc:', mu_phoRecoEff       ,'+-',mu_phoRecoEffErr       
+print '    TTgamma Vis Top Eff&Acc:', mu_TTGammaVis_topAcc,'+-',mu_TTGammaVis_topAccErr
+
+print 'Combined Values:'
+print '    TTgamma Eff&Acc:     ', combined_TTgammaPhoEffAcc    ,'+-',combined_TTgammaPhoEffAccErr
+print '    TTJets Presel Evts:  ', combined_topPreselInt        ,'+-',combined_topPreselErr     
+print '    TTJets Eff&Acc:      ', combined_TTJets_topEffAcc    ,'+-',combined_TTJets_topEffAccErr 
+print '    TTgamma Vis Eff&Acc: ', combined_TTgammaPhoEffAccVis ,'+-',combined_TTgammaPhoEffAccVisErr
