@@ -434,6 +434,7 @@ def doM3fit_photon_New():
 #	otherMCHist.Add(WJetsHist)
 	otherMCHist.Add(SingleTopHist)
 	otherMCHist.Add(ZgHist)
+	otherMCHist.Add(QCDHist)
 	
 	# DataHist.Rebin(2)
 	# TopHist.Rebin(2)
