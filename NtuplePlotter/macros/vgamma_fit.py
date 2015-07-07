@@ -529,7 +529,7 @@ def doQCDfit_photon():
 
 
 
-        (metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, QCDHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_fit_photon.png')
+        (metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, QCDHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_photon_fit.png')
         # recalculate data-driven QCD normalization
         lowbin = DataHist.FindBin(0.01)
         highbin = DataHist.GetNbinsX()+1# overflow bin included
@@ -558,6 +558,69 @@ def doQCDfit_photon():
         print 'Correction to all MC scale factors: ', (1-metFrac)*dataInt/mcInt, ' +-',metFracErr*dataInt/mcInt,'(fit error only)'
         print '#'*80
         return (QCDSF_photon, QCDSFerror_photon)
+
+qcdMETfile = 'templates_barrel_nomet_qcd.root'
+normMETfile = 'tempaltes_barrel_nomet.root'
+
+def doQCDfit_photon_NoMET():
+	print
+	print '#'*80
+	print 'now do MET fit, after photon selection'
+	print '#'*80
+	print
+	varToFit = 'MET'
+
+	qcdDataHist = get1DHist(qcdMETfile, 'Data_'+varToFit)
+	# remove MC contribution
+	qcdDataHist.Add(get1DHist(qcdMETfile, 'TTJets_'+varToFit), -1)
+	qcdDataHist.Add(get1DHist(qcdMETfile, 'WJets_'+varToFit), -1)
+        qcdDataHist.Add(get1DHist(qcdMETfile, 'SingleTop_'+varToFit), -1)
+
+	DataHist = get1DHist(normMETfile, 'Data_'+varToFit)
+
+	MCHist = get1DHist(normMETfile, 'TTJets_'+varToFit)
+	MCHist.Add(get1DHist(normMETfile, 'TTGamma_'+varToFit))
+	MCHist.Add(get1DHist(normMETfile, 'WJets_'+varToFit))
+	MCHist.Add(get1DHist(normMETfile, 'ZJets_'+varToFit))
+	MCHist.Add(get1DHist(normMETfile, 'SingleTop_'+varToFit))
+	MCHist.Add(get1DHist(normMETfile, 'Vgamma_'+varToFit))
+
+	qcdDataHist.Rebin(2)
+	MCHist.Rebin(2)
+	DataHist.Rebin(2)
+
+	(metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, qcdDataHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_photon_fit.png')
+	# recalculate data-driven QCD normalization
+	lowbin = DataHist.FindBin(0.01)
+	highbin =   DataHist.GetNbinsX()+1 # overflow bin included
+        print DataHist.GetBinContent(3), DataHist.GetBinContent(4), DataHist.GetBinContent(5)
+	print 'MET fit in region 0 ->200 GeV: after photon selection'
+	print 'Will calculate integral in the bin range:', lowbin, highbin
+	dataInt = DataHist.Integral(lowbin, highbin)
+	dataIntwithMETcut = DataHist.Integral(DataHist.FindBin(20.01),highbin)
+        qcdIntwithMETcut = qcdDataHist.Integral(DataHist.FindBin(20.01),highbin)
+	print 'Integral of Data total: ', dataInt
+	qcdInt = qcdDataHist.Integral(lowbin, highbin)
+	mcInt = MCHist.Integral(lowbin, highbin)
+	print 'Integral of data-driven QCD in the desired range: ', qcdInt
+	print '#'*80
+	# take into account only fit error
+	# stat errors on histograms are treated while calculating the final answer
+	print 'the met fraction:', metFrac
+	print 'the amount of Data with MET cut:' ,dataIntwithMETcut
+	QCDamount = metFrac*dataInt
+	QCDerror = metFracErr*dataInt
+	print 'Total Amount of QCD without MET cut:',QCDamount,'+-',QCDerror
+	QCDSF = metFrac*dataInt/qcdInt
+	QCDSFerror = metFracErr*dataInt/qcdInt
+
+        print 'Amount of QCD in signal :' ,qcdIntwithMETcut*QCDSF,'+-',qcdIntwithMETcut*QCDSFerror
+
+	print 'Scale factor for QCD in nominal MET range: ', QCDSF,' +-',QCDSFerror,'(fit error only)'
+	print 'Correction to all MC scale factors: ', (1-metFrac)*dataInt/mcInt, ' +-',metFracErr*dataInt/mcInt,'(fit error only)'
+	print '#'*80
+	return (QCDSF, QCDSFerror)
+
 
 def doQCDlowfit_photon():
         varToFit = 'MET_low'

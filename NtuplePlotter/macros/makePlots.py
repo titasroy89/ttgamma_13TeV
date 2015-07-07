@@ -335,10 +335,10 @@ def saveAccTemplates(inputDir, outFileName):
 	
 	saveTemplatesToFile(AccTemplates.values(), varList, outFileName)
 
-def saveNoMETTemplates(inputDir, inputData, outFileName):
+def saveNoMETTemplates(inputDir, inputData, outFileName, histName):
 	varList = ['MET','MET_low','M3']
-	DataTempl = loadDataTemplate(varList, inputData, 'hist_1phoNoMET_top_')
-	MCTemplDict = loadMCTemplates(varList, inputDir, 'hist_1phoNoMET_top_','',1001)
+	DataTempl = loadDataTemplate(varList, inputData, histName)
+	MCTemplDict = loadMCTemplates(varList, inputDir, histName,'',1001)
 	MCTempl = []
 	MCTempl.append(MCTemplDict['WHIZARD'])
 	MCTempl.append(MCTemplDict['TTJets'])
@@ -571,8 +571,8 @@ if skipMET:
 
 # for MET fit. No rescaling
 if WJetsSF == 1.0 and TopSF == 1.0:
-	saveNoMETTemplates(InputHist, DataHist, 'templates_presel_nomet.root')
-	saveNoMETTemplates(QCDHist, QCDHist, 'templates_presel_nomet_qcd.root')
+	saveNoMETTemplates(InputHist, DataHist, 'templates_presel_nomet.root', 'hist_1phoNoMET_top_')
+	saveNoMETTemplates(QCDHist, QCDHist, 'templates_presel_nomet_qcd.root', 'hist_1phoNoMET_top_')
 
 qcd_fit.qcdMETfile = 'templates_presel_nomet_qcd.root'
 qcd_fit.normMETfile = 'templates_presel_nomet.root'
@@ -631,8 +631,15 @@ otherMCSF *= otherMCSF_tmp
 
 makePhotonSelectionPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
 
+saveNoMETTemplates(InputHist, DataHist, 'templates_barrel_nomet.root', 'hist_1phoNoMET_barrel_top_')
+saveNoMETTemplates(QCDHist, QCDHist, 'templates_barrel_nomet_qcd.root', 'hist_1phoNoMET_barrel_top_')
+
+
 # print '*'*80
-# QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
+vgamma_fit.qcdMETfile = 'templates_barrel_nomet_qcd.root'
+vgamma_fit.normMETfile = 'templates_barrel_nomet.root'
+
+QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon_NoMET()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
 #exit()
 
