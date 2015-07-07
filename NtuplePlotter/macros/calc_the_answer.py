@@ -190,14 +190,20 @@ def doTheCalculation():
 
         print '*'*80
         print "ttgammaSig        = ", ttgammaSig  
-	print "phoAcc 	         = ", phoAcc 	       
+        print "ttgammaSigErr        = ", ttgammaSigErr  
+	print
+	print "phoAcc            = ", phoAcc 	       
  	print "TTGamma_topEffAcc = ", TTGamma_topEffAcc 
  	print "topPreselInt      = ", topPreselInt     
  	print "TTJets_topEffAcc  = ", TTJets_topEffAcc 
-
-	print
-	print '*'*80
 	print 'phoRecoEff        = ', phoRecoEff
 	print 'TTGammaVis_topAcc = ', TTGammaVis_topAcc
+	print
+	print "phoAccErr            = ", phoAccErr  
+ 	print "TTGamma_topEffAccErr = ", TTGamma_topEffAccErr
+ 	print "topPreselErr         = ", topPreselErr    
+ 	print "TTJets_topEffAccErr  = ", TTJets_topEffAccErr
+	print 'phoRecoEffErr        = ', phoRecoEffErr
+	print 'TTGammaVis_topAccErr = ', TTGammaVis_topAccErr
 
 	return (xsRatio, xsRatio*xsRatioRelErr)

@@ -1,8 +1,14 @@
 import ROOT
 from math import exp
 
-e_barrelFileName = 'ElePlots/templates_barrel_scaled.root'
-mu_barrelFileName = 'MuPlots/templates_barrel_scaled.root'
+import sys
+e_directory = "ElePlots/"
+mu_directory = "MuPlots/"
+
+preselFileName = 'templates_presel_scaled.root'
+barrelFileName = 'templates_barrel_scaled.root'
+barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
+
 
 myfile = None
 
@@ -21,25 +27,20 @@ eleFakeSF = 1.2
 eleFakeSFErr = 0.15
 
 # parameters used in chi square calculation
-e_photnPurity = 0.564158170272
-e_photnPurityErr = 0.040164138309
-
-e_M3_photon_topFrac =  0.693526827984
-e_M3_photon_topFracErr = 0.0776495892761
-
-e_Ndata = 977.0
-e_NdataErr = 31.2569992162
+e_photnPurity	       =  0.564158170272
+e_photnPurityErr       =  0.0646043755
+e_M3_photon_topFrac    =  0.683315978674
+e_M3_photon_topFracErr =  0.0701062046615
+e_Ndata		       =  977.0
+e_NdataErr             =  31.2569992162
 
 # parameters used in chi square calculation
-mu_photnPurity = 0.531874490818
-mu_photnPurityErr = 0.035565645418
-
-mu_M3_photon_topFrac =  0.686743992662
-mu_M3_photon_topFracErr = 0.067052840812
-
-mu_Ndata = 1203.0  
-mu_NdataErr = 34.684290392
-
+mu_photnPurity	        =  0.531874490818
+mu_photnPurityErr       =  0.0575003678412
+mu_M3_photon_topFrac    =  0.69654529757
+mu_M3_photon_topFracErr =  0.0610381089575
+mu_Ndata	        =  1173.0
+mu_NdataErr             =  34.2490875791
 
 def readSamples(suffix, fileName):
 	var = 'MET'
@@ -159,15 +160,16 @@ def seq(start, stop, step=1):
     else:
         return([])
 
+
 def calculateTTGamma():
 	# read all the numbers from the file
-	e_pho = readSamples('signal', e_barrelFileName)
-	e_ele = readSamples('electron', e_barrelFileName)
-	e_fake = readSamples('fake', e_barrelFileName)
+	e_pho = readSamples('signal', e_directory+barrelFileName_M3fitscaled)
+	e_ele = readSamples('electron', e_directory+barrelFileName_M3fitscaled)
+	e_fake = readSamples('fake', e_directory+barrelFileName_M3fitscaled)
 
-	mu_pho = readSamples('signal', mu_barrelFileName)
-	mu_ele = readSamples('electron', mu_barrelFileName)
-	mu_fake = readSamples('fake', mu_barrelFileName)
+	mu_pho = readSamples('signal', mu_directory+barrelFileName_M3fitscaled)
+	mu_ele = readSamples('electron', mu_directory+barrelFileName_M3fitscaled)
+	mu_fake = readSamples('fake', mu_directory+barrelFileName_M3fitscaled)
 	
 	ttghist = ROOT.TH1F('ttghist','Marginalized Likelihood', 141, 0.2-0.005, 1.6+0.005)
 	vghist = ROOT.TH1F('vghist','Marginalized Likelihood', 61, 0-0.025, 3.0+0.025)
@@ -178,7 +180,14 @@ def calculateTTGamma():
 	bestVgSF = -1.0
 	bestjgSF = -1.0
 	
-	for ttgSF in seq(0.2, 1.6, 0.01):
+	percent = 0
+	i = 0
+	for ttgSF in seq(0.2, 1.6, 0.01):		
+		if (i%7==0):
+			sys.stdout.write("\r[" + "=" * (i / 7) + " " * (20- (i/7)) + "]" + str(percent) + "%")
+			sys.stdout.flush()
+			percent += 5
+		i += 1
 		for VgSF in seq(0.0, 3.0, 0.05):
 			for jgSF in seq(0.5, 1.8, 0.01):
 				lk = getLikelihood(e_pho,e_ele,e_fake,mu_pho,mu_ele,mu_fake,ttgSF, VgSF, jgSF)
@@ -236,5 +245,82 @@ def calculateTTGamma():
 	print 'number of signal events', ttgammaSig, ' +/-',ttgammaSigErr
 	return ttgammaSig,ttgammaSigErr
 
-calculateTTGamma()
+combined_ttgammaSig, combined_ttgammaSigErr = calculateTTGamma()
+
+
+#combined_ttgammaSig, combined_ttgammaSigErr = 762.213858252, 118.341451818
 	
+mu_phoAcc 	     =  0.13477462661
+mu_TTGamma_topEffAcc =  0.079146136607
+mu_topPreselInt      =  222697.219876
+mu_TTJets_topEffAcc  =  0.0450047771279
+mu_phoRecoEff        =  0.271603162212
+mu_TTGammaVis_topAcc =  0.202572797378
+
+mu_phoAccErr            =  0.00218140809392
+mu_TTGamma_topEffAccErr =  0.000357352741188
+mu_topPreselErr         =  1604.07716655
+mu_TTJets_topEffAccErr  =  2.71182285127e-05
+mu_phoRecoEffErr        =  0.00361732138042
+mu_TTGammaVis_topAccErr =  0.000965526239153
+
+
+e_phoAcc 	    =  0.131769190217
+e_TTGamma_topEffAcc =  0.0635214446893
+e_topPreselInt      =  160093.700896
+e_TTJets_topEffAcc  =  0.0340351862929
+e_phoRecoEff        =  0.278322649164
+e_TTGammaVis_topAcc =  0.162581741774
+
+e_phoAccErr            =  0.00240040666203
+e_TTGamma_topEffAccErr =  0.000317815765302
+e_topPreselErr         =  1365.70588597
+e_TTJets_topEffAccErr  =  2.36146892948e-05
+e_phoRecoEffErr        =  0.00419737860878
+e_TTGammaVis_topAccErr =  0.00085048266326
+
+###Combine the efficiencies between the two channels
+combined_topPreselInt = mu_topPreselInt + e_topPreselInt
+combined_TTgammaPhoEffAcc = mu_TTGamma_topEffAcc*mu_phoAcc + e_TTGamma_topEffAcc*e_phoAcc
+combined_TTJets_topEffAcc = mu_TTJets_topEffAcc + e_TTJets_topEffAcc
+
+combined_TTgammaPhoEffAccVis = mu_TTGamma_topEffAcc*mu_phoRecoEff + e_TTGammaVis_topAcc*e_phoRecoEff
+
+###Calculate the combined uncertainties
+combined_topPreselErr = (mu_topPreselErr**2+e_topPreselErr**2)**0.5
+combined_TTgammaPhoEffAccErr = ((mu_TTGamma_topEffAccErr/mu_TTGamma_topEffAcc)**2 + 
+				(mu_phoAccErr/mu_phoAcc)**2 + 
+				(e_TTGamma_topEffAccErr/e_TTGamma_topEffAcc)**2 + 
+				(e_phoAccErr/e_phoAcc)**2)**0.5
+combined_TTJets_topEffAccErr = (mu_TTJets_topEffAccErr**2 + e_TTJets_topEffAccErr**2)**0.5
+combined_TTgammaPhoEffAccVisErr =  ((mu_TTGammaVis_topAccErr/mu_TTGammaVis_topAcc)**2 + 
+				    (mu_phoRecoEffErr/mu_phoRecoEff)**2 + 
+				    (e_TTGammaVis_topAccErr/e_TTGammaVis_topAcc)**2 + 
+				    (e_phoRecoEffErr/e_phoRecoEff)**2)**0.5
+
+
+
+xsRatio = combined_ttgammaSig / combined_TTgammaPhoEffAcc / combined_topPreselInt * combined_TTJets_topEffAcc
+xsRatioRelErr = (   (combined_ttgammaSigErr/combined_ttgammaSig)**2 + 
+		    (combined_TTgammaPhoEffAccErr/combined_TTgammaPhoEffAcc)**2 +
+		    (combined_topPreselErr/combined_topPreselInt)**2 +
+		    (combined_TTJets_topEffAccErr/combined_TTJets_topEffAcc)**2
+		    )**0.5
+
+vis_xsRatio = combined_ttgammaSig / combined_TTgammaPhoEffAccVis / combined_topPreselInt * combined_TTJets_topEffAcc
+vis_xsRatioRelErr = (   (combined_ttgammaSigErr/combined_ttgammaSig)**2 + 
+		       (combined_TTgammaPhoEffAccVisErr/combined_TTgammaPhoEffAccVis)**2 +
+		       (combined_topPreselErr/combined_topPreselInt)**2 +
+		       (combined_TTJets_topEffAccErr/combined_TTJets_topEffAcc)**2
+		       )**0.5
+
+
+print '*'*80
+print 'final answer: cross section ratio:'
+print xsRatio,' +-',xsRatio*xsRatioRelErr
+print '*'*80
+print
+print '*'*80
+print 'visible cross section ratio:'
+print vis_xsRatio,' +-',vis_xsRatio*vis_xsRatioRelErr
+print '*'*80
