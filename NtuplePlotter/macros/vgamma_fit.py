@@ -440,34 +440,35 @@ def doM3fit_photon_New():
 	# WgHist.Rebin(2)
         # otherMCHist.Rebin(2)
 
-	(m3Top, m3TopErr,m3Wgamma, m3WgammaErr, m3otherMC, m3otherMCerr) = makenewFit(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, WHist,otherMCHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
+	(m3Top, m3TopErr,m3Wboson, m3WbosonErr, m3otherMC, m3otherMCerr) = makenewFit(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, WHist,otherMCHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
 
         lowfitBin = DataHist.FindBin(0.01)
         highfitBin = DataHist.FindBin(799.99)
 
         dataInt = DataHist.Integral(lowfitBin,highfitBin)
         topInt = TopHist.Integral(lowfitBin,highfitBin)
-        WgInt = WgHist.Integral(lowfitBin,highfitBin)
+        WInt = WHist.Integral(lowfitBin,highfitBin)
 	otherMCInt = otherMCHist.Integral(lowfitBin, highfitBin)
 
         TopSF = m3Top/ topInt
         TopSFerror = m3TopErr/ topInt
 
-        WgammaSF = m3Wgamma / WgInt
-        WgammaSFerror = m3WgammaErr / WgInt
+        WbosonSF = m3Wboson / WInt
+        WbosonSFerror = m3WbosonErr / WInt
 
 	otherMCSF = m3otherMC/otherMCInt
 	otherMCSFerror = m3otherMCerr/otherMCInt
 
-	totMC = m3Top + m3Wgamma + m3otherMC
+	totMC = m3Top + m3Wboson + m3otherMC
 
 	m3_topFrac = m3Top/totMC
 	m3_topFracErr = m3TopErr/totMC	
 
+
 	print
 	print '#'*80
 	print 'Total amount of Top events in fit:', m3Top, '+-', m3TopErr
-	print 'Total amount of Wgamma events in fit:', m3Wgamma, '+-', m3WgammaErr
+	print 'Total amount of Wboson events in fit:', m3Wboson, '+-', m3WbosonErr
 	print 'Total amount of Other MC events in fit:', m3otherMC, '+-', m3otherMCerr
 	print '#'*80
 
@@ -478,11 +479,11 @@ def doM3fit_photon_New():
 	print 'the top fraction error after photon selection:', m3_topFracErr 	
 	print
         print 'Correction to the Top scale factor: ', TopSF, ' +-', TopSFerror, '(fit error only)'
-	print 'Correction to Wgamma scale factor: ', WgammaSF, ' +-',WgammaSFerror,'(fit error only)'
+	print 'Correction to Wboson scale factor: ', WbosonSF, ' +-',WbosonSFerror,'(fit error only)'
 	print 'Correction to otherMC scale factor: ', otherMCSF, ' +-',otherMCSFerror,'(fit error only)'
         print '#'*80
 	######## Calculate the top fraction (topEvents over total MC events) and return it as well ########
-        return (TopSF, TopSFerror, WgammaSF, WgammaSFerror, otherMCSF, otherMCSFerror, m3_topFrac, m3_topFracErr) 
+        return (TopSF, TopSFerror, WbosonSF, WbosonSFerror, otherMCSF, otherMCSFerror, m3_topFrac, m3_topFracErr) 
 
 	
 def doQCDfit_photon():

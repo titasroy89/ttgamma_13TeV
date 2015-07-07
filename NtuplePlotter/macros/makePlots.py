@@ -621,6 +621,8 @@ TopSF_tmp, TopSFerror_tmp, WgammaSF_tmp, WgammaSFerror_tmp, otherMCSF_tmp, other
 
 TopSF_presel = TopSF
 TopSF_presel_error = TopSFerror
+WJetsSF_presel = WJetsSF
+WJetsSF_presel_error = WJetsSFerror
 
 TopSF *= TopSF_tmp
 WgammaSF *= WgammaSF_tmp
@@ -654,8 +656,8 @@ if systematic == 'EleFakeSF_down':
 
 calc_the_answer.M3TopSF = TopSF_presel
 calc_the_answer.M3TopSFErr = TopSF_presel_error
-calc_the_answer.M3WJetsSF = WJetsSF
-calc_the_answer.M3WJetsSFErr = WJetsSFerror
+calc_the_answer.M3WJetsSF = WJetsSF_presel
+calc_the_answer.M3WJetsSFErr = WJetsSF_presel_error
 calc_the_answer.M3_photon_topFrac = m3_topFrac
 calc_the_answer.M3_photon_topFracErr = m3_topFracErr
 
