@@ -43,7 +43,7 @@ skipPhoton = False #stops before the photon fitting
 skipCalc = False #stops before the calc_the_answer step
 skipMET = False #stops before the MET fitting, just does the photon purity
 
-
+skipQCDphoton = False
 
  ######## Add an argument to determine if running on electrons or muons ######## 
 isSyst = False
@@ -73,6 +73,8 @@ if len(sys.argv) > 1:
 			skipPhoton = True
 		elif systematic == 'skipCalc':
 			skipCalc = True
+		elif systematic == 'skipQCDphoton':
+			skipQCDphoton = True
 		else:
 			isSyst = True
 			sys.stdout = open('ratio_'+systematic+'.txt','w')
@@ -616,32 +618,38 @@ vgamma_fit.setOtherMCconstantM3 = True
 
 ######TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
 
-
-TopSF_tmp, TopSFerror_tmp, WgammaSF_tmp, WgammaSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_New()
-
 TopSF_presel = TopSF
 TopSF_presel_error = TopSFerror
 WJetsSF_presel = WJetsSF
 WJetsSF_presel_error = WJetsSFerror
 
+TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp = 1.,1.,1.,1.,1.,1.
+
+TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_3Templates()
+
 TopSF *= TopSF_tmp
-WgammaSF *= WgammaSF_tmp
-WJetsSF *= WgammaSF_tmp
+WgammaSF *= BkgSF_tmp
+WJetsSF *= BkgSF_tmp
 otherMCSF *= otherMCSF_tmp
 
+##### TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_2Templates()
+
 makePhotonSelectionPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
+
+if skipQCDphoton:
+	print '*'*80
+	print 'Stopping code before the MET fit after photon selection'
+	exit()
 
 saveNoMETTemplates(InputHist, DataHist, 'templates_barrel_nomet.root', 'hist_1phoNoMET_barrel_top_')
 saveNoMETTemplates(QCDHist, QCDHist, 'templates_barrel_nomet_qcd.root', 'hist_1phoNoMET_barrel_top_')
 
-
-# print '*'*80
 vgamma_fit.qcdMETfile = 'templates_barrel_nomet_qcd.root'
 vgamma_fit.normMETfile = 'templates_barrel_nomet.root'
-
+	
 QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon_NoMET()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
-#exit()
+
 
 if skipCalc:
 	print '*'*80
@@ -668,7 +676,7 @@ calc_the_answer.M3WJetsSFErr = WJetsSF_presel_error
 calc_the_answer.M3_photon_topFrac = m3_topFrac
 calc_the_answer.M3_photon_topFracErr = m3_topFracErr
 
-calc_the_answer.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
+#calc_the_answer.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
 
 calc_the_answer.doTheCalculation()
 
