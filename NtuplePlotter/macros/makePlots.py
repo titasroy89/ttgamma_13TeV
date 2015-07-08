@@ -7,6 +7,8 @@ import qcd_fit
 import calc_the_answer
 import vgamma_fit
 
+import mcEventsTable
+
 ROOT.gROOT.SetBatch()
 #########
 #Style
@@ -616,6 +618,8 @@ if skipPhoton:
 vgamma_fit.setQCDconstantM3 = True
 vgamma_fit.setOtherMCconstantM3 = True
 
+vgamma_fit.M3BinWidth=40.
+
 ######TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
 
 TopSF_presel = TopSF
@@ -650,6 +654,10 @@ vgamma_fit.normMETfile = 'templates_barrel_nomet.root'
 QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon_NoMET()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
 
+print
+mcEventsTable.printMCTable()
+
+print
 
 if skipCalc:
 	print '*'*80
@@ -678,5 +686,15 @@ calc_the_answer.M3_photon_topFracErr = m3_topFracErr
 
 #calc_the_answer.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
 
-calc_the_answer.doTheCalculation()
+xsRatio, xsRatioErr, bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr = calc_the_answer.doTheCalculation()
 
+mcEvents.ttgammaSF     = bestttgSF
+mcEvents.vgammaSF      = bestvgSF
+mcEvents.jetToPhotonSF = bestjgSF
+
+mcEvents.ttgammaSFErr     = bestttgSFErr
+mcEvents.vgammaSFErr      = bestvgSFErr
+mcEvents.jetToPhotonSFErr = bestjgSFErr
+
+print
+mcEventsTable.printMCTable()

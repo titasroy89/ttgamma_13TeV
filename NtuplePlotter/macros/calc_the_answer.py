@@ -160,7 +160,7 @@ def doTheCalculation():
  	print 'NdataErr             = ', signal_finder.NdataErr             
 
 	
-	ttgammaSig,ttgammaSigErr = signal_finder.calculateTTGamma()
+	ttgammaSig,ttgammaSigErr, bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr = signal_finder.calculateTTGamma()
 	
 	#################################################
 	
@@ -206,4 +206,4 @@ def doTheCalculation():
 	print 'phoRecoEffErr        = ', phoRecoEffErr
 	print 'TTGammaVis_topAccErr = ', TTGammaVis_topAccErr
 
-	return (xsRatio, xsRatio*xsRatioRelErr)
+	return xsRatio, xsRatio*xsRatioRelErr,bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr
