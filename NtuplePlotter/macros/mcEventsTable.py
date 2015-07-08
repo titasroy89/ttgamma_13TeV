@@ -1,7 +1,8 @@
 import ROOT
 from ROOT import *
 
-inputFile = TFile("templates_barrel_scaled_afterPhotonM3.root",'READ')
+#inputFile = TFile("templates_barrel_scaled_afterPhotonM3.root",'READ')
+inputFile = TFile("templates_barrel_scaled.root",'READ')
 
 samples = ['TTGamma','TTJets', 'Vgamma', 'WJets', 'ZJets', 'SingleTop']
 samples = ['TTGamma','TTJets', 'Wgamma', 'WJets', 'Zgamma', 'ZJets', 'SingleTop']
@@ -28,9 +29,18 @@ tempHist = inputFile.Get("QCD_MET")
 values.append([tempHist.IntegralAndError(-1,-1,err),0.,0.])
 valuesErrs.append([err,0.,0.])
 
+totals = [0.,0.,0.,0.]
+
 samples.append('QCD')
 print '| samples | total | fake jet | electron | photon |'
 for i in range(len(values)):
 ###    print "| %s | %.1f |" % (samples[i], values[i][0])
     print "| %s | %.2f | %.2f +- %.2f | %.1f +- %.2f | %.1f +- %.2f |" % (samples[i], (values[i][0]+values[i][1]+values[i][2]), values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
+    totals[0] += values[i][0]
+    totals[0] += values[i][1]
+    totals[0] += values[i][2]
+    totals[1] += values[i][0]
+    totals[2] += values[i][1]
+    totals[3] += values[i][2]
 
+print "| Totals | %.2f | %.2f | %.2f | %.2f |" % (totals[0], totals[1], totals[2], totals[3])
