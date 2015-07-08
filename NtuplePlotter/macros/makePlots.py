@@ -684,17 +684,24 @@ calc_the_answer.M3WJetsSFErr = WJetsSF_presel_error
 calc_the_answer.M3_photon_topFrac = m3_topFrac
 calc_the_answer.M3_photon_topFracErr = m3_topFracErr
 
-#calc_the_answer.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
+calc_the_answer.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
 
 xsRatio, xsRatioErr, bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr = calc_the_answer.doTheCalculation()
 
-mcEvents.ttgammaSF     = bestttgSF
-mcEvents.vgammaSF      = bestvgSF
-mcEvents.jetToPhotonSF = bestjgSF
+mcEventsTable.ttgammaSF     = bestttgSF
+mcEventsTable.vgammaSF      = bestvgammaSF
+mcEventsTable.jetToPhotonSF = bestjgSF
+mcEventsTable.egammaSF      = 1.5
 
-mcEvents.ttgammaSFErr     = bestttgSFErr
-mcEvents.vgammaSFErr      = bestvgSFErr
-mcEvents.jetToPhotonSFErr = bestjgSFErr
+print
+print 'BestttgSF    = ',bestttgSF    , '+-', bestttgSFErr    
+print 'BestvgammaSF = ',bestvgammaSF , '+-', bestvgammaSFErr 
+print 'BestjgSF     = ',bestjgSF     , '+-', bestjgSFErr     
+
+mcEventsTable.ttgammaSFerr     = bestttgSFErr
+mcEventsTable.vgammaSFerr      = bestvgammaSFErr
+mcEventsTable.jetToPhotonSFerr = bestjgSFErr
+mcEventsTable.egammaSFerr      = 0.2
 
 print
 mcEventsTable.printMCTable()
