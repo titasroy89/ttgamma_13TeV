@@ -1,3 +1,4 @@
+import ROOT
 from ROOT import *
 
 
@@ -29,22 +30,24 @@ def printMCTable():
         for gen in photonGen:
             valSF = 1.
             histName = s + "_" + gen + "_MET"
-            print histName
             tempHist = inputFile.Get(histName)
-            err = Double(0.0)
+            err = ROOT.Double(0.0)
+
             val = tempHist.IntegralAndError(-1,-1,err)
-            err = (err/val)**2
+
+            if val > 0:
+                err = (err/val)**2
 
             ## Apply TTgamma, Vgamma, and jetToPhoton scale factors
             if 'TTGamma' in s:
-                valSF *= ttgamaSF
+                valSF *= ttgammaSF
                 err += (ttgammaSFerr/ttgammaSF)**2
             if 'Wgamma' in s or 'Vgamma' in s:
-                valSF *= vgamaSF
+                valSF *= vgammaSF
                 err += (vgammaSFerr/vgammaSF)**2
             if 'fake' in gen:
                 valSF *= jetToPhotonSF
-                err += (jetToPhotonSFerr/jetToPhotonSFttgammaS)**2
+                err += (jetToPhotonSFerr/jetToPhotonSF)**2
 
             tempVal.append(val*valSF)
             tempErr.append(err**0.5)
@@ -52,6 +55,7 @@ def printMCTable():
         valuesErrs.append(tempErr)
 
     tempHist = inputFile.Get("QCD_MET")
+    err = ROOT.Double(0.0)
     values.append([tempHist.IntegralAndError(-1,-1,err)*jetToPhotonSF,0.,0.])
     valuesErrs.append([(err**2+(jetToPhotonSFerr/jetToPhotonSF)**2)**0.5,0.,0.])
 
