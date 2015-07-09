@@ -404,11 +404,12 @@ def doM3fit_photon():
 	otherMCHist.Add(VgHist)
 
 	binWidth = DataHist.GetBinWidth(0)
-	binRebin = int(binWidth/M3BinWidth)
+	binRebin = int(M3BinWidth/binWidth)
 	if binRebin < 1.: 
 		binRebin = 1
 		print 'New binning is smaller than histogram bin size' 
-
+	else:
+		print 'Rebinning by factor of', binRebin
 	DataHist.Rebin(binRebin)
 	TopHist.Rebin(binRebin)
 	WJetsHist.Rebin(binRebin)
@@ -505,10 +506,12 @@ def doM3fit_photon_3Templates():
 	otherMCHist.Add(QCDHist)
 	
 	binWidth = DataHist.GetBinWidth(0)
-	binRebin = int(binWidth/M3BinWidth)
+	binRebin = int(M3BinWidth/binWidth)
 	if binRebin < 1.: 
 		binRebin = 1
 		print 'New binning is smaller than histogram bin size' 
+	else:
+		print 'Rebinning by factor of', binRebin
 
 	DataHist.Rebin(binRebin)
 	TopHist.Rebin(binRebin)
@@ -604,10 +607,12 @@ def doM3fit_photon_2Templates():
 	BkgHist.Add(QCDHist)
 	
 	binWidth = DataHist.GetBinWidth(0)
-	binRebin = int(binWidth/M3BinWidth)
+	binRebin = int(M3BinWidth/binWidth)
 	if binRebin < 1.: 
 		binRebin = 1
 		print 'New binning is smaller than histogram bin size' 
+	else:
+		print 'Rebinning by factor of', binRebin
 
 	DataHist.Rebin(binRebin)
 	TopHist.Rebin(binRebin)
@@ -753,10 +758,12 @@ def doQCDfit_photon_NoMET():
 	MCHist.Add(get1DHist(normMETfile, 'Vgamma_'+varToFit))
 
 	binWidth = DataHist.GetBinWidth(0)
-	binRebin = int(binWidth/M3BinWidth)
+	binRebin = int(M3BinWidth/binWidth)
 	if binRebin < 1.: 
 		binRebin = 1
 		print 'New binning is smaller than histogram bin size' 
+	else:
+		print 'Rebinning by factor of', binRebin
 
 	qcdDataHist.Rebin(binRebin)
 	MCHist.Rebin(binRebin)
