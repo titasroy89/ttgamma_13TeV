@@ -584,6 +584,9 @@ qcd_fit.normMETfile = 'templates_presel_nomet.root'
 qcd_fit.setQCDconstantM3 = True
 qcd_fit.setOtherMCconstantM3 = True
 
+qcd_fit.M3BinWidth=40.
+
+
 QCDSF,QCDSFerror_met = qcd_fit.doQCDfit()
 
 print "QCD SF from MET fit is :" , QCDSF

@@ -9,6 +9,8 @@ import re
 setQCDconstantM3 = False
 setOtherMCconstantM3 = False
 
+M3BinWidth = 40.
+
 def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName):
 	# RooFit variables
 	sihihVar = RooRealVar(varname, varname, varmin, varmax)
@@ -305,6 +307,19 @@ def doM3fit():
 	otherMCHist.Add(get1DHist(M3file, 'Vgamma_'+varToFit))
 	
 	QCDHist = get1DHist(M3file, 'QCD_'+varToFit)
+
+
+	binWidth = DataHist.GetBinWidth(0)
+	binRebin = int(binWidth/M3BinWidth)
+	if binRebin < 1.: 
+		binRebin = 1
+		print 'New binning is smaller than histogram bin size' 
+
+	DataHist.Rebin(binRebin)
+	TopHist.Rebin(binRebin)
+	WJHist.Rebin(binRebin)
+	otheRMC.Rebin(binRebin)
+	QCDHist.Rebin(binRebin)
 
 	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 0.0, 800.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, 'plots/'+varToFit+'_fit.png')
 	lowfitBin = DataHist.FindBin(0.01)
