@@ -183,14 +183,14 @@ def calculateTTGamma():
 	vghist.SetMinimum(0.0)
 	vghist.Fit('gaus')
 	ccc.SaveAs('plots/Vgamma_SF_Lkhood.png')
-	fit = ttghist.GetFunction('gaus')
+	fit = vghist.GetFunction('gaus')
 	bestVgSFErr = fit.GetParameter(2)
 	
 	jghist.Draw()
 	jghist.GetXaxis().SetTitle('Jet to Photon Scale Factor')
 	jghist.Fit('gaus')
 	ccc.SaveAs('plots/jet_gamma_SF_Lkhood.png')
-	fit = ttghist.GetFunction('gaus')
+	fit = jghist.GetFunction('gaus')
 	bestjgSFErr = fit.GetParameter(2)
 	
 	ttgammaSig = bestttgSF*pho['TTGamma'][0]
