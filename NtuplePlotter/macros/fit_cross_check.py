@@ -2,6 +2,10 @@ import ROOT
 ROOT.gROOT.SetBatch()
 import templateFits
 
+
+ROOT.gStyle.SetOptTitle(0)
+ROOT.gStyle.SetPadLeftMargin(0.12)
+
 templateFits.InputFilename = 'templates_barrel.root'
 templateFits.fitData = False ## to do closure test
 templateFits.NpseudoExp = 0
@@ -22,7 +26,14 @@ for s in scales:
 	graph.SetPointError(gpoint, 0.0, phoPurityError)
 	gpoint+=1
 	
-canvas = ROOT.TCanvas('c1','c1',640,800)
+canvas = ROOT.TCanvas('c1','c1',640,640)
+
+graph.GetXaxis().SetTitle("MC Truth Photon Purity")
+graph.GetYaxis().SetTitle("Fit Result Photon Purity")
+graph.GetYaxis().SetTitleOffset(1.4)
+
+
+
 graph.Draw('Ap')
 graph.SetMarkerStyle(8)
 
