@@ -310,15 +310,18 @@ def doM3fit():
 
 
 	binWidth = DataHist.GetBinWidth(0)
-	binRebin = int(binWidth/M3BinWidth)
+	binRebin = int(M3BinWidth/binWidth)
 	if binRebin < 1.: 
 		binRebin = 1
-		print 'New binning is smaller than histogram bin size' 
+		print 'New binning is smaller than histogram bin size'
+ 	else:
+		print 'Rebinning by factor of', binRebin
+
 
 	DataHist.Rebin(binRebin)
 	TopHist.Rebin(binRebin)
 	WJHist.Rebin(binRebin)
-	otheRMC.Rebin(binRebin)
+	otherMCHist.Rebin(binRebin)
 	QCDHist.Rebin(binRebin)
 
 	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 0.0, 800.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, 'plots/'+varToFit+'_fit.png')
