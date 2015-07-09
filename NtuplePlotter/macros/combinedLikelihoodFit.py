@@ -1,7 +1,9 @@
 import ROOT
 from math import exp
-
 import sys
+
+ROOT.gROOT.SetBatch()
+
 e_directory = "ElePlots/"
 mu_directory = "MuPlots/"
 
@@ -29,16 +31,16 @@ eleFakeSFErr = 0.15
 # parameters used in chi square calculation
 e_photnPurity	       =  0.564158170272
 e_photnPurityErr       =  0.0646043755
-e_M3_photon_topFrac    =  0.683315978674
-e_M3_photon_topFracErr =  0.0701062046615
+e_M3_photon_topFrac    =  0.718232166947
+e_M3_photon_topFracErr =  0.0607172111371
 e_Ndata		       =  977.0
 e_NdataErr             =  31.2569992162
 
 # parameters used in chi square calculation
 mu_photnPurity	        =  0.531874490818
 mu_photnPurityErr       =  0.0575003678412
-mu_M3_photon_topFrac    =  0.69654529757
-mu_M3_photon_topFracErr =  0.0610381089575
+mu_M3_photon_topFrac    =  0.696751649028
+mu_M3_photon_topFracErr =  0.0585215226403
 mu_Ndata	        =  1173.0
 mu_NdataErr             =  34.2490875791
 
@@ -253,10 +255,10 @@ def calculateTTGamma():
 	print 'number of signal events', ttgammaSig, ' +/-',ttgammaSigErr
 	return ttgammaSig,ttgammaSigErr
 
-#combined_ttgammaSig, combined_ttgammaSigErr = calculateTTGamma()
+combined_ttgammaSig, combined_ttgammaSigErr = calculateTTGamma()
 
 
-combined_ttgammaSig, combined_ttgammaSigErr = 762.213858252, 118.341451818
+#combined_ttgammaSig, combined_ttgammaSigErr = 762.213858252, 118.341451818
 	
 mu_phoAcc 	     =  0.13477462661
 mu_TTGamma_topEffAcc =  0.079146136607
