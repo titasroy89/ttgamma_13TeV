@@ -4,11 +4,9 @@ import sys
 
 ROOT.gROOT.SetBatch()
 
-e_directory = "ElePlots/"
-mu_directory = "MuPlots/"
+e_directory = "/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/"
+mu_directory = "/uscms_data/d3/troy2012/ttgamma_muons/TTGammaSemiLep/NtuplePlotter/macros/"
 
-preselFileName = 'templates_presel_scaled.root'
-barrelFileName = 'templates_barrel_scaled.root'
 barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
 
 combined_ttgammaSig, combined_ttgammaSigErr, bestttgSF, bestttgSFErr, bestvgSF, bestvgSFErr, bestjgSF, bestjgSFErr  = 1,1,1,1,1,1,1,1
@@ -26,14 +24,14 @@ def integral(histname, fileName):
 	print integr,err
 	return integr,err
 
-eleFakeSF = 1.2 
+eleFakeSF = 1.5
 eleFakeSFErr = 0.15
 
 # parameters used in chi square calculation
 e_photnPurity	       =  0.564158170272
 e_photnPurityErr       =  0.0646043755
-e_M3_photon_topFrac    =  0.718232166947
-e_M3_photon_topFracErr =  0.0607172111371
+e_M3_photon_topFrac    =  0.720712773763
+e_M3_photon_topFracErr =  0.0609031509759
 e_Ndata		       =  977.0
 e_NdataErr             =  31.2569992162
 
@@ -44,6 +42,17 @@ mu_M3_photon_topFrac    =  0.696751644814
 mu_M3_photon_topFracErr =  0.0585215039131
 mu_Ndata	        =  1173.0
 mu_NdataErr             =  34.2490875791
+
+
+
+#### For testing, putting one channels uncertainties to infinity should return the values from the opposite channel
+
+# mu_photnPurityErr       =  9999999999999.
+# mu_M3_photon_topFracErr =  9999999999999.
+# mu_NdataErr             =  9999999999999.
+# e_photnPurityErr       =  9999999999999.
+# e_M3_photon_topFracErr =  9999999999999.
+# e_NdataErr             =  9999999999999.
 
 def readSamples(suffix, fileName):
 	var = 'MET'
@@ -339,18 +348,18 @@ print combined_ttgammaSig, combined_ttgammaSigErr, bestttgSF, bestttgSFErr, best
 
 #combined_ttgammaSig, combined_ttgammaSigErr = 805.521463834, 112.863397283
 	
-e_phoAcc 	    =  0.131769190217
+e_phoAcc 	    =  0.13176919084
 e_TTGamma_topEffAcc =  0.0635214446893
-e_topPreselInt      =  160093.700896
+e_topPreselInt      =  160026.991583
 e_TTJets_topEffAcc  =  0.0340351862929
-e_phoRecoEff        =  0.278322649164
+e_phoRecoEff        =  0.278322638121
 e_TTGammaVis_topAcc =  0.162581741774
 
-e_phoAccErr            =  0.00240040666203
+e_phoAccErr            =  0.00240040662921
 e_TTGamma_topEffAccErr =  0.000317815765302
-e_topPreselErr         =  1365.70588597
+e_topPreselErr         =  1366.77651567
 e_TTJets_topEffAccErr  =  2.36146892948e-05
-e_phoRecoEffErr        =  0.00419737860878
+e_phoRecoEffErr        =  0.0041973783455
 e_TTGammaVis_topAccErr =  0.00085048266326
 
 
@@ -382,12 +391,12 @@ combined_topPreselErr = (mu_topPreselErr**2+e_topPreselErr**2)**0.5
 combined_TTgammaPhoEffAccErr = ((mu_TTGamma_topEffAccErr/mu_TTGamma_topEffAcc)**2 + 
 				(mu_phoAccErr/mu_phoAcc)**2 + 
 				(e_TTGamma_topEffAccErr/e_TTGamma_topEffAcc)**2 + 
-				(e_phoAccErr/e_phoAcc)**2)**0.5
+				(e_phoAccErr/e_phoAcc)**2)**0.5 * combined_TTgammaPhoEffAcc
 combined_TTJets_topEffAccErr = (mu_TTJets_topEffAccErr**2 + e_TTJets_topEffAccErr**2)**0.5
 combined_TTgammaPhoEffAccVisErr =  ((mu_TTGammaVis_topAccErr/mu_TTGammaVis_topAcc)**2 + 
 				    (mu_phoRecoEffErr/mu_phoRecoEff)**2 + 
 				    (e_TTGammaVis_topAccErr/e_TTGammaVis_topAcc)**2 + 
-				    (e_phoRecoEffErr/e_phoRecoEff)**2)**0.5
+				    (e_phoRecoEffErr/e_phoRecoEff)**2)**0.5 * combined_TTgammaPhoEffAccVis
 
 
 
