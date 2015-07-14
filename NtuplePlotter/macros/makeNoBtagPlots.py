@@ -84,7 +84,7 @@ else:
 WJetsSF = 1.0
 TopSF = 1.0
 QCDSF = 1.0
-ZJetsSF = 0.95
+ZJetsSF = 1.00561896541
 ZJetsSFErr = 0.0
 if isElectron:	
 	ZJetsSF = 0.95  
@@ -482,9 +482,9 @@ if systematic in ['Btag_down','Btag_up','EleEff_down','EleEff_up','JEC_down','JE
 else:
 	outSuffix = ''
 
-InputHist = '../../hist_bin_zeroB'+outSuffix+'/'
-QCDHist = '../../QCD_bin_zeroB/'
-DataHist = '../../hist_bin_zeroB/'
+InputHist = '../../EleHists/hist_bin_zeroB'+outSuffix+'/'
+QCDHist = '../../EleHists/QCD_bin_zeroB/'
+DataHist = '../../EleHists/hist_bin_zeroB/'
 
 ######## Added in a printout of histogram locations, for easier tracking later on ######## 
 
@@ -514,6 +514,10 @@ if systematic == 'QCD_down':
 # save templates for M3 fit
 savePreselTemplates(InputHist, QCDHist, DataHist, 'templates_presel_zeroB.root')
 
+
+qcd_fit.setQCDconstantM3 = True
+qcd_fit.setOtherMCconstantM3 = True
+
 # do M3 fit, update SF for Top and WJets
 qcd_fit.M3file = 'templates_presel_zeroB.root'
 TopSF, TopSFerror, WJetsSF, WJetsSFerror,otherMCSF,otherMCSFerror, QCDSF_m3, QCDSFerror_m3 = qcd_fit.doM3fit()
@@ -523,7 +527,7 @@ print TopSF, WJetsSF,otherMCSF, QCDSF
 #QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
 #TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon = vgamma_fit.doM3fit_photon()
 makeAllPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
-makeQCDPlots(varList_all, QCDHist, 'QCD_plots')
+#makeQCDPlots(varList_all, QCDHist, 'QCD_plots')
 
 
 # ######## Change the vgamma fit to return also the top fraction for use in the likelihood fit ######## 
