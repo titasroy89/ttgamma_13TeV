@@ -1,6 +1,7 @@
 import ROOT
 from ROOT import *
 
+latexFormat = True
 
 inputFileName = "templates_barrel_scaled_afterPhotonM3.root"
 
@@ -71,9 +72,19 @@ def printMCTable():
     totalsErr = [0.,0.,0.,0.]
 
     samples.append('QCD')
-    print '| *Sample* | *Total* | *Fake jet* | *Electron* | *Photon* |'
+    if latexFormat:
+        print '\\begin{tabular}{l c c c c}'
+        print '\\hline'
+        print 'Sample & Total & Fake jet & Electron & Photon \\\\'
+        print '\\hline'
+    else:
+        print '| *Sample* | *Total* | *Fake jet* | *Electron* | *Photon* |'
     for i in range(len(values)):
-        print "| %s | %.2f +- %.2f | %.2f +- %.2f | %.1f +- %.2f | %.1f +- %.2f |" % (samples[i], (values[i][0]+values[i][1]+values[i][2]), (valuesErrs[i][0]**2+valuesErrs[i][1]**2+valuesErrs[i][2]**2)**0.5, values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
+        if latexFormat:
+            print "%s & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ \\\\" % (samples[i], (values[i][0]+values[i][1]+values[i][2]), (valuesErrs[i][0]**2+valuesErrs[i][1]**2+valuesErrs[i][2]**2)**0.5, values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
+        else:
+            print "| %s | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f |" % (samples[i], (values[i][0]+values[i][1]+values[i][2]), (valuesErrs[i][0]**2+valuesErrs[i][1]**2+valuesErrs[i][2]**2)**0.5, values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
+
         totals[0] += values[i][0]
         totals[0] += values[i][1]
         totals[0] += values[i][2]
@@ -92,6 +103,14 @@ def printMCTable():
     totalsErr[1] = totalsErr[1]**0.5
     totalsErr[2] = totalsErr[2]**0.5
     totalsErr[3] = totalsErr[3]**0.5
-    print "| Totals | %.2f +- %.2f | %.2f +- %.2f | %.2f +- %.2f | %.2f +- %.2f |" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
+    if latexFormat:
+        print '\\hline'
+        print "Totals & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ \\\\" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
+        print '\\hline'
+        print '\\end{tabular}'
+    else:
+        print "| Totals | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f |" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
 
     return
+
+#  LocalWords:  latexFormat
