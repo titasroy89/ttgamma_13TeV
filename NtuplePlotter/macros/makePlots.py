@@ -535,9 +535,12 @@ else:
 	outSuffix = ''
 
 if isElectron:
-	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin'+outSuffix+'/'
-	QCDHist =   '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/QCD_bin/'
-	DataHist =  '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin/'
+	# InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin'+outSuffix+'/'
+	# QCDHist =   '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/QCD_bin/'
+	# DataHist =  '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin/'
+	InputHist = '/eos/uscms/store/user/dnoonan/EleHists/hist_bins'+outSuffix+'/'
+	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists/QCD_bins/'
+	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists/hist_bins/'
 if isMuon:
 	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins'+outSuffix+'/'
 	QCDHist = '/uscms_data/d3/troy2012/ANALYSIS_2/QCD_bins/'
@@ -554,13 +557,14 @@ print 'Data Histogram location:', DataHist
 saveAccTemplates(InputHist, 'ttbar_acceptance.root')
 
 ### templates for data driven fit or closure test. No rescaling necessary
-#saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
-#templateFits.InputFilename = 'templates_barrel.root'
-#templateFits.fitData = True ## to do closure test
+saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
+templateFits.InputFilename = 'templates_barrel.root'
+templateFits.fitData = True ## to do closure test
 #templateFits.NpseudoExp = 3000
 
 #phoPurity,phoPurityError = 0.657, 0.0564 #0.506, 0.078  #0.564, 0.063 #### 0.556427532887, 0.0616417156454 ## auto binsize: 0.561220079533, 0.0529980243576
-#phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
+phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
+
 if isElectron:
 	phoPurity, phoPurityError = 0.564158170272, 0.651263076828*0.0991985847174
 if isMuon:
@@ -636,7 +640,7 @@ TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, otherMCSF_tmp, otherMCSFer
 
 TopSF *= TopSF_tmp
 WgammaSF *= BkgSF_tmp
-WJetsSF *= BkgSF_tmp
+WJetsSF *= otherMCSF_tmp
 otherMCSF *= otherMCSF_tmp
 
 ##### TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_2Templates()
