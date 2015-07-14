@@ -79,7 +79,7 @@ if len(sys.argv) > 1:
 			skipQCDphoton = True
 		else:
 			isSyst = True
-			sys.stdout = open('ratio_'+systematic+'.txt','w')
+			sys.stdout = open('Results/ratio_'+systematic+'.txt','w')
 else:
 	print '#'*30
 	print 'At least one argument is required,'
@@ -103,11 +103,20 @@ else:
 	sys.exit(1)
 
 # initialize variables, assign values later
-WJetsSF = 1.0
 TopSF = 1.0
+WJetsSF = 1.0
 QCDSF = 1.0
 ZJetsSF = 1.0
+otherMCSF = 1.0
+WgammaSF = 1.0
+
+TopSFErr = 0.0
+WJetsSFErr = 0.0
+QCDSFErr = 0.0
 ZJetsSFErr = 0.0
+otherMCSFErr = 0.0
+WgammaSFErr = 0.0
+
 if isElectron:	
 	ZJetsSF = 1.20  
 	ZJetsSFErr = 0.06
@@ -122,9 +131,13 @@ if systematic == 'ZJetsSF_down':
 if systematic == 'zeroB':
 	ZJetsSF = 1.0
 
-otherMCSF = 1.0
 
-WgammaSF = 1.0
+if systematic == 'otherMC_up':
+	otherMCSF = 1.2
+if systematic == 'otherMC_down':
+	otherMCSF = 0.8
+
+
 
 #import array
 #binarray = array.array('d')
@@ -590,7 +603,6 @@ qcd_fit.setOtherMCconstantM3 = True
 
 qcd_fit.M3BinWidth=40.
 
-
 QCDSF,QCDSFerror_met = qcd_fit.doQCDfit()
 
 print "QCD SF from MET fit is :" , QCDSF
@@ -598,16 +610,25 @@ print "QCD SF from MET fit is :" , QCDSF
 
 # for systematics of QCD fit
 if systematic == 'QCD_up':
-	QCDSF *= 2
+	QCDSF *= 1.5
 if systematic == 'QCD_down':
-	QCDSF /= 2
+	QCDSF *= 0.5
 # save templates for M3 fit
 savePreselTemplates(InputHist, QCDHist, DataHist, 'templates_presel.root')
 
 # do M3 fit, update SF for Top and WJets
 qcd_fit.M3file = 'templates_presel.root'
-TopSF, TopSFerror, WJetsSF, WJetsSFerror,otherMCSF,otherMCSFerror, QCDSF_m3, QCDSFerror_m3 = qcd_fit.doM3fit()
-QCDSF = QCDSF *QCDSF_m3
+TopSF_m3, TopSFerror_m3, WJetsSF_m3, WJetsSFerror_m3,otherMCSF_m3,otherMCSFerror_m3, QCDSF_m3, QCDSFerror_m3 = qcd_fit.doM3fit()
+
+TopSF *= TopSF_m3 
+WJetsSF *= WJetsSF_m3 
+QCDSF *= QCDSF_m3
+otherMCSF *= otherMCSF_m3
+
+TopSFErr = (TopSFErr**2 + TopSFerror_m3**2)**0.5 
+WJetsSFErr = (WJetsSFErr**2 + WJetsSFerror_m3**2)**0.5 
+QCDSFErr = (QCDSFErr**2 + QCDSFerror_m3**2)**0.5 
+otherMCSFErr = (otherMCSFErr**2 + otherMCSFerror_m3**2)**0.5 
 
 print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
 
@@ -630,20 +651,20 @@ vgamma_fit.M3BinWidth=40.
 ######TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon, otherMCSF_photon, otherMCSFerror_photon, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon()
 
 TopSF_presel = TopSF
-TopSF_presel_error = TopSFerror
+TopSF_presel_error = TopSFErr
 WJetsSF_presel = WJetsSF
-WJetsSF_presel_error = WJetsSFerror
+WJetsSF_presel_error = WJetsSFErr
 
-TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp = 1.,1.,1.,1.,1.,1.
+TopSF_phoM3, TopSFerror_phoM3, BkgSF_phoM3, BkgSFerror_phoM3, otherMCSF_phoM3, otherMCSFerror_phoM3 = 1.,1.,1.,1.,1.,1.
 
-TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, otherMCSF_tmp, otherMCSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_3Templates()
+TopSF_phoM3, TopSFerror_phoM3, BkgSF_phoM3, BkgSFerror_phoM3, otherMCSF_phoM3, otherMCSFerror_phoM3, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_3Templates()
 
-TopSF *= TopSF_tmp
-WgammaSF *= BkgSF_tmp
-WJetsSF *= otherMCSF_tmp
-otherMCSF *= otherMCSF_tmp
+TopSF *= TopSF_phoM3
+WgammaSF *= BkgSF_phoM3
+WJetsSF *= otherMCSF_phoM3
+otherMCSF *= otherMCSF_phoM3
 
-##### TopSF_tmp, TopSFerror_tmp, BkgSF_tmp, BkgSFerror_tmp, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_2Templates()
+##### TopSF_phoM3, TopSFerror_phoM3, BkgSF_phoM3, BkgSFerror_phoM3, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_2Templates()
 
 makePhotonSelectionPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
 
