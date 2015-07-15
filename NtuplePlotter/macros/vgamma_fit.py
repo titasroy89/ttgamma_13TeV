@@ -57,7 +57,7 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 
 		plotter.Draw()
 		plotter.GetYaxis().SetTitleOffset(1.4)
-		plotter.GetXaxis().SetTitle("GeV")
+		plotter.GetXaxis().SetTitle("M3 (GeV)")
 		c1.SaveAs(plotName)
 	print 'fit returned value ',signalFractionVar.getVal(),' +- ',signalFractionVar.getError()
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
