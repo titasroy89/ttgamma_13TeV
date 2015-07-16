@@ -4,8 +4,10 @@ import sys
 
 ROOT.gROOT.SetBatch()
 
-e_directory = "/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/"
+e_directory = "/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/CurrentFile/"
 mu_directory = "/uscms_data/d3/troy2012/ttgamma_muons/TTGammaSemiLep/NtuplePlotter/macros/"
+
+mu_directory = "/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/MuPlots/"
 
 barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
 
@@ -38,21 +40,20 @@ e_NdataErr             =  31.2569992162
 # parameters used in chi square calculation
 mu_photnPurity	        =  0.531874490818
 mu_photnPurityErr       =  0.0575003678412
-mu_M3_photon_topFrac    =  0.696751644814
-mu_M3_photon_topFracErr =  0.0585215039131
+mu_M3_photon_topFrac    =  0.696751649028
+mu_M3_photon_topFracErr =  0.0585215226403
 mu_Ndata	        =  1173.0
 mu_NdataErr             =  34.2490875791
 
 
-
 #### For testing, putting one channels uncertainties to infinity should return the values from the opposite channel
 
-# mu_photnPurityErr       =  9999999999999.
-# mu_M3_photon_topFracErr =  9999999999999.
-# mu_NdataErr             =  9999999999999.
-# e_photnPurityErr       =  9999999999999.
-# e_M3_photon_topFracErr =  9999999999999.
-# e_NdataErr             =  9999999999999.
+#mu_photnPurityErr       =  9999999999999.
+#mu_M3_photon_topFracErr =  9999999999999.
+#mu_NdataErr             =  9999999999999.
+#e_photnPurityErr       =  9999999999999.
+#e_M3_photon_topFracErr =  9999999999999.
+#e_NdataErr             =  9999999999999.
 
 def readSamples(suffix, fileName):
 	var = 'MET'
@@ -468,3 +469,10 @@ print '   * Best VgammaSF      =', bestvgSF,  '+-', bestvgSFErr
 print '   * Best JetToPhotonSF =', bestjgSF,  '+-', bestjgSFErr
 print
 
+TTJetsCX = 239.
+TTJetsCXErr = ((2**2 + 11**2 + 6**2)**0.5)
+
+print 'Cross Section'
+print '   ', xsRatio * TTJetsCX, '+-', xsRatio * TTJetsCX * (xsRatioRelErr**2 + (TTJetsCXErr/TTJetsCX)**2)**0.5
+
+print '   ', xsRatio * TTJetsCX, '+-', xsRatio * TTJetsCX * xsRatioRelErr, '+-', xsRatio * TTJetsCXErr
