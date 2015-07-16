@@ -79,7 +79,7 @@ if len(sys.argv) > 1:
 			skipQCDphoton = True
 		else:
 			isSyst = True
-			sys.stdout = open('Results/ratio_'+systematic+'.txt','w')
+			sys.stdout = open('ratioFiles/ratio_'+systematic+'.txt','w')
 else:
 	print '#'*30
 	print 'At least one argument is required,'
