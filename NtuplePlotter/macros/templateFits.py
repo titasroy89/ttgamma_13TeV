@@ -472,6 +472,8 @@ def doTheFit():
 	leg.AddEntry(randCone_Iso, 'Random cone', 'lf')
 	randCone_Iso.SetTitle('')
 	randCone_Iso.GetXaxis().SetTitle('photon '+FitVarname+' (GeV)')
+	randCone_Iso.SetMarkerSize(0)
+	trueSignalIso.SetMarkerSize(0)
 	randCone_Iso.Draw()
 	trueSignalIso.Draw('same')
 	leg.Draw()
@@ -535,6 +537,9 @@ def doTheFit():
 	#true_sel_bckg.Scale(1.0/true_sel_bckg.Integral())
 
 	#true_sel_bckg.Draw()
+	true_bckg.SetMarkerSize(0)
+	sbIso.SetMarkerSize(0)
+
 	true_bckg.Draw()
 	sbIso.Draw('same')
 	leg.Draw()
