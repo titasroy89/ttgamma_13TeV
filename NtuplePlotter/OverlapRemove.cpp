@@ -67,7 +67,7 @@ bool overlapISRFSR(EventTree* tree){
 		if(tree->mcPID->at(mcInd)==22 &&
 		tree->mcPt->at(mcInd) > Et_cut &&
 		fabs(tree->mcEta->at(mcInd)) < Eta_cut){
-			if(abs(tree->mcMomPID->at(mcInd)) == 24 || tree->mcParentage->at(mcInd)==26 || (tree->mcParentage->at(mcInd)==2 && tree->mcGMomPID->at(mcInd)==-999)){
+			if(abs(tree->mcMomPID->at(mcInd)) == 24 || tree->mcParentage->at(mcInd)==26 || (tree->mcParentage->at(mcInd)==2)){
 				if(secondMinDr(mcInd, tree) > 0.2)
 					haveOverlap = true;
 			}
