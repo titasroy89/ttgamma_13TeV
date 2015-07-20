@@ -27,6 +27,9 @@ Histogrammer::Histogrammer(std::string titleIn){
 	make_hist("mu1Pt","muon 1 Pt",30,0,300,"Muon p_{T} (GeV)","Events / 10 GeV");
 	make_hist("mu1Eta","muon 1 Eta",26,-2.6,2.6,"Muon #eta","Events / 0.2");
 	make_hist("mu1RelIso","muon 1 relative isolation",120,0,1.2,"Muon RelIso","Events / 0.01");
+	make_hist("mu2Pt","muon 2 Pt",30,0,300,"p_{T} (GeV)","Events / 10 GeV");
+        make_hist("mu2RelIso","muon 2 relative isolation",10,0,0.5,"RelIso","Events / 0.05");
+
 	
 	// electrons
 	make_hist("ele1Pt","electron 1 Pt",30,0,300,"Electron p_{T} (GeV)","Events / 10 GeV");
@@ -89,6 +92,7 @@ Histogrammer::Histogrammer(std::string titleIn){
 	make_hist("WtransMass","W transverse mass",20,0,200,"M(W_{T})(GeV)","Events / 10 GeV");
 	make_hist("ele1pho1Mass","electron + photon mass",20,0,200,"M(e,#gamma)(GeV)","Events / 10 GeV");
 	make_hist("ele1ele2Mass","Di-electron mass",40,0,200,"M(e,e)(GeV)","Events / 5 GeV");
+	make_hist("mu1mu2Mass","Di-muon mass",40,0,200,"M(mu,mu)(GeV)","Events / 5 GeV");
 	make_hist("Ht","Ht",30,0,1500,"H_{T} (GeV)","Events / 50 GeV");
 	make_hist("MET","Missing Transverse Momentum",40,0,200,"MET (GeV)","Events / 10 GeV");
 	make_hist("MET_low","Missing Transverse Momentum",20,0,20,"MET (GeV)","Events / 10 GeV");
@@ -221,6 +225,18 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		MTW = TMath::Sqrt(2*(tree->muPt_->at(ind))*(tree->pfMET_)*( 1.0 - TMath::Cos(dR(0.0,tree->muPhi_->at(ind),0.0,tree->pfMETPhi_)) ));
 
 		hists["WtransMass"]->Fill( MTW, weight );
+		if (selEvent->Muons.size() > 1) {
+			int ind2 = selEvent->Muons[1];
+			hists["mu2Pt"]->Fill( tree->muPt_->at(ind2), weight );
+                        hists["mu2RelIso"]->Fill( selector->Mu04RelIso[ind2], weight );
+                        TLorentzVector mu1;
+                        TLorentzVector mu2;
+                        mu1.SetPtEtaPhiM(tree->muPt_->at(ind), tree->muEta_->at(ind), tree->muPhi_->at(ind), 0.0);
+                        mu2.SetPtEtaPhiM(tree->muPt_->at(ind2), tree->muEta_->at(ind2), tree->muPhi_->at(ind2), 0.0);
+                        hists["mu1mu2Mass"]->Fill( (mu1+mu2).M(), weight);
+                }
+
+			
 	}
 
 	// electrons
