@@ -37,6 +37,7 @@ for i in `seq 0 23`; do
     python makePlots.py ${channel} ${Systematics[i]}
     echo "cp templates_barrel_scaled_afterPhotonM3.root ${outDir}templates_barrel_scaled_afterPhotonM3_${Systematics[i]}.root"
     cp templates_barrel_scaled_afterPhotonM3.root ${outDir}templates_barrel_scaled_afterPhotonM3_${Systematics[i]}.root
+    cp templates_barrel_scaled.root ${outDir}templates_barrel_scaled_${Systematics[i]}.root
 done
 
 echo "python makePlots.py ${channel} > ${outDir}ratio_nominal.txt"
