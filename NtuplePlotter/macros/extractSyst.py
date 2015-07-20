@@ -1,6 +1,6 @@
 import os
 
-directory = "Results/"
+directory = "/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/macros/ratioFiles/"
 
 twikiFormat = True#False #by default it prints the table in latex format
 
@@ -40,7 +40,7 @@ for line in _file:
 print nominalVal
 
 unc = {'Nsignal':[[100*signalUnc/nominalVal,100*signalUnc/nominalVal],[100*signalVisUnc/nominalVisVal,100*signalVisUnc/nominalVisVal]]}
-
+values = {'nominal':nominalVal}
 #place syst up in second spot and syst down in first spot
 upDown = {'up':1,'down':0}
 
@@ -48,9 +48,11 @@ for systFile in fileList:
 
     systName = systFile.split('.')[0].split('_')[1:3]
 
-    if not unc.has_key(systName[0]): unc[systName[0]] = [[0,0],[0,0]]
+    if not unc.has_key(systName[0]): 
+        unc[systName[0]] = [[0,0],[0,0]]
+        values[systName[0]] = [0,0]
 
-    _file = file("Results/"+systFile,"r")
+    _file = file(directory+systFile,"r")
     isResult = False
     for line in _file:
         if isResult:
@@ -64,10 +66,9 @@ for systFile in fileList:
         if 'visible cross section ratio' in line:
             isVisResult = True
 
-
     unc[systName[0]][0][upDown[systName[1]]] = (systVal-nominalVal)/nominalVal*100
     unc[systName[0]][1][upDown[systName[1]]] = (systVisVal-nominalVisVal)/nominalVisVal*100
-
+    values[systName[0]][upDown[systName[1]]] = systVal
 
 
 for i in unc:
