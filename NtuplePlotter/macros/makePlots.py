@@ -42,6 +42,7 @@ lep = ''
 
 #Add a couple of flags for stopping at various points in the code
 skipPhoton = False #stops before the photon fitting
+skipAfterMET = False #stops before the photon fitting
 skipCalc = False #stops before the calc_the_answer step
 skipMET = False #stops before the MET fitting, just does the photon purity
 
@@ -65,27 +66,41 @@ if len(sys.argv) > 1:
 		print '   e, electron, mu, muons'
 		print '#'*30
 		sys.exit(1)
+	if 'skipMET' in sys.argv:
+		skipMET = True
+		sys.argv.remove('skipMET')
+	if 'skipAfterMET' in sys.argv:
+		skipAfterMET = True
+		sys.argv.remove('skipAfterMET')
+	if 'skipPhoton' in sys.argv:
+		skipPhoton = True
+		sys.argv.remove('skipPhoton')
+	if 'skipCalc' in sys.argv:
+		skipCalc = True
+		sys.argv.remove('skipCalc')
+	if 'skipQCDphoton' in sys.argv:
+		skipQCDphoton = True
+		sys.argv.remove('skipQCDphoton')
 	if len(sys.argv) > 2:
 		systematic = sys.argv[2]
 		if systematic == 'zeroB':
 			print 'zeroB'
-		elif systematic == 'skipMET':
-			skipMET = True
-		elif systematic == 'skipPhoton':
-			skipPhoton = True
-		elif systematic == 'skipCalc':
-			skipCalc = True
-		elif systematic == 'skipQCDphoton':
-			skipQCDphoton = True
 		else:
 			isSyst = True
 			sys.stdout = open('ratioFiles/ratio_'+systematic+'.txt','w')
+
 else:
 	print '#'*30
 	print 'At least one argument is required,'
 	print 'Must specify if begin run on electrons (e or electron) or muons (mu or muon)'
 	print '#'*30
 	sys.exit(1)
+
+if isSyst:
+	sys.stdout = open('ratioFiles/ratio_'+systematic+'.txt','w')
+else:
+	sys.stdout = open('ratioFiles/ratio_nominal.txt','w')
+
 
  ######## Error checking that a lepton channel was selected'
 if isElectron and isMuon:
@@ -204,7 +219,9 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		stack.Draw('HIST')
 		if lep+'1RelIso' in var:
 			canvas.SetLogy()
-		
+		if 'ele1MVA' in var:
+			stack.GetXaxis().SetRangeUser(-1.1,0.0)
+
 		if 'barrel' in outDirName and 'photon1SigmaIEtaIEta' in var:
 			stack.GetXaxis().SetRangeUser(0.0,0.025)
 		
@@ -263,6 +280,7 @@ def loadQCDTemplate(varlist, inputDir, prefix):
 		(templPrefix+'SingleTbar_t.root',  -1 * QCD_sf * otherMCSF * gSF * SingTopbarT_xs/SingTopbarT_num),
 		(templPrefix+'SingleTbar_s.root',  -1 * QCD_sf * otherMCSF * gSF * SingTopbarS_xs/SingTopbarS_num),
 		(templPrefix+'SingleTbar_tw.root', -1 * QCD_sf * otherMCSF * gSF * SingTopbartW_xs/SingTopbartW_num),
+		(templPrefix+'W2Jets.root', -1 * QCD_sf * WJetsSF * gSF * W2Jets_xs/W2Jets_num),
 		(templPrefix+'W3Jets.root', -1 * QCD_sf * WJetsSF * gSF * W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', -1 * QCD_sf * WJetsSF * gSF * W4Jets_xs/W4Jets_num),
 		(templPrefix+'ZJets.root',  -1 * QCD_sf * ZJetsSF * otherMCSF * gSF * ZJets_xs/ZJets_num),
@@ -320,6 +338,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	
 	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, [
         #(templPrefix+'WJets.root', WJetsSF*gSF*WJets_xs/WJets_num),
+		(templPrefix+'W2Jets.root', WJetsSF*gSF*W2Jets_xs/W2Jets_num),
 		(templPrefix+'W3Jets.root', WJetsSF*gSF*W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', WJetsSF*gSF*W4Jets_xs/W4Jets_num),
 		], varList, ROOT.kGreen -3, fillStyle)
@@ -353,7 +372,7 @@ def saveAccTemplates(inputDir, outFileName):
 	saveTemplatesToFile(AccTemplates.values(), varList, outFileName)
 
 def saveNoMETTemplates(inputDir, inputData, outFileName, histName):
-	varList = ['MET','MET_low','M3']
+	varList = ['MET','MET_low','M3',lep+'1RelIso','ele1MVA']
 	DataTempl = loadDataTemplate(varList, inputData, histName)
 	MCTemplDict = loadMCTemplates(varList, inputDir, histName,'',1001)
 	MCTempl = []
@@ -558,6 +577,9 @@ if isMuon:
 	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins'+outSuffix+'/'
 	QCDHist = '/uscms_data/d3/troy2012/ANALYSIS_2/QCD_bins/'
 	DataHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins/'
+	InputHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_bins'+outSuffix+'/'
+	QCDHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/QCD_bins/'
+	DataHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_bins/'
 
 ######## Added in a printout of histogram locations, for easier tracking later on ######## 
 
@@ -570,18 +592,23 @@ print 'Data Histogram location:', DataHist
 saveAccTemplates(InputHist, 'ttbar_acceptance.root')
 
 ### templates for data driven fit or closure test. No rescaling necessary
-saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
-templateFits.InputFilename = 'templates_barrel.root'
-templateFits.fitData = True ## to do closure test
-#templateFits.NpseudoExp = 3000
+# saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
+# templateFits.InputFilename = 'templates_barrel.root'
+# templateFits.fitData = False ## to do closure test
+# templateFits.NpseudoExp = 0
+# templateFits.doTheFit()
+# templateFits.fitData = True ## to do closure test
+# templateFits.NpseudoExp = 1000
+# templateFits.doTheFit()
 
-#phoPurity,phoPurityError = 0.657, 0.0564 #0.506, 0.078  #0.564, 0.063 #### 0.556427532887, 0.0616417156454 ## auto binsize: 0.561220079533, 0.0529980243576
-phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
+#phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
+
+
 
 if isElectron:
-	phoPurity, phoPurityError = 0.564158170272, 0.651263076828*0.0991985847174
+	phoPurity, phoPurityError = 0.564158170272, 0.0633698012736
 if isMuon:
-	phoPurity, phoPurityError = 0.531874490818, 0.624274264056*0.0921075417519
+	phoPurity, phoPurityError = 0.531773010465, 0.0572147752547
 
 
 if skipMET:
@@ -607,6 +634,11 @@ QCDSF,QCDSFerror_met = qcd_fit.doQCDfit()
 
 print "QCD SF from MET fit is :" , QCDSF
 #QCD_low_SF,QCD_low_SFerror = qcd_fit.doQCD_lowfit()
+
+if skipAfterMET:
+	print '*'*80
+	print 'Stopping code after the MET fit'
+	exit()
 
 # for systematics of QCD fit
 if systematic == 'QCD_up':
@@ -635,7 +667,7 @@ print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",oth
 #QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon()
 #TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon = vgamma_fit.doM3fit_photon()
 makeAllPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
-makeQCDPlots(varList_all, QCDHist, 'QCD_plots')
+makeQCDPlots(varList_all+['ele1MVA'], QCDHist, 'QCD_plots')
 
 if skipPhoton:
 	print '*'*80
