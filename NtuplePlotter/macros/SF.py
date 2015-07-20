@@ -20,6 +20,7 @@ WJets_num      = 57709905 #
 
 W4Jets_num     = 11742268 # 7026978 # PART of the statistics!
 W3Jets_num     = 15408303
+W2Jets_num     = 33954921
 
 ZJets_num      = 30458871 #
 
@@ -89,6 +90,7 @@ WJets_xs          = 36257.0 # 35640.0 # CMS measurement. was: 36257.0  #
 ZJets_xs          = 3350.0 # CMS measurement. was: 3533.0 # 3503.71 #
 
 #http://cms.cern.ch/iCMS/prep/requestmanagement?dsn=W4JetsToLNu*&campid=Summer12
+W2Jets_xs         = 1750.0 # PREP
 W3Jets_xs         = 519.0 # PREP
 W4Jets_xs         = 214.0 # PREP
 
