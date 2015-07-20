@@ -9,14 +9,15 @@ import likelihoodCombination
 
 ROOT.gROOT.SetBatch()
 
+#Set directories where muon and electron files are stored, looking for both the ratio.txt files and the template root files.
 e_Directory = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/ratioFiles'
 mu_Directory = '/uscms_data/d3/troy2012/ttgamma_muons/TTGammaSemiLep/NtuplePlotter/macros'
 mu_Directory = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros'
 mu_Directory = '/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/ratioFiles'
 
-
 templatesFileName = 'templates_barrel_scaled_afterPhotonM3.root'
 
+#list of systematics to look for
 systList = ["Btag",
             "EleEff",
             "EleFakeSF",
@@ -31,10 +32,9 @@ systList = ["Btag",
             "toppt"]
 
 systList = ["Btag"]
+
+
 #check if all files are there before starting the likelihood fits
-
-checkFiles = True
-
 for _dir in [e_Directory, mu_Directory]:
     if not os.path.exists(_dir):
         print 'Path does not exist:', _dir
@@ -44,23 +44,24 @@ for _dir in [e_Directory, mu_Directory]:
         exit()
     if not os.path.exists(_dir+'/'+templatesFileName.replace('.root','_nominal.root')):
         print 'File does not exist:', _dir+'/'+templatesFileName.replace('.root','_nominal.root')
-        if checkFiles: exit()
+        exit()
     for syst in systList:
         if not os.path.exists(_dir+'/ratio_'+syst+'_up.txt'):
             print 'File does not exist:', _dir+'/ratio_'+syst+'_up.txt'
-            if checkFiles: exit()
+            exit()
         if not os.path.exists(_dir+'/'+templatesFileName.replace('.root','_'+syst+'_up.root')):
             print 'File does not exist:', _dir+'/'+templatesFileName.replace('.root','_'+syst+'_up.root')
-            if checkFiles: exit()
+            exit()
         if not os.path.exists(_dir+'/ratio_'+syst+'_down.txt'):
             print 'File does not exist:', _dir+'/ratio_'+syst+'_down.txt'
-            if checkFiles: exit()
+            exit()
         if not os.path.exists(_dir+'/'+templatesFileName.replace('.root','_'+syst+'_down.root')):
             print 'File does not exist:', _dir+'/'+templatesFileName.replace('.root','_'+syst+'_down.root')
-            if checkFiles: exit()
+            exit()
 print 'All files are present'
 
-
+#list of the parameters (and errors) to look for in the ratio files
+# these names are then used as keys for the dictionaries storing the values
 parameters = ['photnPurity'          ,
               'M3_photon_topFrac'    ,
               'Ndata'                ,
@@ -69,6 +70,8 @@ parameters = ['photnPurity'          ,
               'NdataErr'             ,
               ]
 
+#list of the efficiencies (and errors) to look for in the ratio files
+# these names are then used as keys for the dictionaries storing the values
 efficiencies = ['phoAcc'           ,
                 'TTGamma_topEffAcc',
                 'topPreselInt'     ,
@@ -83,8 +86,15 @@ efficiencies = ['phoAcc'           ,
                 'TTGammaVis_topAccErr'
                 ]
 
-
 def findValues(e_fileName, mu_fileName):
+    """
+    Parses the ratio.txt files from the output of makePlots to get the parameter and efficiency values needed for the likelihood fit and cross section ratio calculation
+    Returns three dictionaries:
+       e_data: the parameters and uncertainties from the electron+jets channel
+       mu_data: the parameters and uncertainties from the muon+jets channel
+       combined_eff: the combined efficiency values for the two channels
+    """
+
     e_ratioFile = file(e_fileName,'r')
     e_data = {}
     e_eff = {}
@@ -144,9 +154,11 @@ def findValues(e_fileName, mu_fileName):
     
     return e_data, mu_data, combined_eff
 
+### dictionaries to store the ratios for the nominal and systematic sample combinations
 ratioValues = {}
 vis_ratioValues = {}
 
+### get the ratio for the nominal sample
 e_file = e_Directory + '/ratio_nominal.txt'
 mu_file = mu_Directory + '/ratio_nominal.txt'
 e_data, mu_data, combined_eff = findValues(e_file, mu_file)
@@ -157,20 +169,13 @@ result = likelihoodCombination.calculateTTGamma(e_Directory+'/'+templatesFileNam
 ratioValues['nominal'] = result[0]
 vis_ratioValues['nominal'] = result[1]
 
+#loop over all systematics in systlist
 for syst in systList:
 
+    # for all systematics, the cross section ratios are stored in ratioValues as a list, with the first value being the syst_down ratio and second being syst_up
     ratioValues[syst] = [0,0]
     vis_ratioValues[syst] = [0,0]
-        
-    e_file = e_Directory + '/ratio_'+syst+'_up.txt'
-    mu_file = mu_Directory + '/ratio_'+syst+'_up.txt'
-    e_data, mu_data, combined_eff = findValues(e_file, mu_file)
-    likelihoodCombination.e_data = e_data
-    likelihoodCombination.mu_data = mu_data
-    result = likelihoodCombination.calculateTTGamma(e_Directory+'/'+templatesFileName.replace('.root','_'+syst+'_up.root'), mu_Directory+'/'+templatesFileName.replace('.root','_'+syst+'_up.root'), combined_eff)
-    ratioValues[syst][1] = result[0]
-    vis_ratioValues[syst][1] = result[1]
-
+    
     e_file = e_Directory + '/ratio_'+syst+'_down.txt'
     mu_file = mu_Directory + '/ratio_'+syst+'_down.txt'
     e_data, mu_data, combined_eff = findValues(e_file, mu_file)
@@ -179,4 +184,13 @@ for syst in systList:
     result = likelihoodCombination.calculateTTGamma(e_Directory+'/'+templatesFileName.replace('.root','_'+syst+'_down.root'), mu_Directory+'/'+templatesFileName.replace('.root','_'+syst+'_down.root'), combined_eff)
     ratioValues[syst][0] = result[0]
     vis_ratioValues[syst][0] = result[1]
+
+    e_file = e_Directory + '/ratio_'+syst+'_up.txt'
+    mu_file = mu_Directory + '/ratio_'+syst+'_up.txt'
+    e_data, mu_data, combined_eff = findValues(e_file, mu_file)
+    likelihoodCombination.e_data = e_data
+    likelihoodCombination.mu_data = mu_data
+    result = likelihoodCombination.calculateTTGamma(e_Directory+'/'+templatesFileName.replace('.root','_'+syst+'_up.root'), mu_Directory+'/'+templatesFileName.replace('.root','_'+syst+'_up.root'), combined_eff)
+    ratioValues[syst][1] = result[0]
+    vis_ratioValues[syst][1] = result[1]
 
