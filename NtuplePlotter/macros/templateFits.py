@@ -279,6 +279,12 @@ def doTheFit():
 		boundaries = array.array('d')
 		boundaries.fromlist(binlist)
 
+
+	binlist = [-0.5, 0.8, 2.2, 5.0, 10.0, 20.0]
+	print 'using custom bins for Data:',binlist
+	boundaries = array.array('d')
+	boundaries.fromlist(binlist)
+
 	#### test with MC truth shapes ###
 	#sig_templ = pseudosignal
 	#sig_templ.Rebin(2)
@@ -340,6 +346,15 @@ def doTheFit():
 	# draw the result
 	ROOT.gStyle.SetOptFit(111)
 	c1 = ROOT.TCanvas('c1','c1',800,800)
+
+	labelcms = ROOT.TPaveText(c1.GetLeftMargin(),1.-c1.GetTopMargin(),0.6,1.05-c1.GetTopMargin(),"NDCBR")
+	labelcms.SetTextAlign(12)
+	labelcms.SetTextSize(0.045)
+	labelcms.SetFillColor(ROOT.kWhite)
+	labelcms.SetFillStyle(0)
+	labelcms.AddText("CMS Preliminary, #sqrt{s} = 8 TeV")
+	labelcms.SetBorderSize(0)
+
 	pe_results.GetXaxis().SetTitle('signal fraction')
 	pe_results.Draw()
 	pe_results.Fit('gaus')
@@ -358,7 +373,7 @@ def doTheFit():
 
 	ROOT.gStyle.SetOptStat(0)
 
-	leg = ROOT.TLegend(0.6,0.7,0.99,0.94)
+	leg = ROOT.TLegend(0.6,0.7,0.99-c1.GetRightMargin(),0.99-c1.GetTopMargin())
 	leg.SetFillColor(0)
 
 	# calculate signal fraction in selected regoin (iso < 5.0) ##########
@@ -372,9 +387,11 @@ def doTheFit():
 	selleftbinsig = sig_templ.FindBin(lowFitrange)
 	selrightbinsig = sig_templ.FindBin(selectionRange)
 	print 'Signal Nominal selection bins',selleftbinsig,selrightbinsig
+	print 'Signal Nominal selection range:', sig_templ.GetBinLowEdge(selleftbinsig), sig_templ.GetBinLowEdge(selrightbinsig+1)
 	selleftbinbckg = bckg_templ.FindBin(lowFitrange)
 	selrightbinbckg = bckg_templ.FindBin(selectionRange)
 	print 'Background Nominal selection bins',selleftbinbckg,selrightbinbckg
+	print 'Background Nominal selection range:', bckg_templ.GetBinLowEdge(selleftbinbckg), bckg_templ.GetBinLowEdge(selrightbinbckg+1)
 
 	sig_templ.Scale(1.0/sig_templ.Integral(fitleftbinsig,fitrightbinsig))
 	bckg_templ.Scale(1.0/bckg_templ.Integral(fitleftbinbckg,fitrightbinbckg))
@@ -431,6 +448,7 @@ def doTheFit():
 	stack.SetTitle('')
 	stack.Draw('hist')
 	stack.GetXaxis().SetTitle('photon '+FitVarname+' (GeV)')
+	stack.GetYaxis().SetTitle('Events')
 	stack.SetMaximum(1.2*stack.GetMaximum())
 	stack.GetXaxis().SetRangeUser(lowFitrange,highFitrange)
 
@@ -444,7 +462,11 @@ def doTheFit():
 	pseudodataR.SetMarkerStyle(8)
 	pseudodataR.SetLineColor(1)
 	pseudodataR.Draw('esame')
-	c1.SaveAs('fitplots/plot_'+phoEtrange+FitVarname+'.png')
+	labelcms.Draw()
+	if fitData:
+		c1.SaveAs('fitplots/plot_'+phoEtrange+FitVarname+'_data.png')
+	else:
+		c1.SaveAs('fitplots/plot_'+phoEtrange+FitVarname+'_closuretest.png')
 
 	if fitData:
 		print 'Fitting of Data is done'
@@ -477,6 +499,7 @@ def doTheFit():
 	randCone_Iso.Draw()
 	trueSignalIso.Draw('same')
 	leg.Draw()
+	labelcms.Draw()
 	c1.SaveAs('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ.png')
 	c1.SetLogy(1)
 	c1.SaveAs('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ_log.png')
@@ -524,6 +547,7 @@ def doTheFit():
 	true_bckg.Draw()
 	sbIso.Draw('same')
 	leg.Draw()
+	labelcms.Draw()
 	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg.png')
 	c1.SetLogy(1)
 	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg_log.png')
@@ -543,6 +567,7 @@ def doTheFit():
 	true_bckg.Draw()
 	sbIso.Draw('same')
 	leg.Draw()
+	labelcms.Draw()
 	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange.png')
 	c1.SetLogy(1)
 	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange_log.png')

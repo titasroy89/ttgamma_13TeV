@@ -142,12 +142,35 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 sumPdf.plotOn(plotter, RooFit.Components('qcdPdf'), RooFit.Name('qcd'),
                     RooFit.LineColor(50))
 
-                sumPdf.paramOn(plotter) # fix
+		sumPdf.paramOn(plotter,RooFit.Layout(0.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()), RooFit.FillColor(kWhite)) # fix
+
+		leg = TLegend(.7,.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()-.15)
+		leg.SetFillColor(kWhite)
+		leg.SetLineColor(kWhite)
+		leg.AddEntry(plotter.findObject('data'), 'Data','p')
+		leg.AddEntry(plotter.findObject('sum'), 'Sum','l')
+		leg.AddEntry(plotter.findObject('signal'), 'Top','l')
+		leg.AddEntry(plotter.findObject('background'), 'W+Jets','l')
+		leg.AddEntry(plotter.findObject('otherMC'), 'Other MC','l')
+		leg.AddEntry(plotter.findObject('qcd'), 'QCD','l')
+		c1.SetTickx(0)
+		c1.SetTicky(0)
+
+		labelcms = TPaveText(0.14,0.92,0.6,1.0,"NDCBR")
+		labelcms.SetTextAlign(12);
+		labelcms.SetTextSize(0.045);
+		labelcms.SetFillColor(kWhite);
+		labelcms.SetFillStyle(0);
+		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
+		labelcms.SetBorderSize(0);
 
                 plotter.Draw()
                 plotter.GetYaxis().SetTitleOffset(1.4)
-		plotter.GetXaxis().SetTitle("GeV")
+		plotter.GetXaxis().SetTitle("M3 (GeV)")
+		leg.Draw()
+		labelcms.Draw()
                 c1.SaveAs(plotName)
+                c1.SaveAs(plotName.replace('png','pdf'))
         print 'fit returned value ',signalVar.getVal(),' +- ',signalVar.getError()
         return (signalVar.getVal(),signalVar.getError(),   bkgVar.getVal(),bkgVar.getError(), otherMCVar.getVal(),otherMCVar.getError(), qcdVar.getVal(), qcdVar.getError())
 
@@ -220,12 +243,34 @@ def makenewFit_3templates(varname, varmin, varmax, signalHist, backgroundHist, o
                 sumPdf.plotOn(plotter, RooFit.Components('otherMCPdf'), RooFit.Name('otherMC'),
                     RooFit.LineColor(6))
 
-                sumPdf.paramOn(plotter) # fix
+		sumPdf.paramOn(plotter,RooFit.Layout(0.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()), RooFit.FillColor(kWhite)) # fix
+
+		leg = TLegend(.7,.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()-.15)
+		leg.SetFillColor(kWhite)
+		leg.SetLineColor(kWhite)
+		leg.AddEntry(plotter.findObject('data'), 'Data','p')
+		leg.AddEntry(plotter.findObject('sum'), 'Sum','l')
+		leg.AddEntry(plotter.findObject('signal'), 'Top','l')
+		leg.AddEntry(plotter.findObject('background'), 'W+Jets','l')
+		leg.AddEntry(plotter.findObject('otherMC'), 'Other MC','l')
+		c1.SetTickx(0)
+		c1.SetTicky(0)
+
+		labelcms = TPaveText(0.14,0.92,0.6,1.0,"NDCBR")
+		labelcms.SetTextAlign(12);
+		labelcms.SetTextSize(0.045);
+		labelcms.SetFillColor(kWhite);
+		labelcms.SetFillStyle(0);
+		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
+		labelcms.SetBorderSize(0);
 
                 plotter.Draw()
                 plotter.GetYaxis().SetTitleOffset(1.4)
-		plotter.GetXaxis().SetTitle("GeV")
+		plotter.GetXaxis().SetTitle("M3 (GeV)")
+		leg.Draw()
+		labelcms.Draw()
                 c1.SaveAs(plotName)
+                c1.SaveAs(plotName.replace('png','pdf'))
 
         print 'fit returned value ',signalVar.getVal(),' +- ',signalVar.getError()
         return (signalVar.getVal(),signalVar.getError(),   bkgVar.getVal(),bkgVar.getError(), otherMCVar.getVal(),otherMCVar.getError())
