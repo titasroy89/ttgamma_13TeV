@@ -64,7 +64,8 @@ def saveTemplatesToFile(templateList, varlist, outFileName):
 
 def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist, outDirName):
 	canvas = ROOT.TCanvas('c1','c1',640,800)
-	
+	canvas.SetLeftMargin(.14)
+		
 	latex = ROOT.TLatex()
 	latex.SetNDC()
 	latex.SetTextAlign(12)
@@ -72,27 +73,26 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 	latex.SetLineWidth(2)
 	
 	for var in varlist:
-		legend = ROOT.TLegend(0.7, 1 - 0.05*(1 + len(MCTemplateList) + len(SignalTemplateZoomList)), 0.99, 1.00)
+		legend = ROOT.TLegend(0.7, 0.99 - canvas.GetTopMargin() - 0.05*(1 + len(MCTemplateList) + len(SignalTemplateZoomList)), 0.99-canvas.GetRightMargin(), 0.99-canvas.GetTopMargin())
 		legend.SetBorderSize(0)
-		legend.SetFillColor(10)
+		legend.SetFillColor(ROOT.kWhite)
 		
 		if dataTemplate is not None:
 			legend.AddEntry(dataTemplate.histList[var], dataTemplate.name, 'pl')
 		
 		# MC templates listed in the order they appear in legend
-		for mc in MCTemplateList:
+		for mc in MCTemplateList[::-1]:
 			mcHist = mc.histList[var]
 			legend.AddEntry(mcHist, mc.name, 'f')
 		
 		stack = ROOT.THStack('stack_'+var,var)
 		# reverse order for stack to be consistent with legend
-		MCTemplateList.reverse()
+
 		for mc in MCTemplateList:
 			mcHist = mc.histList[var]
 			#if var == 'M3pho':
 			#	mcHist.Rebin(2)
 			stack.Add(mcHist)
-		MCTemplateList.reverse()
 
 		if dataTemplate is not None:
 			#if var == 'M3pho':
@@ -114,11 +114,17 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		if dataTemplate is not None:
 			stack.GetXaxis().SetTitle(dataTemplate.histList[var].GetXaxis().GetTitle())
 			stack.GetYaxis().SetTitle(dataTemplate.histList[var].GetYaxis().GetTitle())
+			stack.GetYaxis().SetTitleOffset(1.8)
 		stack.SetTitle('')
 
 		if dataTemplate is not None:
+			dataTemplate.histList[var].SetMarkerStyle(20)
+			dataTemplate.histList[var].SetMarkerSize(1.2)
+			dataTemplate.histList[var].SetMarkerColor(ROOT.kBlack)
+			dataTemplate.histList[var].SetLineColor(ROOT.kBlack)
 			dataTemplate.histList[var].Draw('ESAME')
-					
+			dataTemplate.histList[var].Draw('ESAME')
+			
 		for signal,zoom in SignalTemplateZoomList:
 			sigHist = signal.histList[var].Clone()
 			#sigHist.SetFillStyle(3244)
@@ -131,7 +137,7 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		if 'cut_flow' not in var:
 			legend.Draw()
 		
-		latex.DrawLatex(0.1,0.94,'CMS Preliminary #sqrt{s} = 8 TeV')
+		latex.DrawLatex(canvas.GetLeftMargin(),0.94,'CMS Preliminary #sqrt{s} = 8 TeV')
 		canvas.SaveAs(outDirName+'/'+var+'.png')
 		
 def loadDataTemplate(varlist, inputDir, prefix):
@@ -165,7 +171,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	MCtemplates['TTJets'] = distribution('TTJets'+titleSuffix, [
 		(templPrefix+'TTJets1l.root', TopSF*gSF*TTJets1l_xs/TTJets1l_num),
 		(templPrefix+'TTJets2l.root', TopSF*gSF*TTJets2l_xs/TTJets2l_num),
-		#(templPrefix+'TTJetsHad.root', TopSF*gSF*TTJetsHad_xs/TTJetsHad_num),
+		(templPrefix+'TTJetsHad.root', TopSF*gSF*TTJetsHad_xs/TTJetsHad_num),
 		], varList ,11, fillStyle)
 	
 	###################################
@@ -174,9 +180,13 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	nonWJetsSF = 1.0
 	#nonWJetsSF = WJetsSF
 	
-	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, [
-        (templPrefix+'Zgamma.root', nonWJetsSF*gSF*Zgamma_xs/Zgamma_num),
+	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, [
         (templPrefix+'Wgamma.root', nonWJetsSF*gSF*Wgamma_xs/Wgamma_num),
+    #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
+        ], varList, 90, fillStyle)
+
+	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, [
+        (templPrefix+'Zgamma.root', nonWJetsSF*gSF*Zgamma_xs/Zgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
         ], varList, 90, fillStyle)
 
@@ -199,23 +209,23 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 		(templPrefix+'ZJets.root', nonWJetsSF*gSF*ZJets_xs/ZJets_num)], varList, 9, fillStyle)
 
 	
-	MCtemplates['Other'] = distribution('Diboson'+titleSuffix, [
+	# MCtemplates['Other'] = distribution('Diboson'+titleSuffix, [
 
-        (templPrefix+'WZ_3lnu.root', nonWJetsSF*gSF*WZ_3lnu_xs/WZ_3lnu_num),
-        (templPrefix+'WZ_2l2q.root', nonWJetsSF*gSF*WZ_2l2q_xs/WZ_2l2q_num),
+        # (templPrefix+'WZ_3lnu.root', nonWJetsSF*gSF*WZ_3lnu_xs/WZ_3lnu_num),
+        # (templPrefix+'WZ_2l2q.root', nonWJetsSF*gSF*WZ_2l2q_xs/WZ_2l2q_num),
         
-        (templPrefix+'ZZ_2e2mu.root', nonWJetsSF*gSF*ZZ_2e2mu_xs/ZZ_2e2mu_num),
-        (templPrefix+'ZZ_2e2tau.root', nonWJetsSF*gSF*ZZ_2e2tau_xs/ZZ_2e2tau_num),
-        (templPrefix+'ZZ_2mu2tau.root', nonWJetsSF*gSF*ZZ_2mu2tau_xs/ZZ_2mu2tau_num),
-        (templPrefix+'ZZ_4e.root', nonWJetsSF*gSF*ZZ_4e_xs/ZZ_4e_num),
-        (templPrefix+'ZZ_4mu.root', nonWJetsSF*gSF*ZZ_4mu_xs/ZZ_4mu_num),
-        (templPrefix+'ZZ_4tau.root', nonWJetsSF*gSF*ZZ_4tau_xs/ZZ_4tau_num),
+        # (templPrefix+'ZZ_2e2mu.root', nonWJetsSF*gSF*ZZ_2e2mu_xs/ZZ_2e2mu_num),
+        # (templPrefix+'ZZ_2e2tau.root', nonWJetsSF*gSF*ZZ_2e2tau_xs/ZZ_2e2tau_num),
+        # (templPrefix+'ZZ_2mu2tau.root', nonWJetsSF*gSF*ZZ_2mu2tau_xs/ZZ_2mu2tau_num),
+        # (templPrefix+'ZZ_4e.root', nonWJetsSF*gSF*ZZ_4e_xs/ZZ_4e_num),
+        # (templPrefix+'ZZ_4mu.root', nonWJetsSF*gSF*ZZ_4mu_xs/ZZ_4mu_num),
+        # (templPrefix+'ZZ_4tau.root', nonWJetsSF*gSF*ZZ_4tau_xs/ZZ_4tau_num),
         
-        (templPrefix+'WW_2l2nu.root', nonWJetsSF*gSF*WW_2l2nu_xs/WW_2l2nu_num),
+        # (templPrefix+'WW_2l2nu.root', nonWJetsSF*gSF*WW_2l2nu_xs/WW_2l2nu_num),
 
-          #(templPrefix+'TTW.root', gSF*TTW_xs/TTW_num),
-          #(templPrefix+'TTZ.root', gSF*TTZ_xs/TTZ_num),
-		], varList, 49, fillStyle)
+        #   #(templPrefix+'TTW.root', gSF*TTW_xs/TTW_num),
+        #   #(templPrefix+'TTZ.root', gSF*TTZ_xs/TTZ_num),
+	# 	], varList, 49, fillStyle)
 
 	return MCtemplates
 
@@ -228,12 +238,13 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 	MCTempl = []
 	MCTempl.append(MCTemplDict['WHIZARD'])
 	MCTempl.append(MCTemplDict['TTJets'])
-	MCTempl.append(MCTemplDict['Vgamma'])
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
+	MCTempl.append(MCTemplDict['Zgamma'])
+	MCTempl.append(MCTemplDict['Wgamma'])
 	MCTempl.append(MCTemplDict['ZJets'])
 #	MCTempl.append(MCTemplDict['Other'])
-	
+
 	saveTemplatesToFile([DataTempl] + MCTempl, ['MET',lep+'1'+lep+'2Mass'], outDirName+'/templates_presel.root')
 	
 	plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
@@ -244,22 +255,22 @@ varList_all = ['nVtx',
 			'MET','Ht','WtransMass','M3','M3first','minM3','M3pho','dRpho3j','M3phoMulti', 
 			#'M3_0_30', 'M3_30_100', 'M3_100_200', 'M3_200_300', 'M3_300_up', #'M3minPt',
 			lep+'1Pt',lep+'1Eta',lep+'1RelIso',
-			lep+'1D0',lep+'1MVA',lep+'1Dz',
+#			lep+'1D0',lep+'1MVA',lep+'1Dz',
 			lep+'2Pt',lep+'2RelIso',
 			lep+'1'+lep+'2Mass',
-			lep+'1sigmaIetaIeta',lep+'1EoverP',
-			lep+'1DrJet',lep+'1pho1Mass',
-			'looseEleDrGenPho',
-			'cut_flow',
-			'genPhoRegionWeight',
-			'nJets',
-			'jet1Pt','jet2Pt','jet3Pt','jet4Pt','jet1Eta','jet2Eta','jet3Eta','jet4Eta',
-			'photon1Et','photon1Eta','photon1HoverE','photon1SigmaIEtaIEta',
-			'photon1DrElectron','photon1DrJet',
-			'photon1ChHadIso','photon1NeuHadIso','photon1PhoIso',
-			'photon1ChHadSCRIso','photon1PhoSCRIso',
-			'photon1ChHadRandIso','photon1PhoRandIso',
-			'photon1MotherID','photon1GMotherID','photon1DrMCbquark','GenPhotonEt',
+			# lep+'1sigmaIetaIeta',lep+'1EoverP',
+			# lep+'1DrJet',lep+'1pho1Mass',
+			# 'looseEleDrGenPho',
+			# 'cut_flow',
+			# 'genPhoRegionWeight',
+			# 'nJets',
+			# 'jet1Pt','jet2Pt','jet3Pt','jet4Pt','jet1Eta','jet2Eta','jet3Eta','jet4Eta',
+			# 'photon1Et','photon1Eta','photon1HoverE','photon1SigmaIEtaIEta',
+			# 'photon1DrElectron','photon1DrJet',
+			# 'photon1ChHadIso','photon1NeuHadIso','photon1PhoIso',
+			# 'photon1ChHadSCRIso','photon1PhoSCRIso',
+			# 'photon1ChHadRandIso','photon1PhoRandIso',
+			# 'photon1MotherID','photon1GMotherID','photon1DrMCbquark','GenPhotonEt',
 			#'photon1_Sigma_ChSCRIso'
 			]
 # main part ##############################################################################################
@@ -278,8 +289,8 @@ if isElectron:
 	makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check_zeroB/plots')
 
 if isMuon:
-	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins_twoMu'
-	DataHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins_twoMu'
+	InputHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_2Muons/'
+	DataHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_2Muons/'
 
 	makeAllPlots(varList_all, InputHist, DataHist, 'di_mu_cross_check/plots')
 

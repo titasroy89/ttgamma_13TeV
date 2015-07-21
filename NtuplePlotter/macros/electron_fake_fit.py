@@ -1,5 +1,27 @@
 import ROOT
 import sys
+import os
+
+from Style import *
+ 
+thestyle = Style()
+HasCMSStyle = False
+style = None
+if os.path.isfile('tdrstyle.C'):
+ 	ROOT.gROOT.ProcessLine('.L tdrstyle.C')
+        ROOT.setTDRStyle()
+        print "Found tdrstyle.C file, using this style."
+        HasCMSStyle = True
+        if os.path.isfile('CMSTopStyle.cc'):
+ 		gROOT.ProcessLine('.L CMSTopStyle.cc+')
+ 		style = CMSTopStyle()
+ 		style.setupICHEPv1()
+ 		print "Found CMSTopStyle.cc file, use TOP style if requested in xml file."
+if not HasCMSStyle:
+ 	print "Using default style defined in cuy package."
+ 	thestyle.SetStyle()
+ 
+ROOT.gROOT.ForceStyle()
 
 
 useDiboson = False
@@ -30,6 +52,9 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 	sihihArgSet = ROOT.RooArgSet()
 	sihihArgSet.add(sihihVar)
 
+	# dataHist.GetXaxis().SetTitle("e#gamma Inv. Mass (GeV)")
+	# signalHist.GetXaxis().SetTitle("e#gamma Inv. Mass (GeV)")
+	# backgroundHist.GetXaxis().SetTitle("e#gamma Inv. Mass (GeV)")
 	# create PDFs
 	signalDataHist = ROOT.RooDataHist('signalDataHist','signal RooDataHist', sihihArgList, signalHist)
 	signalPdf = ROOT.RooHistPdf('signalPdf',varname+' of signal', sihihArgSet, signalDataHist)
@@ -65,10 +90,29 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 			ROOT.RooFit.LineColor(ROOT.kGreen))
 		sumPdf.plotOn(plotter, ROOT.RooFit.Components('backgroundPdf'), ROOT.RooFit.Name('background'), 
 			ROOT.RooFit.LineColor(ROOT.kBlue))
-		sumPdf.paramOn(plotter) # fix
+#		sumPdf.paramOn(plotter) # fix
 
+		leg = ROOT.TLegend(.7,.99-c1.GetTopMargin()-.05*4,.99-c1.GetRightMargin(),.99-c1.GetTopMargin())
+		leg.SetFillColor(ROOT.kWhite)
+		leg.SetLineColor(ROOT.kWhite)
+		leg.AddEntry(plotter.findObject('data'), 'Data','p')
+		leg.AddEntry(plotter.findObject('sum'), 'Sum','l')
+		leg.AddEntry(plotter.findObject('signal'), 'Z#rightarrowee (e to #gamma)','l')
+		leg.AddEntry(plotter.findObject('background'), 'Background','l')
+
+		labelcms = ROOT.TPaveText(0.14,1.-c1.GetTopMargin(),0.6,1.05-c1.GetTopMargin(),"NDCBR")
+		labelcms.SetTextAlign(12);
+		labelcms.SetTextSize(0.045);
+		labelcms.SetFillColor(ROOT.kWhite);
+		labelcms.SetFillStyle(0);
+		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
+		labelcms.SetBorderSize(0);
+		
+		plotter.GetXaxis().SetTitle("M(e,#gamma) (GeV)")
 		plotter.Draw()
 		plotter.GetYaxis().SetTitleOffset(1.4)
+		leg.Draw()
+		labelcms.Draw()
 		c1.SaveAs(plotName)
 	print 'fit returned value ',signalFractionVar.getVal(),' +- ',signalFractionVar.getError()
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
@@ -130,7 +174,8 @@ ttbar_all, ttbar_ele, ttbar_pho = addEle_Pho_contributions('TTGamma', ttbar_all,
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('WJets', bg_all, bg_ele, bg_pho)
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('ZJets', bg_all, bg_ele, bg_pho)
 if useDiboson: bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Diboson', bg_all, bg_ele, bg_pho)
-bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Vgamma', bg_all, bg_ele, bg_pho)
+bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Wgamma', bg_all, bg_ele, bg_pho)
+bg_all, bg_ele, bg_pho = addEle_Pho_contributions('Zgamma', bg_all, bg_ele, bg_pho)
 bg_all, bg_ele, bg_pho = addEle_Pho_contributions('SingleTop', bg_all, bg_ele, bg_pho)
 # QCD has no MC information, expect no real photon and no electron
 qcdInt,qcdErr = getInt_Err(get1DHist('templates_barrel_scaled_zeroB.root', 'QCD_MET'))
@@ -149,7 +194,7 @@ print 'bg ele and pho fractions',bg_ele[0]/bg_all[0], '  ', bg_pho[0]/bg_all[0]
 # Vgamma electron fakes and ZJets electron fakes as "electrons"
 # everything else as "other"
 electronTempl = getEleMass_template('ZJets')
-electronTempl.Add( getEleMass_template('Vgamma') )
+electronTempl.Add( getEleMass_template('Zgamma') )
 
 fileName = 'templates_barrel_scaled_zeroB.root'
 otherTempl = get1DHist(fileName, 'TTJets' + '_ele1pho1Mass')
@@ -157,7 +202,8 @@ otherTempl.Add( get1DHist(fileName, 'TTGamma' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'WJets' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'ZJets' + '_ele1pho1Mass') )
 if useDiboson: otherTempl.Add( get1DHist(fileName, 'Diboson' + '_ele1pho1Mass') )
-otherTempl.Add( get1DHist(fileName, 'Vgamma' + '_ele1pho1Mass') )
+otherTempl.Add( get1DHist(fileName, 'Wgamma' + '_ele1pho1Mass') )
+otherTempl.Add( get1DHist(fileName, 'Zgamma' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'SingleTop' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'QCD' + '_ele1pho1Mass') )
 
@@ -168,7 +214,7 @@ dataTempl = get1DHist(fileName, 'Data' + '_ele1pho1Mass')
 
 lowmass = 20.0
 highmass = 180.0
-(eleFrac, eleFracErr) = makeFit('ele1pho1Mass', lowmass, highmass, electronTempl, otherTempl, dataTempl, 'e_gamma_mass_fit.png')
+(eleFrac, eleFracErr) = makeFit('ele1pho1Mass', lowmass, highmass, electronTempl, otherTempl, dataTempl, 'egammaPlots/e_gamma_mass_fit.png')
 
 print 'Finding fit range in bins'
 lowbin = dataTempl.FindBin(lowmass + 0.01)
