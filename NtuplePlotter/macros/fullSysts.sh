@@ -45,4 +45,5 @@ python makePlots.py ${channel} > ${outDir}ratio_nominal.txt
 
 echo "cp templates_barrel_scaled_afterPhotonM3.root ${outDir}templates_barrel_scaled_afterPhotonM3_nominal.root"
 cp templates_barrel_scaled_afterPhotonM3.root ${outDir}templates_barrel_scaled_afterPhotonM3_nominal.root
+cp templates_barrel_scaled.root ${outDir}templates_barrel_scaled_nominal.root
 
