@@ -19,7 +19,7 @@ jetToPhotonSFerr = 0.
 egammaSF = 1.
 egammaSFerr = 0.
 
-def printMCTable():
+def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
 
     samples = ['TTGamma','TTJets', 'Wgamma', 'WJets', 'Zgamma', 'ZJets', 'SingleTop']
     inputFile = TFile(inputFileName,"READ")
@@ -53,6 +53,13 @@ def printMCTable():
             if 'fake' in gen:
                 valSF *= jetToPhotonSF
                 err += (jetToPhotonSFerr/jetToPhotonSF)**2
+            if 'TTGamma' in s or 'TTJets' in s:
+                err += TopSFRelErr**2
+            if 'WJets' in s:
+                err += WJetsSFRelErr**2
+            if 'WGamma' in s:
+                err += WgammaSFRelErr**2
+                
 
             tempVal.append(val*valSF)
             tempErr.append(err**0.5*val*valSF)
