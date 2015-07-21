@@ -117,7 +117,7 @@ else:
 TopSF = 1.0
 WJetsSF = 1.0
 QCDSF = 1.0
-ZJetsSF = 1.005
+ZJetsSF = 1.00
 otherMCSF = 1.0
 WgammaSF = 1.0
 
