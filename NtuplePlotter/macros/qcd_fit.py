@@ -11,7 +11,7 @@ setOtherMCconstantM3 = False
 
 M3BinWidth = 40.
 
-def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName):
+def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName='', savePlots = True):
 	# RooFit variables
 	sihihVar = RooRealVar(varname, varname, varmin, varmax)
 	sihihArgList = RooArgList()
@@ -43,7 +43,7 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 	# fit
 	sumPdf.fitTo( dataDataHist, RooFit.SumW2Error(0), RooFit.PrintLevel(-1) )
 	
-	if plotName!='':
+	if plotName!='' and savePlots:
 		# plot results
 		c1 = TCanvas('c1', 'c1', 800, 600)
 		plotter = RooPlot('myplot','',sihihVar,varmin,varmax,20) # nBins is dummy
@@ -53,7 +53,7 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 			RooFit.LineColor(50))
 		sumPdf.plotOn(plotter, RooFit.Components('backgroundPdf'), RooFit.Name('background'), 
 			RooFit.LineColor(kBlue))
-		sumPdf.paramOn(plotter,RooFit.Layout(0.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()), RooFit.FillColor(kWhite)) # fix
+		sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-c1.GetRightMargin(),.96-c1.GetTopMargin())) # fix
 
 		leg = TLegend(.7,.55,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()-.1)
 		leg.SetFillColor(kWhite)
@@ -72,8 +72,8 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 		labelcms.SetBorderSize(0);
 
 
-		c1.SetTickx(0)
-		c1.SetTicky(0)
+#		c1.SetTickx(0)
+#		c1.SetTicky(0)
 		plotter.Draw()
 		plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("MET (GeV)")
@@ -86,7 +86,7 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
 
 
-def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist, qcdHist, dataHist, plotName):
+def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist, qcdHist, dataHist, plotName='',savePlots = True):
         # RooFit variables
         sihihVar = RooRealVar(varname, varname, varmin, varmax)
         sihihArgList = RooArgList()
@@ -173,9 +173,10 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 sumPdf.plotOn(plotter, RooFit.Components('qcdPdf'), RooFit.Name('qcd'),
                     RooFit.LineColor(50))
 
-		sumPdf.paramOn(plotter,RooFit.Layout(0.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()), RooFit.FillColor(kWhite)) # fix
+#		sumPdf.paramOn(plotter,RooFit.Layout(0.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()), RooFit.FillColor(kWhite)) # fix
+		sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-c1.GetRightMargin(),.96-c1.GetTopMargin())) # fix
 
-		leg = TLegend(.7,.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()-.15)
+		leg = TLegend(.7,.48,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()-.17)
 		leg.SetFillColor(kWhite)
 		leg.SetLineColor(kWhite)
 		leg.AddEntry(plotter.findObject('data'), 'Data','p')
@@ -184,8 +185,6 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 		leg.AddEntry(plotter.findObject('background'), 'W+Jets','l')
 		leg.AddEntry(plotter.findObject('otherMC'), 'Other MC','l')
 		leg.AddEntry(plotter.findObject('qcd'), 'QCD','l')
-		c1.SetTickx(0)
-		c1.SetTicky(0)
 
 		labelcms = TPaveText(0.14,0.92,0.6,1.0,"NDCBR")
 		labelcms.SetTextAlign(12);
@@ -229,7 +228,7 @@ M3file = 'templates_presel.root'
 #M3file = 'templates_presel_nomet.root'
 M3file_photon = 'templates_barrel_scaled.root'
 M3file_presel_scaled = 'templates_presel_scaled.root'
-def doQCD_lowfit():
+def doQCD_lowfit(savePlots = True, plotName=''):
 	varToFit = 'MET_low'
 	qcdDataHist = get1DHist(qcdMETfile, 'Data_'+varToFit)
         # remove MC contribution
@@ -245,7 +244,10 @@ def doQCD_lowfit():
         MCHist.Add(get1DHist(normMETfile, 'ZJets_'+varToFit))
         MCHist.Add(get1DHist(normMETfile, 'SingleTop_'+varToFit))
 
-        (metFrac, metFracErr) = makeFit(varToFit, 0., 20.0, qcdDataHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_fit.png')
+	if plotName=='':
+		plotName = 'plots/'+varToFit+'_QCD_fit.png'
+
+        (metFrac, metFracErr) = makeFit(varToFit, 0., 20.0, qcdDataHist, MCHist, DataHist, plotName,savePlots)
         # recalculate data-driven QCD normalization
         lowbin = DataHist.FindBin(0.01)
         highbin =  DataHist.FindBin(19.99)# overflow bin included
@@ -271,7 +273,7 @@ def doQCD_lowfit():
         print '#'*80
 	return (QCD_low_SF, QCD_low_SFerror)
 
-def doQCDfit():
+def doQCDfit(savePlots=True,plotName=''):
 	print
 	print '#'*80
 	print 'now do MET fit, preselection'
@@ -293,7 +295,10 @@ def doQCDfit():
 	MCHist.Add(get1DHist(normMETfile, 'ZJets_'+varToFit))
 	MCHist.Add(get1DHist(normMETfile, 'SingleTop_'+varToFit))
 
-	(metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, qcdDataHist, MCHist, DataHist, 'plots/'+varToFit+'_QCD_fit.png')
+	if plotName=='':
+		plotName = 'plots/'+varToFit+'_QCD_fit.png'
+
+	(metFrac, metFracErr) = makeFit(varToFit, 0., 200.0, qcdDataHist, MCHist, DataHist, plotName ,savePlots)
 	# recalculate data-driven QCD normalization
 	lowbin = DataHist.FindBin(0.01)
 	highbin =   DataHist.GetNbinsX()+1 # overflow bin included
@@ -327,7 +332,7 @@ def doQCDfit():
 
 
 
-def doM3fit():
+def doM3fit(savePlots=False, plotName = ''):
 
 	print
 	print '#'*80
@@ -369,7 +374,10 @@ def doM3fit():
 	otherMCHist.Rebin(binRebin)
 	QCDHist.Rebin(binRebin)
 
-	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 0.0, 800.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, 'plots/'+varToFit+'_fit.png')
+	if plotName=='':
+		plotName = 'plots/'+varToFit+'_fit.png'
+
+	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 0.0, 800.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, plotName, savePlots)
 	lowfitBin = DataHist.FindBin(0.01)
 	highfitBin = DataHist.FindBin(799.99)
 			
