@@ -48,6 +48,8 @@ skipMET = False #stops before the MET fitting, just does the photon purity
 
 skipQCDphoton = False
 
+SaveOutput = False
+
  ######## Add an argument to determine if running on electrons or muons ######## 
 isSyst = False
 systematic = ''
@@ -81,6 +83,9 @@ if len(sys.argv) > 1:
 	if 'skipQCDphoton' in sys.argv:
 		skipQCDphoton = True
 		sys.argv.remove('skipQCDphoton')
+	if 'SaveOutput' in sys.argv:
+		SaveOutput = True
+		sys.argv.remove('SaveOutput')
 	if len(sys.argv) > 2:
 		systematic = sys.argv[2]
 		if systematic == 'zeroB':
@@ -96,10 +101,11 @@ else:
 	print '#'*30
 	sys.exit(1)
 
-if isSyst:
-	sys.stdout = open('ratioFiles/ratio_'+systematic+'.txt','w')
-else:
-	sys.stdout = open('ratioFiles/ratio_nominal.txt','w')
+if SaveOutput:
+	if isSyst:
+		sys.stdout = open('ratioFiles/ratio_'+systematic+'.txt','w')
+	else:
+		sys.stdout = open('ratioFiles/ratio_nominal.txt','w')
 
 
  ######## Error checking that a lepton channel was selected'
@@ -280,7 +286,7 @@ def loadQCDTemplate(varlist, inputDir, prefix):
 		(templPrefix+'SingleTbar_t.root',  -1 * QCD_sf * otherMCSF * gSF * SingTopbarT_xs/SingTopbarT_num),
 		(templPrefix+'SingleTbar_s.root',  -1 * QCD_sf * otherMCSF * gSF * SingTopbarS_xs/SingTopbarS_num),
 		(templPrefix+'SingleTbar_tw.root', -1 * QCD_sf * otherMCSF * gSF * SingTopbartW_xs/SingTopbartW_num),
-		(templPrefix+'W2Jets.root', -1 * QCD_sf * WJetsSF * gSF * W2Jets_xs/W2Jets_num),
+#		(templPrefix+'W2Jets.root', -1 * QCD_sf * WJetsSF * gSF * W2Jets_xs/W2Jets_num),
 		(templPrefix+'W3Jets.root', -1 * QCD_sf * WJetsSF * gSF * W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', -1 * QCD_sf * WJetsSF * gSF * W4Jets_xs/W4Jets_num),
 		(templPrefix+'ZJets.root',  -1 * QCD_sf * ZJetsSF * otherMCSF * gSF * ZJets_xs/ZJets_num),
@@ -338,7 +344,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	
 	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, [
         #(templPrefix+'WJets.root', WJetsSF*gSF*WJets_xs/WJets_num),
-		(templPrefix+'W2Jets.root', WJetsSF*gSF*W2Jets_xs/W2Jets_num),
+#		(templPrefix+'W2Jets.root', WJetsSF*gSF*W2Jets_xs/W2Jets_num),
 		(templPrefix+'W3Jets.root', WJetsSF*gSF*W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', WJetsSF*gSF*W4Jets_xs/W4Jets_num),
 		], varList, ROOT.kGreen -3, fillStyle)
