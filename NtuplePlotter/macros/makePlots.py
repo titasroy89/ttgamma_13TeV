@@ -43,6 +43,7 @@ lep = ''
 #Add a couple of flags for stopping at various points in the code
 skipPhoton = False #stops before the photon fitting
 skipAfterMET = False #stops before the photon fitting
+skipAfterM3 = False #stops before the photon fitting
 skipCalc = False #stops before the calc_the_answer step
 skipMET = False #stops before the MET fitting, just does the photon purity
 
@@ -74,6 +75,9 @@ if len(sys.argv) > 1:
 	if 'skipAfterMET' in sys.argv:
 		skipAfterMET = True
 		sys.argv.remove('skipAfterMET')
+	if 'skipAfterM3' in sys.argv:
+		skipAfterM3 = True
+		sys.argv.remove('skipAfterM3')
 	if 'skipPhoton' in sys.argv:
 		skipPhoton = True
 		sys.argv.remove('skipPhoton')
@@ -139,7 +143,7 @@ otherMCSFErr = 0.0
 WgammaSFErr = 0.0
 
 if isElectron:	
-	ZJetsSF = 1.20  
+	ZJetsSF = 1.26  
 	ZJetsSFErr = 0.06
 if isMuon:
 	ZJetsSF = 1.14 
@@ -327,7 +331,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 
 	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, [
         (templPrefix+'Zgamma.root', otherMCSF*gSF*Zgamma_xs/Zgamma_num),
-        ], varList, ROOT.kGray, fillStyle)
+        ], varList, ROOT.kAzure+3, fillStyle)
 
 	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, [
         (templPrefix+'Wgamma.root', otherMCSF*WgammaSF*gSF*Wgamma_xs/Wgamma_num),
@@ -468,13 +472,15 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	# save final templates, exactly as they are on the plots
 		saveTemplatesToFile([DataTempl] + MCTempl, ['MET','MET_low','M3','WtransMass','genPhoRegionWeight','MCcategory'], 'templates_presel_scaled.root')
  	print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
+	MCTempl.remove(MCTemplDict['Vgamma'])	
 	plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
 	
 	
 	shortVarList = varList[:]
 	shortVarList.remove('cut_flow')
 	shortVarList.remove('genPhoRegionWeight')
-	
+	shortVarList.append('ele1pho1Mass')
+
 	region = 'barrel'
 	# load templates
 	DataTempl_b = loadDataTemplate(shortVarList, dataDir, 'hist_1pho_'+region+'_top_') #change
@@ -499,10 +505,11 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
  	print "SF after photon selection :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
 	# save final templates, exactly as they are on the plots and by categories
 	saveTemplatesToFile([DataTempl_b] + MCTempl_b + MCTempl_rs_b.values() + MCTempl_fe_b.values() + MCTempl_fjrb_b.values(), 
-		['MET','MET_low','M3','WtransMass','MCcategory','nJets'], 
+		['MET','MET_low','M3','WtransMass','MCcategory','nJets','ele1pho1Mass'], 
 		'templates_barrel_scaled.root'
 		)
 	
+	MCTempl_b.remove(MCTemplDict_b['Vgamma'])
 	plotTemplates( DataTempl_b, MCTempl_b, [], shortVarList, outDirName+'/'+region+'_samples')
 	
 	############################
@@ -658,6 +665,11 @@ savePreselTemplates(InputHist, QCDHist, DataHist, 'templates_presel.root')
 qcd_fit.M3file = 'templates_presel.root'
 TopSF_m3, TopSFerror_m3, WJetsSF_m3, WJetsSFerror_m3,otherMCSF_m3,otherMCSFerror_m3, QCDSF_m3, QCDSFerror_m3 = qcd_fit.doM3fit()
 
+if skipAfterM3:
+	print '*'*80
+	print 'Stopping code after the M3 fit'
+	exit()
+
 TopSF *= TopSF_m3 
 WJetsSF *= WJetsSF_m3 
 QCDSF *= QCDSF_m3
@@ -674,6 +686,15 @@ print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",oth
 #TopSF_photon, TopSFerror_photon, WJetsSF_photon, WJetsSFerror_photon = vgamma_fit.doM3fit_photon()
 makeAllPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
 makeQCDPlots(varList_all+['ele1MVA'], QCDHist, 'QCD_plots')
+
+
+mcEventsTable.inputFileName = "templates_barrel_scaled.root"
+print 
+print 'Event count, photon selection, before M3 fit'
+print
+mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
+print
+
 
 if skipPhoton:
 	print '*'*80
@@ -702,6 +723,11 @@ WgammaSF *= BkgSF_phoM3
 WJetsSF *= otherMCSF_phoM3
 otherMCSF *= otherMCSF_phoM3
 
+TopSFErr = (TopSFErr**2 + TopSFerror_phoM3**2)**0.5 
+WJetsSFErr = (WJetsSFErr**2 + otherMCSFerror_phoM3**2)**0.5 
+otherMCSFErr = (otherMCSFErr**2 + otherMCSFerror_phoM3**2)**0.5 
+WgammaSFErr = BkgSFerror_phoM3
+
 ##### TopSF_phoM3, TopSFerror_phoM3, BkgSF_phoM3, BkgSFerror_phoM3, m3_topFrac, m3_topFracErr = vgamma_fit.doM3fit_photon_2Templates()
 
 makePhotonSelectionPlots(varList_all, InputHist, QCDHist, DataHist, 'plots')
@@ -720,8 +746,11 @@ vgamma_fit.normMETfile = 'templates_barrel_nomet.root'
 QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon_NoMET()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
 
+mcEventsTable.inputFileName = "templates_barrel_scaled_afterPhotonM3.root"
+print 
+print 'Event count, photon selection, after M3 fit'
 print
-mcEventsTable.printMCTable()
+mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
 
 print
 
@@ -769,5 +798,7 @@ mcEventsTable.vgammaSFerr      = bestvgammaSFErr
 mcEventsTable.jetToPhotonSFerr = bestjgSFErr
 mcEventsTable.egammaSFerr      = 0.2
 
+print 
+print 'Event count, photon selection, likelihood Scale Factors Applied'
 print
-mcEventsTable.printMCTable()
+mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
