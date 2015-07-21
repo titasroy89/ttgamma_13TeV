@@ -92,7 +92,7 @@ if len(sys.argv) > 1:
 			print 'zeroB'
 		else:
 			isSyst = True
-			sys.stdout = open('ratioFiles/ratio_'+systematic+'.txt','w')
+			sys.stdout = open('ratio_'+systematic+'.txt','w')
 
 else:
 	print '#'*30
