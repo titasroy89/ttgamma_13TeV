@@ -99,7 +99,10 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
 		labelcms.SetBorderSize(0);
 
-
+		if doEle:
+			plotter.GetXaxis().SetTitle("M(ee) (GeV)")
+		if doMu:
+			plotter.GetXaxis().SetTitle("M(#mu#mu) (GeV)")
 		plotter.Draw()
 		leg.Draw()
 		labelcms.Draw()
