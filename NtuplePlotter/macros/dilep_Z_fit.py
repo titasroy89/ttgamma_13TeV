@@ -21,7 +21,7 @@ if (doEle and doMu) or not (doEle or doMu):
 	sys.exit()
 
 
-
+ROOT.gROOT.SetBatch()
 openfiles = {}
 
 def get1DHist(filename, histname):

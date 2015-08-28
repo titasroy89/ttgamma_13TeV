@@ -204,6 +204,8 @@ electronTempl.Add( getEleMass_template('Zgamma') )
 
 if useZeroB: fileName = 'templates_barrel_scaled_zeroB.root'
 else: fileName = 'templates_barrel_scaled.root'
+
+print fileName
 otherTempl = get1DHist(fileName, 'TTJets' + '_ele1pho1Mass')
 otherTempl.Add( get1DHist(fileName, 'TTGamma' + '_ele1pho1Mass') )
 otherTempl.Add( get1DHist(fileName, 'WJets' + '_ele1pho1Mass') )
