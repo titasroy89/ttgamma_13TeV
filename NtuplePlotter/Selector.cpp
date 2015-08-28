@@ -38,7 +38,7 @@ Selector::Selector(){
 	mu_RelIsoLoose_cut = 0.2;
         mu_RelIso_range[0] = 0.0;
         mu_RelIso_range[1] = 0.12;
-	mu_Iso_MVA_invert = false;
+	mu_Iso_invert = false;
 }
 
 void Selector::process_objects(const EventTree* inp_tree){
@@ -178,6 +178,11 @@ void Selector::filter_muons(){
 		//	) / pt );
 		Mu04RelIso.push_back( frelIsocorr );
 		// fill Muons vector with indices of muons passing selection
+
+		bool IsoPass = frelIsocorr >= mu_RelIso_range[0] && frelIsocorr <= mu_RelIso_range[1];		
+
+		if (mu_Iso_invert) IsoPass = !IsoPass;
+
 		bool passLoose = pt > 10.0 && TMath::Abs(eta) < 2.5 && frelIsocorr < 0.2 && isPFMuon && ( isGlobalMuon || isTrackerMuon);
 		bool passTight = pt > 26.0 && TMath::Abs(eta) < 2.1 && 
 				tree->muChi2NDF_->at(muInd) < 10 &&
@@ -187,12 +192,20 @@ void Selector::filter_muons(){
 				fabs( tree->muDz_->at(muInd) ) < 0.5 && //check this
 				tree->muNumberOfValidPixelHits_->at(muInd) > 0 &&
 				tree->muStations_->at(muInd) > 1 &&
-				frelIsocorr >= mu_RelIso_range[0] && frelIsocorr <= mu_RelIso_range[1] &&
+		                IsoPass &&
 				isPFMuon && isGlobalMuon && isTrackerMuon;
 		
 		//bool muSel = TMath::Abs(eta) < 2.5 &&
 		//				pt > mu_PtLoose_cut &&
 		//				Mu04RelIso[muInd] < mu_RelIsoLoose_cut;
+
+		// if(passTight){
+		// 	Muons.push_back(muInd);
+		// }
+		// else if (passLoose){
+		// 	MuonsLoose.push_back(muInd);
+		// }
+
 		if( passTight && passLoose ){
 			Muons.push_back(muInd);
 		}

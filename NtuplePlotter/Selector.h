@@ -78,7 +78,8 @@ public:
 	double mu_RelIsoLoose_cut;
 	double mu_RelIso_range[2];
  	double mu_MVA_range[2];
-	bool mu_Iso_MVA_invert;
+	bool   mu_Iso_invert;
+
 private:
 	const EventTree* tree;
 	void clear_vectors();
