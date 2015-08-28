@@ -17,7 +17,8 @@ int mueff012_g = 1; // 0:down, 1:norm, 2:up
 int eleeff012_g = 1;
 int btagvar012_g = 1; // 0:down, 1:norm, 2:up
 int phosmear012_g = 1; // 0:down, 1:norm, 2:up 
-int elesmear012_g = 1; // 0:down, 1:norm, 2: up
+int musmear012_g = 1; // 0:down, 1:norm, 2: up
+
 int toppt012_g = 1; // 0:down, 1:norm, 2: up
 
 int top_sample_g = 0; // 0: no ttbar, 1: ttjets_1l, 2: ttjets_2l, 3: ttjets_had
@@ -26,7 +27,7 @@ double topPtWeight(EventTree* tree);
 double getMuEff(EventTree* tree, EventPick* evt );
 double getEleEff(EventTree* tree, EventPick* evt);
 double getBtagSF(EventTree* tree, EventPick* evt);
-void doEleSmearing(EventTree* tree);
+void doMuSmearing(EventTree* tree);
 void doPhoSmearing(EventTree* tree);
 void doJER(EventTree* tree);
 double JERcorrection(double eta);
@@ -61,15 +62,15 @@ int main(int ac, char** av){
 	if( outDirName.find("Btag_down") != std::string::npos) {systematics=true; btagvar012_g = 0;}
 	if( outDirName.find("pho_up") != std::string::npos) {systematics=true; phosmear012_g = 2;}
 	if( outDirName.find("pho_down") != std::string::npos) {systematics=true; phosmear012_g = 0;}
-	if( outDirName.find("elesmear_up") != std::string::npos) {systematics=true; elesmear012_g = 2;}
-	if( outDirName.find("elesmear_down") != std::string::npos) {systematics=true; elesmear012_g = 0;}
+	if( outDirName.find("musmear_up") != std::string::npos) {systematics=true; musmear012_g = 2;}
+	if( outDirName.find("musmear_down") != std::string::npos) {systematics=true; musmear012_g = 0;}
 	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "Pileup_observed_69300_p5.root";}
 	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "Pileup_observed_69300_m5.root";}
 	if( outDirName.find("toppt_up") != std::string::npos) {systematics=true; toppt012_g = 2;}
 	if( outDirName.find("toppt_down") != std::string::npos) {systematics=true; toppt012_g = 0;}
 
-	std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << "  EleEff: " << eleeff012_g << "  BtagVar: " << btagvar012_g << "  ";
-	std::cout << "  PhoSmear: " << phosmear012_g << "  EleSmear: " << elesmear012_g << "  pileup: " << PUfilename << "  ";
+	std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << "  MuEff: " << mueff012_g << "  BtagVar: " << btagvar012_g << "  ";
+	std::cout << "  PhoSmear: " << phosmear012_g << "  muSmear: " << musmear012_g << "  pileup: " << PUfilename << "  ";
 	std::cout << "  topPt: " << toppt012_g << std::endl;
 	// book HistCollect
 	HistCollect* looseCollect = new HistCollect("1pho",std::string("top_")+av[1]);
@@ -83,7 +84,14 @@ int main(int ac, char** av){
 	// object selectors
 	Selector* selectorLoose = new Selector();
 	bool isQCD = false;
-	if(std::string(av[3]).find("QCD") != std::string::npos){
+
+	// create event selectors here
+	EventPick* evtPickLoose = new EventPick("LoosePhotonID");
+	EventPick* evtPickLooseNoMET = new EventPick("LoosePhotonID");
+
+	std::cout << av[2] << std::endl;
+	if(std::string(av[2]).find("QCD") != std::string::npos){
+	        std::cout << "IS QCD" << std::endl;
 		isQCD = true;
 		//selectorLoose->mu_MVA_range[0] = -1.0;
 		//selectorLoose->mu_MVA_range[1] = -0.1;
@@ -99,19 +107,23 @@ int main(int ac, char** av){
 		looseCollectNoMET->fillRS = false;
 		looseCollectNoMET->fillFE = false;
 		looseCollectNoMET->fillFJRB = false;
+		
+		evtPickLoose->NlooseMuVeto_le = 99.;
+		evtPickLooseNoMET->NlooseMuVeto_le = 99.;
+
 	}
 	//Selector* selectorTight = new Selector();
 	// set up the parameters for object selectors here
 	//selectorTight->pho_ID_ind = 2; // tight ID
-	
-	// create event selectors here
-	EventPick* evtPickLoose = new EventPick("LoosePhotonID");
-	EventPick* evtPickLooseNoMET = new EventPick("LoosePhotonID");
+	std::cout << selectorLoose->mu_RelIso_range[0] << std::endl;
+	std::cout << selectorLoose->mu_RelIso_range[1] << std::endl;
+
 	evtPickLooseNoMET->MET_cut = -1.0;
 	//evtPickLoose->veto_pho_jet_dR = 0.05;
 	//evtPickLoose->Njet_ge = 4;
 	//evtPickLoose->NBjet_ge = 2;
-	
+	// evtPickLoose->NlooseMuVeto_le = 0;
+	// evtPickLoose->NlooseEleVeto_le = 0;
 
 	if( outDirName.find("zeroB") != std::string::npos){
 		evtPickLoose->NBjet_ge = 0;
@@ -182,6 +194,7 @@ int main(int ac, char** av){
 			doPhoSmearing(tree);
 			// electron energy smearing
 			//doEleSmearing(tree);
+			doMuSmearing(tree);
 		}
 		// do overlap removal here: overlapMadGraph(tree) or overlapWHIZARD(tree)
 		if( isMC && doOverlapRemoval && overlapMadGraph(tree)){
@@ -384,17 +397,17 @@ double topPtWeight(EventTree* tree){
 	return 1.0;
 }
 
-void doEleSmearing(EventTree* tree){
+void doMuSmearing(EventTree* tree){
 	static TRandom3 rand;
-	if(elesmear012_g == 1) return;
-	for(int eleInd = 0; eleInd < tree->nEle_; ++eleInd){
-		if(tree->elePt_->at(eleInd) < 15) continue;
+	if(musmear012_g == 1) return;
+	for(int muInd = 0; muInd < tree->nMu_; ++muInd){
+		if(tree->muPt_->at(muInd) < 15) continue;
 		//std::cout << "electron Pt before " << tree->elePt_->at(eleInd) << "   "; 
 		double factor = 1.0;
-		if(elesmear012_g == 0) factor = 0.99;
-		if(elesmear012_g == 2) factor = 1.01;
+		if(musmear012_g == 0) factor = 0.99;
+		if(musmear012_g == 2) factor = 1.01;
 		//std::cout << "factor " << factor << "  ";
-		tree->elePt_->at(eleInd) *= factor;
+		tree->muPt_->at(muInd) *= factor;
 		//std::cout << "electron Pt after " << tree->elePt_->at(eleInd) << std::endl;
 	}
 }
