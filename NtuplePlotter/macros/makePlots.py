@@ -4,10 +4,13 @@ import sys, os
 
 import templateFits
 import qcd_fit
-import calc_the_answer
+import calc_the_answer_test
 import vgamma_fit
 
 import mcEventsTable
+
+mcEventsTable.egammaSF      = 1.458
+mcEventsTable.egammaSFerr      = 0.1985
 
 ROOT.gROOT.SetBatch()
 #########
@@ -96,7 +99,7 @@ if len(sys.argv) > 1:
 			print 'zeroB'
 		else:
 			isSyst = True
-			sys.stdout = open('ratio_'+systematic+'.txt','w')
+#			sys.stdout = open('ratio_'+systematic+'.txt','w')
 
 else:
 	print '#'*30
@@ -106,10 +109,12 @@ else:
 	sys.exit(1)
 
 if SaveOutput:
+	if isElectron: folder = 'ratioFiles_ele/'
+	if isMuon: folder = 'ratioFiles_mu/'
 	if isSyst:
-		sys.stdout = open('ratioFiles/ratio_'+systematic+'.txt','w')
+		sys.stdout = open(folder+'ratio_'+systematic+'.txt','w')
 	else:
-		sys.stdout = open('ratioFiles/ratio_nominal.txt','w')
+		sys.stdout = open(folder+'ratio_nominal.txt','w')
 
 
  ######## Error checking that a lepton channel was selected'
@@ -209,14 +214,14 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		MCTemplateList.reverse()
 		for mc in MCTemplateList:
 			mcHist = mc.histList[var]
-			#if var == 'M3pho':
-			#	mcHist.Rebin(2)
+			if var == 'M3' and 'barrel' in outDirName:
+				mcHist.Rebin(4)
 			stack.Add(mcHist)
 		MCTemplateList.reverse()
 
 		if dataTemplate is not None:
-			#if var == 'M3pho':
-			#	dataTemplate.histList[var].Rebin(2)
+			if var == 'M3' and 'barrel' in outDirName:
+				dataTemplate.histList[var].Rebin(4)
 			if dataTemplate.histList[var].GetMaximum() > stack.GetMaximum():
 				stack.SetMaximum(dataTemplate.histList[var].GetMaximum())
 
@@ -290,7 +295,7 @@ def loadQCDTemplate(varlist, inputDir, prefix):
 		(templPrefix+'SingleTbar_t.root',  -1 * QCD_sf * otherMCSF * gSF * SingTopbarT_xs/SingTopbarT_num),
 		(templPrefix+'SingleTbar_s.root',  -1 * QCD_sf * otherMCSF * gSF * SingTopbarS_xs/SingTopbarS_num),
 		(templPrefix+'SingleTbar_tw.root', -1 * QCD_sf * otherMCSF * gSF * SingTopbartW_xs/SingTopbartW_num),
-#		(templPrefix+'W2Jets.root', -1 * QCD_sf * WJetsSF * gSF * W2Jets_xs/W2Jets_num),
+		(templPrefix+'W2Jets.root', -1 * QCD_sf * WJetsSF * gSF * W2Jets_xs/W2Jets_num),
 		(templPrefix+'W3Jets.root', -1 * QCD_sf * WJetsSF * gSF * W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', -1 * QCD_sf * WJetsSF * gSF * W4Jets_xs/W4Jets_num),
 		(templPrefix+'ZJets.root',  -1 * QCD_sf * ZJetsSF * otherMCSF * gSF * ZJets_xs/ZJets_num),
@@ -348,7 +353,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	
 	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, [
         #(templPrefix+'WJets.root', WJetsSF*gSF*WJets_xs/WJets_num),
-#		(templPrefix+'W2Jets.root', WJetsSF*gSF*W2Jets_xs/W2Jets_num),
+		(templPrefix+'W2Jets.root', WJetsSF*gSF*W2Jets_xs/W2Jets_num),
 		(templPrefix+'W3Jets.root', WJetsSF*gSF*W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', WJetsSF*gSF*W4Jets_xs/W4Jets_num),
 		], varList, ROOT.kGreen -3, fillStyle)
@@ -360,6 +365,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 
 def saveAccTemplates(inputDir, outFileName):
 	varList = ['MCcategory']
+
 	AccTemplates = {}
 	
 	AccTemplates['TTGamma'] = distribution('TTGamma_signal', [
@@ -381,6 +387,28 @@ def saveAccTemplates(inputDir, outFileName):
 	
 	saveTemplatesToFile(AccTemplates.values(), varList, outFileName)
 
+def saveTTgammaAccTemplates(inputDir, outFileName):
+	varList = ['MCcategory','genPhoRegionWeight_1l_2l']
+
+	print inputDir
+
+	AccTemplates = {}
+	
+	AccTemplates['TTGamma_presel'] = distribution('TTGamma_presel', [
+		(inputDir+'hist_1pho_top_TTGamma.root', 1.0),
+		], varList, 97)
+	# AccTemplates['TTJets1l'] = distribution('TTJets1l_presel', [
+	# 	(inputDir+'hist_1pho_top_TTJets1l.root', 1.0),
+	# 	], varList ,11)
+	# AccTemplates['TTJets2l'] = distribution('TTJets2l_presel', [
+	# 	(inputDir+'hist_1pho_top_TTJets2l.root', 1.0),
+	# 	], varList ,11)
+	# AccTemplates['TTJetsHad'] = distribution('TTJetsHad_presel', [
+	# 	(inputDir+'hist_1pho_top_TTJetsHad.root', 1.0),
+	# 	], varList ,11)
+	
+	saveTemplatesToFile(AccTemplates.values(), varList, outFileName)
+
 def saveNoMETTemplates(inputDir, inputData, outFileName, histName):
 	varList = ['MET','MET_low','M3',lep+'1RelIso','ele1MVA']
 	DataTempl = loadDataTemplate(varList, inputData, histName)
@@ -392,6 +420,8 @@ def saveNoMETTemplates(inputDir, inputData, outFileName, histName):
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
+	print inputDir
+	print histName
 	saveTemplatesToFile([DataTempl] + MCTempl, varList, outFileName)
 
 def saveBarrelFitTemplates(inputDir, inputData,  outFileName):
@@ -574,25 +604,21 @@ varList_all = ['nVtx',
 			#'photon1_Sigma_ChSCRIso'
 			]
 # main part ##############################################################################################
-if systematic in ['Btag_down','Btag_up','EleEff_down','EleEff_up','JEC_down','JEC_up','JER_down','JER_up','PU_down','PU_up','elesmear_down','elesmear_up','pho_down','pho_up','toppt_down','toppt_up']:
+if systematic in ['Btag_down','Btag_up','EleEff_down','EleEff_up','JEC_down','JEC_up','JER_down','JER_up','PU_down','PU_up','elesmear_down','elesmear_up','pho_down','pho_up','toppt_down','toppt_up','MuEff_down','MuEff_up','musmear_down','musmear_up']:
 	outSuffix = '_'+systematic
 else:
 	outSuffix = ''
 
 if isElectron:
-	# InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin'+outSuffix+'/'
-	# QCDHist =   '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/QCD_bin/'
-	# DataHist =  '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin/'
-	InputHist = '/eos/uscms/store/user/dnoonan/EleHists/hist_bins'+outSuffix+'/'
+	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins'+outSuffix+'/'
+	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/QCD_bins/'
 	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists/QCD_bins/'
-	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists/hist_bins/'
+	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins/'
 if isMuon:
-	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins'+outSuffix+'/'
-	QCDHist = '/uscms_data/d3/troy2012/ANALYSIS_2/QCD_bins/'
-	DataHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins/'
-	InputHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_bins'+outSuffix+'/'
-	QCDHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/QCD_bins/'
-	DataHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_bins/'
+	InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins'+outSuffix+'/'
+	QCDHist =   '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/QCD_bins/'
+	QCDHist =   '/eos/uscms/store/user/dnoonan/MuHists/QCD_bins/'
+	DataHist =  '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins/'
 
 ######## Added in a printout of histogram locations, for easier tracking later on ######## 
 
@@ -603,25 +629,26 @@ print 'Data Histogram location:', DataHist
 
 # TTJets and TTGamma acceptance histograms
 saveAccTemplates(InputHist, 'ttbar_acceptance.root')
+saveTTgammaAccTemplates(InputHist, 'ttgamma_acceptance.root')
 
 ### templates for data driven fit or closure test. No rescaling necessary
-# saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
-# templateFits.InputFilename = 'templates_barrel.root'
-# templateFits.fitData = False ## to do closure test
-# templateFits.NpseudoExp = 0
-# templateFits.doTheFit()
-# templateFits.fitData = True ## to do closure test
-# templateFits.NpseudoExp = 1000
-# templateFits.doTheFit()
+saveBarrelFitTemplates(InputHist, DataHist, 'templates_barrel.root')
+templateFits.InputFilename = 'templates_barrel.root'
+templateFits.fitData = False ## to do closure test
+templateFits.NpseudoExp = 0
+templateFits.doTheFit()
+templateFits.fitData = True ## to do closure test
+templateFits.NpseudoExp = 1500
+#templateFits.doTheFit()
 
-#phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
+phoPurity,phoPurityError,MCfrac = templateFits.doTheFit()
 
 
 
-if isElectron:
-	phoPurity, phoPurityError = 0.564158170272, 0.0633698012736
-if isMuon:
-	phoPurity, phoPurityError = 0.531773010465, 0.0572147752547
+# if isElectron:
+# 	phoPurity, phoPurityError = 0.564158170272, 0.0633698012736
+# if isMuon:
+#phoPurity, phoPurityError = 0.531773010465, 0.0572147752547
 
 
 if skipMET:
@@ -641,7 +668,7 @@ qcd_fit.normMETfile = 'templates_presel_nomet.root'
 qcd_fit.setQCDconstantM3 = True
 qcd_fit.setOtherMCconstantM3 = True
 
-qcd_fit.M3BinWidth=40.
+qcd_fit.M3BinWidth=10.
 
 QCDSF,QCDSFerror_met = qcd_fit.doQCDfit()
 
@@ -759,34 +786,33 @@ if skipCalc:
 	print 'Stopping code before the likelihood fit (calc_the_answer)'
 	sys.exit(0)
 
-calc_the_answer.TTJets1l_num = TTJets1l_num
-calc_the_answer.TTJets2l_num = TTJets2l_num
-calc_the_answer.TTJetsHad_num = TTJetsHad_num
+calc_the_answer_test.TTJets1l_num = TTJets1l_num
+calc_the_answer_test.TTJets2l_num = TTJets2l_num
+calc_the_answer_test.TTJetsHad_num = TTJetsHad_num
 
-calc_the_answer.photnPurity = phoPurity
-calc_the_answer.photnPurityErr = phoPurityError
-calc_the_answer.eleFakeSF = 1.5
-calc_the_answer.eleFakeSFErr = 0.2
+calc_the_answer_test.photnPurity = phoPurity
+calc_the_answer_test.photnPurityErr = phoPurityError
+calc_the_answer_test.eleFakeSF = 1.458
+calc_the_answer_test.eleFakeSFErr = 0.1985
 if systematic == 'EleFakeSF_up':
-	calc_the_answer.eleFakeSF = 1.5 + 0.2
+	calc_the_answer_test.eleFakeSF = 1.458+0.1985
 if systematic == 'EleFakeSF_down':
-	calc_the_answer.eleFakeSF = 1.5 - 0.2
+	calc_the_answer_test.eleFakeSF = 1.458-0.1985
 
-calc_the_answer.M3TopSF = TopSF_presel
-calc_the_answer.M3TopSFErr = TopSF_presel_error
-calc_the_answer.M3WJetsSF = WJetsSF_presel
-calc_the_answer.M3WJetsSFErr = WJetsSF_presel_error
-calc_the_answer.M3_photon_topFrac = m3_topFrac
-calc_the_answer.M3_photon_topFracErr = m3_topFracErr
+calc_the_answer_test.M3TopSF = TopSF_presel
+calc_the_answer_test.M3TopSFErr = TopSF_presel_error
+calc_the_answer_test.M3WJetsSF = WJetsSF_presel
+calc_the_answer_test.M3WJetsSFErr = WJetsSF_presel_error
+calc_the_answer_test.M3_photon_topFrac = m3_topFrac
+calc_the_answer_test.M3_photon_topFracErr = m3_topFracErr
 
-calc_the_answer.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
+calc_the_answer_test.barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
 
-xsRatio, xsRatioErr, bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr = calc_the_answer.doTheCalculation()
+xsRatio, xsRatioErr, bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr = calc_the_answer_test.doTheCalculation()
 
 mcEventsTable.ttgammaSF     = bestttgSF
 mcEventsTable.vgammaSF      = bestvgammaSF
 mcEventsTable.jetToPhotonSF = bestjgSF
-mcEventsTable.egammaSF      = 1.5
 
 print
 print 'BestttgSF    = ',bestttgSF    , '+-', bestttgSFErr    
@@ -796,7 +822,6 @@ print 'BestjgSF     = ',bestjgSF     , '+-', bestjgSFErr
 mcEventsTable.ttgammaSFerr     = bestttgSFErr
 mcEventsTable.vgammaSFerr      = bestvgammaSFErr
 mcEventsTable.jetToPhotonSFerr = bestjgSFErr
-mcEventsTable.egammaSFerr      = 0.2
 
 print 
 print 'Event count, photon selection, likelihood Scale Factors Applied'
