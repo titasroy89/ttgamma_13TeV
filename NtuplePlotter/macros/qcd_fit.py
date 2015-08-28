@@ -194,6 +194,8 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
 		labelcms.SetBorderSize(0);
 
+		print 'chi2 = ',plotter.chiSquare('sum','data')
+
                 plotter.Draw()
                 plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("M3 (GeV)")
