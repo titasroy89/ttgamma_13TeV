@@ -28,12 +28,12 @@ NtuplePlotter/makeTemplates SingleTbar_s  $hist ${dir}job_summer12_tbar_s_presel
 NtuplePlotter/makeTemplates SingleTbar_tw $hist ${dir}job_summer12_tbar_tW_presel.root
 
 
-NtuplePlotter/makeTemplates WW_2l2nu      $hist ${dir}job_summer12_WW_2l2nu_presel.root
-NtuplePlotter/makeTemplates WZ_2l2q       $hist ${dir}job_summer12_WZ_2l2q_presel.root
-NtuplePlotter/makeTemplates WZ_3lnu       $hist ${dir}job_summer12_WZ_3lnu_presel.root
-NtuplePlotter/makeTemplates ZZ_2e2mu      $hist ${dir}job_summer12_ZZ_2e2mu_presel.root
-NtuplePlotter/makeTemplates ZZ_2e2tau     $hist ${dir}job_summer12_ZZ_2e2tau_presel.root
-NtuplePlotter/makeTemplates ZZ_2mu2tau    $hist ${dir}job_summer12_ZZ_2mu2tau_presel.root
-NtuplePlotter/makeTemplates ZZ_4e         $hist ${dir}job_summer12_ZZ_4e_presel.root
-NtuplePlotter/makeTemplates ZZ_4mu        $hist ${dir}job_summer12_ZZ_4mu_presel.root
-NtuplePlotter/makeTemplates ZZ_4tau       $hist ${dir}job_summer12_ZZ_4tau_presel.root
+# NtuplePlotter/makeTemplates WW_2l2nu      $hist ${dir}job_summer12_WW_2l2nu_presel.root
+# NtuplePlotter/makeTemplates WZ_2l2q       $hist ${dir}job_summer12_WZ_2l2q_presel.root
+# NtuplePlotter/makeTemplates WZ_3lnu       $hist ${dir}job_summer12_WZ_3lnu_presel.root
+# NtuplePlotter/makeTemplates ZZ_2e2mu      $hist ${dir}job_summer12_ZZ_2e2mu_presel.root
+# NtuplePlotter/makeTemplates ZZ_2e2tau     $hist ${dir}job_summer12_ZZ_2e2tau_presel.root
+# NtuplePlotter/makeTemplates ZZ_2mu2tau    $hist ${dir}job_summer12_ZZ_2mu2tau_presel.root
+# NtuplePlotter/makeTemplates ZZ_4e         $hist ${dir}job_summer12_ZZ_4e_presel.root
+# NtuplePlotter/makeTemplates ZZ_4mu        $hist ${dir}job_summer12_ZZ_4mu_presel.root
+# NtuplePlotter/makeTemplates ZZ_4tau       $hist ${dir}job_summer12_ZZ_4tau_presel.root

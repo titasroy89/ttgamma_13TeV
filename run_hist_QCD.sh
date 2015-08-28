@@ -1,39 +1,52 @@
 #!/bin/csh
 
-set hist="QCD_bin"
-set dir="/eos/uscms/store/user/makouski/PreSelSkimQCD/"
+# set hist="QCD_bin"
+# set dir="/eos/uscms/store/user/makouski/PreSelSkimQCD/"
 
-# set hist="histTest"
-# set dir="/eos/uscms/store/user/makouski/PreSelSkim/"
-
-NtuplePlotter/makeTemplates Data_a        $hist ${dir}1electron_a_presel.root
-NtuplePlotter/makeTemplates Data_b        $hist ${dir}1electron_b_presel.root
-NtuplePlotter/makeTemplates Data_c        $hist ${dir}1electron_c_presel.root
-NtuplePlotter/makeTemplates Data_d        $hist ${dir}1electron_d_presel.root
-
-NtuplePlotter/makeTemplates W4Jets        $hist ${dir}job_summer12_W4jets_presel.root
-NtuplePlotter/makeTemplates W3Jets        $hist ${dir}job_summer12_W3jets_presel.root
-NtuplePlotter/makeTemplates TTJets2l      $hist ${dir}job_summer12_ttjets_2l_presel.root 
-NtuplePlotter/makeTemplates TTJets1l      $hist ${dir}job_summer12_ttjets_1l_presel.root 
-NtuplePlotter/makeTemplates TTJetsHad     $hist ${dir}job_summer12_ttjets_had_presel.root
-NtuplePlotter/makeTemplates TTGamma       $hist ${dir}job_summer12_ttg_presel.root
-NtuplePlotter/makeTemplates ZJets         $hist ${dir}job_summer12_Zjets_presel.root          
-NtuplePlotter/makeTemplates Zgamma        $hist ${dir}job_summer12_Zg_presel.root	      
-NtuplePlotter/makeTemplates Wgamma        $hist ${dir}job_summer12_Wg_presel.root	      
-NtuplePlotter/makeTemplates SingleT_t     $hist ${dir}job_summer12_t_t_presel.root
-NtuplePlotter/makeTemplates SingleT_s     $hist ${dir}job_summer12_t_s_presel.root
-NtuplePlotter/makeTemplates SingleT_tw    $hist ${dir}job_summer12_t_tW_presel.root
-NtuplePlotter/makeTemplates SingleTbar_t  $hist ${dir}job_summer12_tbar_t_presel.root
-NtuplePlotter/makeTemplates SingleTbar_s  $hist ${dir}job_summer12_tbar_s_presel.root
-NtuplePlotter/makeTemplates SingleTbar_tw $hist ${dir}job_summer12_tbar_tW_presel.root
+set hist="/eos/uscms/store/user/dnoonan/MuHists_looseVeto/QCD_bins/"
+set dir="/eos/uscms/store/user/dnoonan/QCDskims_mu/"
 
 
-NtuplePlotter/makeTemplates WW_2l2nu      $hist ${dir}job_summer12_WW_2l2nu_presel.root
-NtuplePlotter/makeTemplates WZ_2l2q       $hist ${dir}job_summer12_WZ_2l2q_presel.root
-NtuplePlotter/makeTemplates WZ_3lnu       $hist ${dir}job_summer12_WZ_3lnu_presel.root
-NtuplePlotter/makeTemplates ZZ_2e2mu      $hist ${dir}job_summer12_ZZ_2e2mu_presel.root
-NtuplePlotter/makeTemplates ZZ_2e2tau     $hist ${dir}job_summer12_ZZ_2e2tau_presel.root
-NtuplePlotter/makeTemplates ZZ_2mu2tau    $hist ${dir}job_summer12_ZZ_2mu2tau_presel.root
-NtuplePlotter/makeTemplates ZZ_4e         $hist ${dir}job_summer12_ZZ_4e_presel.root
-NtuplePlotter/makeTemplates ZZ_4mu        $hist ${dir}job_summer12_ZZ_4mu_presel.root
-NtuplePlotter/makeTemplates ZZ_4tau       $hist ${dir}job_summer12_ZZ_4tau_presel.root
+mkdir ${hist}
+
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates Data_a $hist ${dir}skim_data_mu_a.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates Data_b $hist ${dir}skim_data_mu_b.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates Data_c $hist ${dir}skim_data_mu_c.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates Data_d $hist ${dir}skim_data_mu_d.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates W4Jets $hist ${dir}skim_W4jets.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates W3Jets $hist ${dir}skim_W3jets.root
+# #/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/#NtuplePlotter/makeTemplates W2Jets $hist ${dir}skim_W2jets.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates TTJets2l $hist ${dir}skim_ttjets_2l.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates TTJets1l $hist ${dir}skim_ttjets_1l.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates TTJetsHad $hist ${dir}skim_ttjets_0l.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates TTGamma $hist ${dir}skim_ttg.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates ZJets $hist ${dir}skim_DYJetsToLL.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates Zgamma $hist ${dir}skim_Zg.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates Wgamma $hist ${dir}skim_Wg.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates SingleT_t $hist ${dir}skim_t_t.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates SingleT_s $hist ${dir}skim_t_s.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates SingleT_tw $hist ${dir}skim_t_tW.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates SingleTbar_t $hist ${dir}skim_tbar_t.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates SingleTbar_s $hist ${dir}skim_tbar_s.root
+# /uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/NtuplePlotter/makeTemplates SingleTbar_tw $hist ${dir}skim_tbar_tW.root
+
+
+NtuplePlotter/makeTemplates Data_a $hist ${dir}skim_data_mu_a.root
+NtuplePlotter/makeTemplates Data_b $hist ${dir}skim_data_mu_b.root
+NtuplePlotter/makeTemplates Data_c $hist ${dir}skim_data_mu_c.root
+NtuplePlotter/makeTemplates Data_d $hist ${dir}skim_data_mu_d.root
+NtuplePlotter/makeTemplates W4Jets $hist ${dir}skim_W4jets.root
+NtuplePlotter/makeTemplates W3Jets $hist ${dir}skim_W3jets.root
+NtuplePlotter/makeTemplates TTJets2l $hist ${dir}skim_ttjets_2l.root
+NtuplePlotter/makeTemplates TTJets1l $hist ${dir}skim_ttjets_1l.root
+NtuplePlotter/makeTemplates TTJetsHad $hist ${dir}skim_ttjets_0l.root
+NtuplePlotter/makeTemplates TTGamma $hist ${dir}skim_ttg.root
+NtuplePlotter/makeTemplates ZJets $hist ${dir}skim_DYJetsToLL.root
+NtuplePlotter/makeTemplates Zgamma $hist ${dir}skim_Zg.root
+NtuplePlotter/makeTemplates Wgamma $hist ${dir}skim_Wg.root
+NtuplePlotter/makeTemplates SingleT_t $hist ${dir}skim_t_t.root
+NtuplePlotter/makeTemplates SingleT_s $hist ${dir}skim_t_s.root
+NtuplePlotter/makeTemplates SingleT_tw $hist ${dir}skim_t_tW.root
+NtuplePlotter/makeTemplates SingleTbar_t $hist ${dir}skim_tbar_t.root
+NtuplePlotter/makeTemplates SingleTbar_s $hist ${dir}skim_tbar_s.root
+NtuplePlotter/makeTemplates SingleTbar_tw $hist ${dir}skim_tbar_tW.root
