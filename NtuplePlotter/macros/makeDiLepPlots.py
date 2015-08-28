@@ -278,19 +278,19 @@ varList_all = ['nVtx',
 
 
 if isElectron:
-	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
-	DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_twoEle/'
+	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle/'
+	DataHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle/'
 
 	makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/plots')
 
-	InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
-	DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bin_zeroB_twoEle/'
+	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle_zeroB/'
+	DataHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle_zeroB/'
 
 	makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check_zeroB/plots')
 
 if isMuon:
-	InputHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_2Muons/'
-	DataHist = '/uscms/home/troy2012/TTGAMMA_trial/TTGammaSemiLep/hist_2Muons/'
+	InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins_twoMu/'
+	DataHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins_twoMu/'
 
 	makeAllPlots(varList_all, InputHist, DataHist, 'di_mu_cross_check/plots')
 

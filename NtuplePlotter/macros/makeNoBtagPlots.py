@@ -568,9 +568,9 @@ if isElectron:
 	# InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bins_zeroB'+outSuffix+'/'
 	# QCDHist =   '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/QCD_bins_zeroB/'
 	# DataHist =  '/uscms_data/d2/dnoonan/TTGammaElectrons/EleHists/hist_bins_zeroB/'
-	InputHist = '/eos/uscms/store/user/dnoonan/EleHists/hist_bins_zeroB'+outSuffix+'/'
-	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists/QCD_bins_zeroB/'
-	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists/hist_bins_zeroB/'
+	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_zeroB'+outSuffix+'/'
+	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/QCD_bins_zeroB/'
+	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_zeroB/'
 if isMuon:
 	InputHist = '/uscms_data/d3/troy2012/ANALYSIS_2/hist_bins'+outSuffix+'/'
 	QCDHist = '/uscms_data/d3/troy2012/ANALYSIS_2/QCD_bins/'
