@@ -2,6 +2,8 @@ import ROOT
 import sys
 from math import exp
 
+ROOT.gROOT.SetBatch(0)
+
 myfile = None
 
 eleFakeSF = 1.5
@@ -39,7 +41,7 @@ mu_data  = {'photnPurity'          : mu_photnPurity         ,
 	    'NdataErr'             : mu_NdataErr            ,
 	    }
 
-def integral(histname, fileName):
+def integral(histname, fileName, verbose = True):
 	global myfile
 	# if myfile == None:
 	# 	myfile = ROOT.TFile(fileName,'READ')		
@@ -47,11 +49,11 @@ def integral(histname, fileName):
 	err = ROOT.Double(0.0)
 	hist = myfile.Get(histname)
 	integr = hist.IntegralAndError(0,hist.GetNbinsX() + 1, err)
-	print integr,err
+	if verbose: print integr,err
 	return integr,err
 
 
-def readSamples(suffix, fileName):
+def readSamples(suffix, fileName, verbose = True):
 	var = 'MET'
 	######## Added QCD to the list of samples ########
 	samplnames = ['TTGamma', 'TTJets', 'Vgamma', 'SingleTop', 'WJets', 'ZJets', 'QCD']
@@ -60,11 +62,11 @@ def readSamples(suffix, fileName):
 		if n=='QCD' and (suffix=='signal' or suffix=='electron'):
 			samples[n] = (0.0,0.0)
 			continue
-		print 'getting counts for ',n,suffix###, 'in', fileName
+		if verbose: print 'getting counts for ',n,suffix###, 'in', fileName
 		if n=='QCD':
-			int,err = integral(n+'_'+var, fileName)
+			int,err = integral(n+'_'+var, fileName, verbose)
 		else:
-			int,err = integral(n+'_'+suffix+'_'+var, fileName)
+			int,err = integral(n+'_'+suffix+'_'+var, fileName, verbose)
 		samples[n] = (int,err)
 	return samples
 
@@ -170,15 +172,15 @@ def seq(start, stop, step=1):
         return([])
 
 
-def calculateTTGamma(e_templateFile, mu_templateFile, combined_eff, saveFitPlots = False):
+def calculateTTGamma(e_templateFile, mu_templateFile, combined_eff, saveFitPlots = False, verbose = True, progressBar = False):
 	# read all the numbers from the file
-	e_pho = readSamples('signal', e_templateFile)
-	e_ele = readSamples('electron', e_templateFile)
-	e_fake = readSamples('fake', e_templateFile)
+	e_pho = readSamples('signal', e_templateFile, verbose)
+	e_ele = readSamples('electron', e_templateFile, verbose)
+	e_fake = readSamples('fake', e_templateFile, verbose)
 
-	mu_pho = readSamples('signal', mu_templateFile)
-	mu_ele = readSamples('electron', mu_templateFile)
-	mu_fake = readSamples('fake', mu_templateFile)
+	mu_pho = readSamples('signal', mu_templateFile, verbose)
+	mu_ele = readSamples('electron', mu_templateFile, verbose)
+	mu_fake = readSamples('fake', mu_templateFile, verbose)
 	
 	ttghist = ROOT.TH1F('ttghist','Marginalized Likelihood', 141, 0.2-0.005, 1.6+0.005)
 	vghist = ROOT.TH1F('vghist','Marginalized Likelihood', 61, 0-0.025, 3.0+0.025)
@@ -201,10 +203,11 @@ def calculateTTGamma(e_templateFile, mu_templateFile, combined_eff, saveFitPlots
 	percent = 0
 	i = 0
 	for ttgSF in seq(0.2, 1.6, 0.01):		
-		if (i%7==0):
-			sys.stdout.write("\r[" + "=" * (i / 7) + " " * (20- (i/7)) + "]" + str(percent) + "%")
-			sys.stdout.flush()
-			percent += 5
+		if progressBar:
+			if (i%7==0):
+				sys.stdout.write("\r[" + "=" * (i / 7) + " " * (20- (i/7)) + "]" + str(percent) + "%")
+				sys.stdout.flush()
+				percent += 5
 		i += 1
 		for VgSF in seq(0.0, 3.0, 0.05):
 			for jgSF in seq(0.5, 1.8, 0.01):
@@ -226,8 +229,9 @@ def calculateTTGamma(e_templateFile, mu_templateFile, combined_eff, saveFitPlots
 					bestvgSF = VgSF
 					bestjgSF = jgSF
 	
-	print 'max likelihood ',maxlk
-	print "best SF's:", bestttgSF, bestvgSF, bestjgSF
+	if verbose:
+		print 'max likelihood ',maxlk
+		print "best SF's:", bestttgSF, bestvgSF, bestjgSF
 
 	b_e_allmc,e_allmcErr = NallMC(e_pho,e_ele,e_fake, bestttgSF, bestvgSF, bestjgSF)
 	b_e_top,e_topErr = Ntop(e_pho,e_ele,e_fake, bestttgSF, bestvgSF, bestjgSF)
@@ -254,7 +258,7 @@ def calculateTTGamma(e_templateFile, mu_templateFile, combined_eff, saveFitPlots
 
 	ttghist.Draw()
 	ttghist.GetXaxis().SetTitle('TTGamma Scale Factor')
-	ttghist.Fit('gaus')
+	ttghist.Fit('gaus',"Q")
 	fit = ttghist.GetFunction('gaus')
 	bestttgSFErr = fit.GetParameter(2)
 	if saveFitPlots: ccc.SaveAs('TTGamma_SF_Lkhood.png')
@@ -262,14 +266,14 @@ def calculateTTGamma(e_templateFile, mu_templateFile, combined_eff, saveFitPlots
 	vghist.Draw()
 	vghist.GetXaxis().SetTitle('Vgamma Scale Factor')
 	vghist.SetMinimum(0.0)
-	vghist.Fit('gaus')
+	vghist.Fit('gaus',"Q")
 	fit = vghist.GetFunction('gaus')
 	bestvgSFErr = fit.GetParameter(2)
 	if saveFitPlots: ccc.SaveAs('Vgamma_SF_Lkhood.png')
 	
 	jghist.Draw()
 	jghist.GetXaxis().SetTitle('Jet to Photon Scale Factor')
-	jghist.Fit('gaus')
+	jghist.Fit('gaus',"Q")
 	fit = jghist.GetFunction('gaus')
 	bestjgSFErr = fit.GetParameter(2)
 	if saveFitPlots: ccc.SaveAs('jet_gamma_SF_Lkhood.png')
