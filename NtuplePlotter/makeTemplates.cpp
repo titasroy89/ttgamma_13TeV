@@ -151,6 +151,7 @@ int main(int ac, char** av){
 	if( std::string(av[1]).find("TTJets") != std::string::npos) doOverlapRemoval = true;
 	if( std::string(av[1]).find("ZJets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("WJets") != std::string::npos) doOverlapRemovalWZ = true;
+	if( std::string(av[1]).find("W2Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W3Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W4Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	
