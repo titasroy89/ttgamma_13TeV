@@ -1,5 +1,7 @@
 #include"Histogrammer.h"
 
+double secondMinDr(int myInd, const EventTree* tree);
+
 Histogrammer::Histogrammer(std::string titleIn){
 	title = titleIn;
 	
@@ -75,6 +77,7 @@ Histogrammer::Histogrammer(std::string titleIn){
 	make_hist("photon1GMotherID","photon 1 Gmother PDG ID",35,-0.5,34.5,"Photon Gmother PID","Events");
 	make_hist("photon1DrMCbquark","dR photon 1 to gen level b",40,0,2,"#DeltaR(#gamma,b_{MC})","Events / 0.05");
 	make_hist("GenPhotonEt","Et of matched Gen Photon",20,0,200,"Gen Photon E_{T} (GeV)","Events / 10 GeV");
+	make_hist("GenPhotonMinDR","MinDR of matched Gen Photon",100,0,1,"Gen Photon Min #DeltaR","Events");
 	make_hist("nPhotons","number of photons",15,-0.5,14.5,"N_{#gamma}","Events");
 
 	// jets
@@ -103,7 +106,7 @@ Histogrammer::Histogrammer(std::string titleIn){
 	make_hist("M3first","Mass of 3 highest Pt jets",100,0,1000,"highest pt M3 (GeV)","Events / 10 GeV");
 	make_hist("minM3","Minimal Mass of 3 jets",60,0,600,"min M3 (GeV)","Events / 10 GeV");
 	make_hist("M3minPt","Mass of 3 jets with smallest total Pt",60,0,600,"M3 min Pt (Gev)","Events / 10 GeV");
-	make_hist("M3","Mass of 3 jets with highest total Pt",20,0,800,"M3 (GeV)","Events / 10 GeV");
+	make_hist("M3","Mass of 3 jets with highest total Pt",80,0,800,"M3 (GeV)","Events / 10 GeV");
 	make_hist("M3pho","Mass of 3 jets + photon with highest total Pt",40,0,400,"M(3jets+#gamma) (Gev)","Events / 10 GeV");
 	make_hist("M3phoMulti","Mass of all combinations 3 jets + photon",40,0,400,"M(all 3jets+#gamma) (Gev)","Events / 10 GeV");
 	make_hist("ele1D0","electron 1 Dxy_PV",80,-0.2,0.2,"Electron Dxy_PV (cm)","Events / 0.005 cm");
@@ -347,9 +350,10 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 				if( tree->mcIndex->at(mcI) == tree->phoGenIndex_->at(ind) ) 
 					phoGen=mcI;
 			}
-			if( phoGen > 0)
+			if( phoGen > 0){
 				hists["GenPhotonEt"]->Fill(tree->mcPt->at(phoGen), weight);
-				
+				hists["GenPhotonMinDR"]->Fill(secondMinDr(phoGen, tree), weight);
+			}
 			if(mindr<999) {
 				hists["photon1DrMCbquark"]->Fill( mindr, weight );
 			}
@@ -554,8 +558,9 @@ void Histogrammer::make_hist2d(const char* hname, const char* htitle, int nxbins
 void Histogrammer::write_histograms(std::string folderS, std::vector<TH1F*> histVector){
 
 	TFile* outFile = new TFile((folderS+"/hist_"+title+".root").c_str(), "RECREATE");
-	
+
 	for( std::map< std::string, TH1F* >::iterator it = hists.begin(); it != hists.end(); ++it){
+	  
 		it->second->SetDirectory(outFile->GetDirectory(""));
 		it->second->Write();
 		it->second->SetDirectory(0);
