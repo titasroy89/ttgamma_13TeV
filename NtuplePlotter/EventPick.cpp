@@ -19,6 +19,15 @@ EventPick::EventPick(std::string titleIn){
 	genPhoRegionWeight->SetDirectory(0);
 	histVector.push_back(genPhoRegionWeight);
 
+	genPhoRegionWeight_1l_2l = new TH1F("genPhoRegionWeight_1l_2l","GenPhoton passing fiducial cuts with 1 or 2 gen leptons: barrel 0 or endcap 1",2,-0.5,1.5);
+	genPhoRegionWeight_1l_2l->SetDirectory(0);
+	histVector.push_back(genPhoRegionWeight_1l_2l);
+
+	genPhoMinDR = new TH1F("genPhoMinDR", "Min DR between gen photon and other gen particles", 100, 0., 1.);
+	genPhoMinDR->SetDirectory(0);
+	histVector.push_back(genPhoMinDR);
+
+
 	// assign cut values
 	veto_jet_dR = 0.1;
 	veto_lep_jet_dR = 0.5;
@@ -34,6 +43,7 @@ EventPick::EventPick(std::string titleIn){
 	NEleVeto_le = 0;
 	Npho_ge = 1;
 	NlooseMuVeto_le = 0;
+	NlooseEleVeto_le = 0;
 }
 
 EventPick::~EventPick(){
@@ -138,7 +148,8 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	else passPreSel = false;
 	if(passPreSel && selector->MuonsLoose.size() <= NlooseMuVeto_le) {cutFlow->Fill(3); cutFlowWeight->Fill(3,weight);}
 	else passPreSel = false;
-	if(passPreSel && selector->Electrons.size() <= NEleVeto_le) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
+	//	if(passPreSel && selector->Electrons.size() <= NEleVeto_le) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
+	if(passPreSel && selector->Electrons.size() <= NEleVeto_le && selector->ElectronsLoose.size() <= NlooseEleVeto_le) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
 	else passPreSel = false;
 	if(passPreSel && Jets.size() >= Njet_ge ) {cutFlow->Fill(5); cutFlowWeight->Fill(5,weight);}
 	 else passPreSel = false;
@@ -175,6 +186,47 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	}
 	if(foundGenPhotonBarrel) genPhoRegionWeight->Fill(0.0, weight);
 	if(foundGenPhotonEndcap) genPhoRegionWeight->Fill(1.0, weight);
+
+	int EleP = 0;
+	int EleM = 0;
+	int MuP = 0;
+	int MuM = 0;
+	int TauP = 0;
+	int TauM = 0;
+
+	for( int mcI = 0; mcI < tree->nMC_; ++mcI){
+	  if(abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10){
+	    if( tree->mcPID->at(mcI) == 11 ) EleP = 1;
+	    if( tree->mcPID->at(mcI) == -11 ) EleM = 1;
+	    if( tree->mcPID->at(mcI) == 13 ) MuP = 1;
+	    if( tree->mcPID->at(mcI) == -13 ) MuM = 1;
+	    if( tree->mcPID->at(mcI) == 15) TauP = 1;
+	    if( tree->mcPID->at(mcI) == -15) TauM = 1;
+	  }
+	}
+	int nEle = EleP + EleM;
+	int nMu = MuP + MuM;
+	int nTau = TauP + TauM;
+	int nLep = nEle + nMu + nTau;
+
+	if (nLep == 1 || nLep == 2){
+	  if(foundGenPhotonBarrel) genPhoRegionWeight_1l_2l->Fill(0.0, weight);
+	  if(foundGenPhotonEndcap) genPhoRegionWeight_1l_2l->Fill(1.0, weight);
+	}	  
+
+
+	if(passPreSel && !(tree->isData_)){
+	  double minDR = 999.;
+	  for(int mcInd=0; mcInd<tree->nMC_; ++mcInd){
+	    if(tree->mcPID->at(mcInd) == 22 &&
+	       (tree->mcParentage->at(mcInd)==2 || tree->mcParentage->at(mcInd)==10 || tree->mcParentage->at(mcInd)==26)){
+	      double dr = secondMinDr(mcInd, tree);
+	      if (dr < minDR) minDR = dr;
+	    }
+	  }
+	  genPhoMinDR->Fill(minDR, weight);
+	}
+
 }
 
 void EventPick::print_cutflow(){

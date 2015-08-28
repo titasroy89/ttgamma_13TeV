@@ -54,6 +54,7 @@ public:
 	
 	int Npho_ge;
 	int NlooseMuVeto_le;
+	int NlooseEleVeto_le;
 	
 	// variables showing passing or failing selections
 	bool passPreSel; // passed preselection
@@ -64,6 +65,8 @@ public:
 	TH1F* cutFlow;
 	TH1F* cutFlowWeight;
 	TH1F* genPhoRegionWeight;
+	TH1F* genPhoRegionWeight_1l_2l;
+	TH1F* genPhoMinDR;
 
 private:
 	const EventTree* tree;
