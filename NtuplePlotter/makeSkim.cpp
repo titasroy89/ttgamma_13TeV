@@ -18,15 +18,19 @@ int main(int ac, char** av){
 	EventTree* tree = new EventTree(ac-2, av+2);
 	Selector* selector = new Selector();
 	selector->jet_Pt_cut = 20;
-	selector->mu_RelIso_range[0] = 0.25; 
-	selector->mu_RelIso_range[1] = 1.;
-	std::cout << "muon antiselection is on" << std::endl;
-	selector->mu_Iso_MVA_invert = true;
+	// selector->mu_RelIso_range[0] = 0.25; 
+	// selector->mu_RelIso_range[1] = 1.;
+	// std::cout << "muon antiselection is on" << std::endl;
+	//	selector->mu_Iso_MVA_invert = true;
 	EventPick* evtPick = new EventPick("nominal");
        //needed for the QCD and otherwise
         evtPick->MET_cut = -1.0;	
 	// antiselection for QCD fit
 	std::string outDirName(av[1]);
+	if( outDirName.find("QCD") != std::string::npos){
+		std::cout << "muon antiselection is on" << std::endl;
+		selector->mu_Iso_invert = true;
+	}
 
 	evtPick->NBjet_ge = 0;
 	
