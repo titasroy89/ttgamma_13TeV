@@ -16,8 +16,8 @@ vgammaSFerr = 0.
 jetToPhotonSF = 1.
 jetToPhotonSFerr = 0.
 
-egammaSF = 1.
-egammaSFerr = 0.
+egammaSF = 1.47
+egammaSFerr = 0.19
 
 def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
 
@@ -73,6 +73,11 @@ def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
     values.append([val,0.,0.])
     valuesErrs.append([val*(err**2+(jetToPhotonSFerr/jetToPhotonSF)**2)**0.5,0.,0.])
 
+
+    tempHist = inputFile.Get("Data_MET")
+    dataErr = ROOT.Double(0.0)
+    dataTot = tempHist.IntegralAndError(-1,-1,dataErr)
+
     inputFile.Close("R")
 
     totals = [0.,0.,0.,0.]
@@ -113,10 +118,12 @@ def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
     if latexFormat:
         print '\\hline'
         print "Totals & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ \\\\" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
+        print 'Data & $%.1f \\pm %.1f$ &  -  &  -  \\\\' % (dataTot, dataErr)
         print '\\hline'
         print '\\end{tabular}'
     else:
         print "| Totals | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f |" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
+        print '| Data | %.1f +- %.1f |  -  |  -  | - |' % (dataTot, dataErr)
 
     return
 
