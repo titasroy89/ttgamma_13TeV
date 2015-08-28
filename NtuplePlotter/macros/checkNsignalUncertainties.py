@@ -133,9 +133,9 @@ total_e = result_ele[2][0][1]
 photn_e = result_photn_fixed_ele[2][0][1]
 topfrac_e = result_topFrac_fixed_ele[2][0][1]
 nData_e = result_Ndata_fixed_ele[2][0][1]
-print 'e photon:', sqrt(total_e**2 - photn_e**2)
-print 'e topFrac:', sqrt(total_e**2 - topfrac_e**2)
-print 'e nData:', sqrt(total_e**2 - nData_e**2)
+print 'e photon:', (total_e**2 - photn_e**2)**0.5
+print 'e topFrac:', (total_e**2 - topfrac_e**2)**0.5
+print 'e nData:', (total_e**2 - nData_e**2)**0.5
 
 print
 print
@@ -144,6 +144,6 @@ total_mu = result_mu[2][0][1]
 photn_mu = result_photn_fixed_mu[2][0][1]
 topfrac_mu = result_topFrac_fixed_mu[2][0][1]
 nData_mu = result_Ndata_fixed_mu[2][0][1]
-print 'e photon:', sqrt(total_mu**2 - photn_mu**2)
-print 'e topFrac:', sqrt(total_mu**2 - topfrac_mu**2)
-print 'e nData:', sqrt(total_mu**2 - nData_mu**2)
+print 'e photon:', (total_mu**2 - photn_mu**2)**0.5
+print 'e topFrac:', (total_mu**2 - topfrac_mu**2)**0.5
+print 'e nData:', (total_mu**2 - nData_mu**2)**0.5
