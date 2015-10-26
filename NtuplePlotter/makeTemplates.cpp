@@ -167,7 +167,8 @@ int main(int ac, char** av){
 	tree->GetEntry(0);
 	isMC = !(tree->isData_);
 	JECvariation* jecvar;
-	jecvar = new JECvariation("./jecAK5PF/Summer12_V7", isMC);
+	//	jecvar = new JECvariation("./jecAK5PF/Summer12_V7", isMC);
+	jecvar = new JECvariation("./jecAK5PF/Summer13_V5", isMC);
 
 	// we don't need systematics variations for Data
 	if(!isMC && systematics) {
@@ -380,6 +381,7 @@ double SFtop(double pt){
 	if(top_sample_g==2) return exp(0.148 - 0.00129*pt);
 	return 1.0;
 }
+
 double topPtWeight(EventTree* tree){
 	double toppt=0.0;
 	double antitoppt=0.0;
@@ -391,9 +393,16 @@ double topPtWeight(EventTree* tree){
 	if(toppt > 0.001 && antitoppt > 0.001)
 		weight = sqrt( SFtop(toppt) * SFtop(antitoppt) );
 	
-	if(toppt012_g == 1) return weight;
-	if(toppt012_g == 0) return 1.0;
-	if(toppt012_g == 2) return weight*weight;
+	// if(toppt012_g == 1) return weight;
+	// if(toppt012_g == 0) return 1.0;
+	// if(toppt012_g == 2) return weight*weight;
+
+	//This has been changed, the new prescription is to not use the top pt reweighting, and the syst is using it
+	if(toppt012_g == 1) return 1.0;
+	if(toppt012_g == 0) return weight;
+	if(toppt012_g == 2) return weight;
+
+
 	// should not get here
 	return 1.0;
 }
