@@ -2,6 +2,10 @@ import ROOT
 ROOT.gROOT.SetBatch()
 import array
 
+import CMS_lumi
+isElectron = False
+isMuon = False
+
 def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName):
 	# RooFit variables
 	sihihVar = ROOT.RooRealVar(varname, varname, varmin, varmax)
@@ -29,7 +33,25 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 	
 	if plotName!='':
 		# plot results
-		c1 = ROOT.TCanvas('c1', 'c1', 800, 600)
+		H = 600; 
+		W = 800; 
+
+		canvas = ROOT.TCanvas('c1','c1',W,H)
+		T = 0.08*H
+		B = 0.12*H 
+		L = 0.12*W
+		R = 0.04*W
+		canvas.SetFillColor(0)
+		canvas.SetBorderMode(0)
+		canvas.SetFrameFillStyle(0)
+		canvas.SetFrameBorderMode(0)
+		canvas.SetLeftMargin( L/W )
+		canvas.SetRightMargin( R/W )
+		canvas.SetTopMargin( T/H )
+		canvas.SetBottomMargin( B/H )
+		canvas.SetTickx(0)
+		canvas.SetTicky(0)
+		
 		plotter = ROOT.RooPlot(sihihVar,varmin,varmax,20) # nBins is dummy 
 		dataDataHist.plotOn(plotter, ROOT.RooFit.Name('data'))
 		sumPdf.plotOn(plotter, ROOT.RooFit.Name('sum'), ROOT.RooFit.LineColor(ROOT.kRed))
@@ -37,10 +59,22 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 			ROOT.RooFit.LineColor(ROOT.kGreen))
 		sumPdf.plotOn(plotter, ROOT.RooFit.Components('backgroundPdf'), ROOT.RooFit.Name('background'), 
 			ROOT.RooFit.LineColor(ROOT.kBlue))
-		sumPdf.paramOn(plotter)
+#		sumPdf.paramOn(plotter)
 
 		plotter.Draw()
-		c1.SaveAs(plotName)
+		channelText = ""
+		if isMuon: channelText = "#mu+jets"
+		if isElectron: channelText = "e+jets"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+		CMS_lumi.CMS_lumi(canvas, 2, 33)
+
+
+		canvas.Update()
+		canvas.RedrawAxis();
+		canvas.Print(plotName, ".png")
+		canvas.Print(plotName.replace('png', 'pdf'), ".pdf")
 	print 'fit returned value ',signalFractionVar.getVal(),' +- ',signalFractionVar.getError()
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
 	
@@ -344,16 +378,28 @@ def doTheFit():
 		
 
 	# draw the result
-	ROOT.gStyle.SetOptFit(111)
-	c1 = ROOT.TCanvas('c1','c1',800,800)
+#	ROOT.gStyle.SetOptFit(111)
+#	c1 = ROOT.TCanvas('c1','c1',800,600)
 
-	labelcms = ROOT.TPaveText(c1.GetLeftMargin(),1.-c1.GetTopMargin(),0.6,1.05-c1.GetTopMargin(),"NDCBR")
-	labelcms.SetTextAlign(12)
-	labelcms.SetTextSize(0.045)
-	labelcms.SetFillColor(ROOT.kWhite)
-	labelcms.SetFillStyle(0)
-	labelcms.AddText("CMS Preliminary, #sqrt{s} = 8 TeV")
-	labelcms.SetBorderSize(0)
+	H = 600; 
+	W = 800; 
+
+	canvas = ROOT.TCanvas('c1','c1',W,H)
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvas.SetFillColor(0)
+	canvas.SetBorderMode(0)
+	canvas.SetFrameFillStyle(0)
+	canvas.SetFrameBorderMode(0)
+	canvas.SetLeftMargin( L/W )
+	canvas.SetRightMargin( R/W )
+	canvas.SetTopMargin( T/H )
+	canvas.SetBottomMargin( B/H )
+	canvas.SetTickx(0)
+	canvas.SetTicky(0)
+
 
 	pe_results.GetXaxis().SetTitle('signal fraction')
 	pe_results.Draw()
@@ -365,16 +411,37 @@ def doTheFit():
 		print 'sigma from fit',fitPEsigma
 
 	if NpseudoExp > 0:
-		c1.SaveAs('fitplots/pe_results.png')
+		channelText = ""
+		if isMuon: channelText = "#mu+jets"
+		if isElectron: channelText = "e+jets"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+		CMS_lumi.CMS_lumi(canvas, 2, 33)
+
+
+		canvas.Update()
+		canvas.RedrawAxis();
+		
+		canvas.Print('fitplots/pe_results.png','.png')
+		canvas.Print('fitplots/pe_results.pdf','.pdf')
 		pe_pull.GetXaxis().SetTitle('signal fraction pull')
 		pe_pull.Draw()
 		pe_pull.Fit('gaus')
-		c1.SaveAs('fitplots/pe_pull.png')
+
+		CMS_lumi.CMS_lumi(canvas, 2, 33)
+
+
+		canvas.Update()
+		canvas.RedrawAxis();
+		canvas.Print('fitplots/pe_pull.png','.png')
+		canvas.Print('fitplots/pe_pull.pdf','.pdf')
 
 	ROOT.gStyle.SetOptStat(0)
 
-	leg = ROOT.TLegend(0.6,0.7,0.99-c1.GetRightMargin(),0.99-c1.GetTopMargin())
-	leg.SetFillColor(0)
+	leg = ROOT.TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*3,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
+	leg.SetFillColor(ROOT.kWhite)
+	leg.SetLineColor(ROOT.kWhite)
 
 	# calculate signal fraction in selected regoin (iso < 5.0) ##########
 	fitleftbinsig = sig_templ.FindBin(lowFitrange)
@@ -447,7 +514,7 @@ def doTheFit():
 	stack.Add(sig_templR)
 	stack.SetTitle('')
 	stack.Draw('hist')
-	stack.GetXaxis().SetTitle('photon '+FitVarname+' (GeV)')
+	stack.GetXaxis().SetTitle('Footprint Removed Ch. Had. Iso. (GeV)')
 	stack.GetYaxis().SetTitle('Events')
 	stack.SetMaximum(1.2*stack.GetMaximum())
 	stack.GetXaxis().SetRangeUser(lowFitrange,highFitrange)
@@ -462,11 +529,25 @@ def doTheFit():
 	pseudodataR.SetMarkerStyle(8)
 	pseudodataR.SetLineColor(1)
 	pseudodataR.Draw('esame')
-	labelcms.Draw()
+
+	channelText = ""
+	if isMuon: channelText = "#mu+jets"
+	if isElectron: channelText = "e+jets"
+	
+	CMS_lumi.extraText = channelText
+	CMS_lumi.writeExtraText = True
+	CMS_lumi.CMS_lumi(canvas, 2, 33)
+	
+
+	canvas.Update()
+	canvas.RedrawAxis();
+
 	if fitData:
-		c1.SaveAs('fitplots/plot_'+phoEtrange+FitVarname+'_data.png')
+		canvas.Print('fitplots/plot_'+phoEtrange+FitVarname+'_data.png', ".png")
+		canvas.Print('fitplots/plot_'+phoEtrange+FitVarname+'_data.pdf', ".pdf")
 	else:
-		c1.SaveAs('fitplots/plot_'+phoEtrange+FitVarname+'_closuretest.png')
+		canvas.Print('fitplots/plot_'+phoEtrange+FitVarname+'_closureTest.png', ".png")
+		canvas.Print('fitplots/plot_'+phoEtrange+FitVarname+'_closureTest.pdf', ".pdf")
 
 	if fitData:
 		print 'Fitting of Data is done'
@@ -476,6 +557,26 @@ def doTheFit():
 	leg.Clear()
 
 	## compare template shapes here
+
+
+	H = 600; 
+	W = 800; 
+	
+	canvas = ROOT.TCanvas('c1','c1',W,H)
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvas.SetFillColor(0)
+	canvas.SetBorderMode(0)
+	canvas.SetFrameFillStyle(0)
+	canvas.SetFrameBorderMode(0)
+	canvas.SetLeftMargin( L/W )
+	canvas.SetRightMargin( R/W )
+	canvas.SetTopMargin( T/H )
+	canvas.SetBottomMargin( B/H )
+	canvas.SetTickx(0)
+	canvas.SetTicky(0)
 
 	# signal template: compare MC truth photon isolation with random cone isolation
 	trueSignalIso = getWeightedHist('rs', InputFilename, hist2d_name, 0.0, sihihSelCut)
@@ -490,20 +591,40 @@ def doTheFit():
 	randCone_Iso.Scale(1.0/randCone_Iso.Integral())
 	randCone_Iso.SetLineColor(2)
 
+	leg = ROOT.TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*2,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
+	leg.SetFillColor(ROOT.kWhite)
+	leg.SetLineColor(ROOT.kWhite)
+
 	leg.AddEntry(trueSignalIso, 'MC truth signal','lf')
 	leg.AddEntry(randCone_Iso, 'Random cone', 'lf')
 	randCone_Iso.SetTitle('')
-	randCone_Iso.GetXaxis().SetTitle('photon '+FitVarname+' (GeV)')
+	randCone_Iso.GetXaxis().SetTitle('Footprint Removed Ch. Had. Iso. (GeV)')
+	randCone_Iso.GetYaxis().SetTitle('Events / 0.2 GeV')
 	randCone_Iso.SetMarkerSize(0)
 	trueSignalIso.SetMarkerSize(0)
 	randCone_Iso.Draw()
 	trueSignalIso.Draw('same')
 	leg.Draw()
-	labelcms.Draw()
-	c1.SaveAs('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ.png')
-	c1.SetLogy(1)
-	c1.SaveAs('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ_log.png')
-	c1.SetLogy(0)
+#	labelcms.Draw()
+
+	channelText = ""
+	if isMuon: channelText = "#mu+jets"
+	if isElectron: channelText = "e+jets"
+	
+	CMS_lumi.extraText = channelText
+	CMS_lumi.writeExtraText = True
+	CMS_lumi.CMS_lumi(canvas, 2, 33)
+	
+
+	canvas.Update()
+	canvas.RedrawAxis();
+
+	canvas.Print('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ.png','.png')
+	canvas.Print('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ.pdf','.pdf')
+	canvas.SetLogy(1)
+	canvas.Print('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ_log.png', '.png')
+	canvas.Print('fitplots/'+hist_sig_name+'_sig'+phoEtrange+'templ_log.pdf', 'pdf')
+	canvas.SetLogy(0)
 	leg.Clear()
 
 	# background template comparison:
@@ -536,6 +657,9 @@ def doTheFit():
 	#true_sel_bckg = getWeightedHist('fjrb', InputFilename, hist_sig_name)
 	#true_sel_bckg.Scale(1.0/true_sel_bckg.Integral())
 	#true_sel_bckg.SetLineColor(3)
+	leg = ROOT.TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*2,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
+	leg.SetFillColor(ROOT.kWhite)
+	leg.SetLineColor(ROOT.kWhite)
 
 	leg.AddEntry(true_bckg,'MC truth bckg','lf')
 	leg.AddEntry(sbIso,'#sigma_{i#etai#eta} side band', 'lf')
@@ -543,15 +667,25 @@ def doTheFit():
 
 	#true_sel_bckg.Draw()
 	true_bckg.SetTitle('')
-	true_bckg.GetXaxis().SetTitle('photon '+FitVarname+' (GeV)')
+	true_bckg.GetXaxis().SetTitle('Footprint Removed Ch. Had. Iso. (GeV)')
+	true_bckg.GetYaxis().SetTitle('Events / 0.2 GeV')
 	true_bckg.Draw()
 	sbIso.Draw('same')
 	leg.Draw()
-	labelcms.Draw()
-	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg.png')
-	c1.SetLogy(1)
-	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg_log.png')
-	c1.SetLogy(0)
+
+	CMS_lumi.CMS_lumi(canvas, 2, 33)
+	
+
+	canvas.Update()
+	canvas.RedrawAxis();
+
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg.png','.png')
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg.pdf','.pdf')
+	canvas.SetLogy(1)
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg_log.png','.png')
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg_log.pdf','.pdf')
+	canvas.SetLogy(0)
+
 
 	true_bckg.GetXaxis().SetRangeUser(lowFitrange,highFitrange)
 	true_bckg.Scale(1.0/true_bckg.Integral())
@@ -567,11 +701,19 @@ def doTheFit():
 	true_bckg.Draw()
 	sbIso.Draw('same')
 	leg.Draw()
-	labelcms.Draw()
-	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange.png')
-	c1.SetLogy(1)
-	c1.SaveAs('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange_log.png')
-	c1.SetLogy(0)
+
+	CMS_lumi.CMS_lumi(canvas, 2, 33)
+	
+
+	canvas.Update()
+	canvas.RedrawAxis();
+
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange.png','.png')
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange.pdf','.pdf')
+	canvas.SetLogy(1)
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange_log.png','.png')
+	canvas.Print('fitplots/'+hist_sig_name+phoEtrange+'_bckg_fitrange_log.pdf','.pdf')
+	canvas.SetLogy(0)
 
 	leg.Clear()
 

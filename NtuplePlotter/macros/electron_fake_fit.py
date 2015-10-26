@@ -4,6 +4,8 @@ import os
 
 from Style import *
  
+import CMS_lumi
+
 thestyle = Style()
 HasCMSStyle = False
 style = None
@@ -85,7 +87,25 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 	
 	if plotName!='':
 		# plot results
-		c1 = ROOT.TCanvas('c1', 'c1', 800, 600)
+		H = 600; 
+		W = 800; 
+
+		canvas = ROOT.TCanvas('c1','c1',W,H)
+		T = 0.08*H
+		B = 0.12*H 
+		L = 0.12*W
+		R = 0.04*W
+		canvas.SetFillColor(0)
+		canvas.SetBorderMode(0)
+		canvas.SetFrameFillStyle(0)
+		canvas.SetFrameBorderMode(0)
+		canvas.SetLeftMargin( L/W )
+		canvas.SetRightMargin( R/W )
+		canvas.SetTopMargin( T/H )
+		canvas.SetBottomMargin( B/H )
+		canvas.SetTickx(0)
+		canvas.SetTicky(0)
+
 		plotter = ROOT.RooPlot('myplot','',sihihVar,varmin,varmax,20) # nBins is dummy
 		dataDataHist.plotOn(plotter, ROOT.RooFit.Name('data'))
 		sumPdf.plotOn(plotter, ROOT.RooFit.Name('sum'), ROOT.RooFit.LineColor(ROOT.kRed))
@@ -95,28 +115,31 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 			ROOT.RooFit.LineColor(ROOT.kBlue))
 #		sumPdf.paramOn(plotter) # fix
 
-		leg = ROOT.TLegend(.7,.99-c1.GetTopMargin()-.05*4,.99-c1.GetRightMargin(),.99-c1.GetTopMargin())
+		leg = ROOT.TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*4,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
 		leg.SetFillColor(ROOT.kWhite)
 		leg.SetLineColor(ROOT.kWhite)
 		leg.AddEntry(plotter.findObject('data'), 'Data','p')
 		leg.AddEntry(plotter.findObject('sum'), 'Sum','l')
 		leg.AddEntry(plotter.findObject('signal'), 'Z#rightarrowee (e to #gamma)','l')
 		leg.AddEntry(plotter.findObject('background'), 'Background','l')
-
-		labelcms = ROOT.TPaveText(0.14,1.-c1.GetTopMargin(),0.6,1.05-c1.GetTopMargin(),"NDCBR")
-		labelcms.SetTextAlign(12);
-		labelcms.SetTextSize(0.045);
-		labelcms.SetFillColor(ROOT.kWhite);
-		labelcms.SetFillStyle(0);
-		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
-		labelcms.SetBorderSize(0);
 		
 		plotter.GetXaxis().SetTitle("M(e,#gamma) (GeV)")
 		plotter.Draw()
 		plotter.GetYaxis().SetTitleOffset(1.4)
 		leg.Draw()
-		labelcms.Draw()
-		c1.SaveAs(plotName)
+
+		channelText = "e+jets"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+		CMS_lumi.CMS_lumi(canvas, 2, 33)
+
+
+		canvas.Update()
+		canvas.RedrawAxis();
+		canvas.Print(plotName, ".png")
+		canvas.Print(plotName.replace('png', 'pdf'), ".pdf")
+
 	print 'fit returned value ',signalFractionVar.getVal(),' +- ',signalFractionVar.getError()
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
 

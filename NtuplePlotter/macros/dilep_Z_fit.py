@@ -7,6 +7,7 @@ if 'zeroB' in sys.argv:
 doEle = False
 doMu = False
 
+import CMS_lumi
 
 lep = ''
 if 'mu' in sys.argv:
@@ -23,6 +24,30 @@ if (doEle and doMu) or not (doEle or doMu):
 
 ROOT.gROOT.SetBatch()
 openfiles = {}
+
+from Style import *
+
+thestyle = Style()
+ 
+HasCMSStyle = False
+style = None
+if os.path.isfile('tdrstyle.C'):
+ 	ROOT.gROOT.ProcessLine('.L tdrstyle.C')
+        ROOT.setTDRStyle()
+        print "Found tdrstyle.C file, using this style."
+        HasCMSStyle = True
+        if os.path.isfile('CMSTopStyle.cc'):
+ 		gROOT.ProcessLine('.L CMSTopStyle.cc+')
+ 		style = CMSTopStyle()
+ 		style.setupICHEPv1()
+ 		print "Found CMSTopStyle.cc file, use TOP style if requested in xml file."
+if not HasCMSStyle:
+ 	print "Using default style defined in cuy package."
+ 	thestyle.SetStyle()
+ 
+ROOT.gROOT.ForceStyle()
+ #############
+
 
 def get1DHist(filename, histname):
 	if filename not in openfiles:
@@ -73,7 +98,25 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 	
 	if plotName!='':
 		# plot results
-		c1 = ROOT.TCanvas('c1', 'c1', 800, 600)
+		H = 600; 
+		W = 800; 
+
+		canvas = ROOT.TCanvas('c1','c1',W,H)
+		T = 0.08*H
+		B = 0.12*H 
+		L = 0.12*W
+		R = 0.04*W
+		canvas.SetFillColor(0)
+		canvas.SetBorderMode(0)
+		canvas.SetFrameFillStyle(0)
+		canvas.SetFrameBorderMode(0)
+		canvas.SetLeftMargin( L/W )
+		canvas.SetRightMargin( R/W )
+		canvas.SetTopMargin( T/H )
+		canvas.SetBottomMargin( B/H )
+		canvas.SetTickx(0)
+		canvas.SetTicky(0)
+
 		plotter = ROOT.RooPlot('myplot','',sihihVar,varmin,varmax,20) # nBins is dummy
 		dataDataHist.plotOn(plotter, ROOT.RooFit.Name('data'))
 		sumPdf.plotOn(plotter, ROOT.RooFit.Name('sum'), ROOT.RooFit.LineColor(ROOT.kRed))
@@ -83,21 +126,14 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 			ROOT.RooFit.LineColor(ROOT.kBlue))
 #		sumPdf.paramOn(plotter) # fix
 
-		leg = ROOT.TLegend(.7,.99-c1.GetTopMargin()-0.05*4,.99-c1.GetRightMargin(),.99-c1.GetTopMargin())
+		leg = ROOT.TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*4,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
 		leg.SetFillColor(ROOT.kWhite)
 		leg.SetLineColor(ROOT.kWhite)
 		leg.AddEntry(plotter.findObject('data'), 'Data','p')
 		leg.AddEntry(plotter.findObject('sum'), 'Sum','l')
-		leg.AddEntry(plotter.findObject('signal'), 'Z+Jets','l')
+		leg.AddEntry(plotter.findObject('signal'), 'Z+jets','l')
 		leg.AddEntry(plotter.findObject('background'), 'Background','l')
 
-		labelcms = ROOT.TPaveText(c1.GetLeftMargin(),1.-c1.GetTopMargin(),0.6,1.05-c1.GetTopMargin(),"NDCBR")
-		labelcms.SetTextAlign(12);
-		labelcms.SetTextSize(0.045);
-		labelcms.SetFillColor(ROOT.kWhite);
-		labelcms.SetFillStyle(0);
-		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
-		labelcms.SetBorderSize(0);
 
 		if doEle:
 			plotter.GetXaxis().SetTitle("M(ee) (GeV)")
@@ -105,9 +141,21 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 			plotter.GetXaxis().SetTitle("M(#mu#mu) (GeV)")
 		plotter.Draw()
 		leg.Draw()
-		labelcms.Draw()
 		plotter.GetYaxis().SetTitleOffset(1.4)
-		c1.SaveAs(plotName)
+		channelText = ""
+		if doMu: channelText = "#mu#mu"
+		if doEle: channelText = "ee"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+		CMS_lumi.CMS_lumi(canvas, 2, 33)
+
+
+		canvas.Update()
+		canvas.RedrawAxis();
+		canvas.Print(plotName, ".png")
+		canvas.Print(plotName.replace('png', 'pdf'), ".pdf")
+
 	print 'fit returned value ',signalFractionVar.getVal(),' +- ',signalFractionVar.getError()
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
 

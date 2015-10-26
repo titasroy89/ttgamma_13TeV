@@ -1,5 +1,31 @@
+import os
 import ROOT
 from math import exp
+
+from Style import *
+
+import CMS_lumi
+ 
+thestyle = Style()
+ 
+HasCMSStyle = False
+style = None
+if os.path.isfile('tdrstyle.C'):
+ 	ROOT.gROOT.ProcessLine('.L tdrstyle.C')
+        ROOT.setTDRStyle()
+        print "Found tdrstyle.C file, using this style."
+        HasCMSStyle = True
+        if os.path.isfile('CMSTopStyle.cc'):
+ 		gROOT.ProcessLine('.L CMSTopStyle.cc+')
+ 		style = CMSTopStyle()
+ 		style.setupICHEPv1()
+ 		print "Found CMSTopStyle.cc file, use TOP style if requested in xml file."
+if not HasCMSStyle:
+ 	print "Using default style defined in cuy package."
+ 	thestyle.SetStyle()
+ 
+ROOT.gROOT.ForceStyle()
+ #############
 
 barrelFileName = 'templates_barrel_scaled.root'
 myfile = None
@@ -170,11 +196,36 @@ def calculateTTGamma():
 	print 'top fraction in MC ',b_top/b_allmc, '  M3 fit:',M3_photon_topFrac
 	
 	ROOT.gStyle.SetOptFit(111)
-	ccc = ROOT.TCanvas('ccc','ccc',800,800)
+	ROOT.gStyle.SetOptStat(0)
+	H = 600; 
+	W = 800; 
+
+	canvas = ROOT.TCanvas('c1','c1',W,H)
+
+
+	# references for T, B, L, R
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvas.SetFillColor(0)
+	canvas.SetBorderMode(0)
+	canvas.SetFrameFillStyle(0)
+	canvas.SetFrameBorderMode(0)
+	canvas.SetLeftMargin( L/W )
+	canvas.SetRightMargin( R/W )
+	canvas.SetTopMargin( T/H )
+	canvas.SetBottomMargin( B/H )
+	canvas.SetTickx(0)
+	canvas.SetTicky(0)
+
 	ttghist.Draw()
 	ttghist.GetXaxis().SetTitle('TTGamma Scale Factor')
 	ttghist.Fit('gaus')
-	ccc.SaveAs('plots/TTGamma_SF_Lkhood.png')
+
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.Print('plots/TTGamma_SF_Lkhood.png', '.png')
+	canvas.Print('plots/TTGamma_SF_Lkhood.pdf', '.pdf')
 	fit = ttghist.GetFunction('gaus')
 	bestttgSFErr = fit.GetParameter(2)
 	
@@ -182,14 +233,18 @@ def calculateTTGamma():
 	vghist.GetXaxis().SetTitle('Vgamma Scale Factor')
 	vghist.SetMinimum(0.0)
 	vghist.Fit('gaus')
-	ccc.SaveAs('plots/Vgamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.Print('plots/Vgamma_SF_Lkhood.png', '.png')
+	canvas.Print('plots/Vgamma_SF_Lkhood.pdf', '.pdf')
 	fit = vghist.GetFunction('gaus')
 	bestVgSFErr = fit.GetParameter(2)
 	
 	jghist.Draw()
 	jghist.GetXaxis().SetTitle('Jet to Photon Scale Factor')
 	jghist.Fit('gaus')
-	ccc.SaveAs('plots/jet_gamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.Print('plots/jet_gamma_SF_Lkhood.png', '.png')
+	canvas.Print('plots/jet_gamma_SF_Lkhood.pdf', '.pdf')
 	fit = jghist.GetFunction('gaus')
 	bestjgSFErr = fit.GetParameter(2)
 	

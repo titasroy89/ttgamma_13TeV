@@ -1,3 +1,4 @@
+import os
 from distribution_mod import distribution
 import ROOT
 import sys
@@ -9,9 +10,34 @@ WJetsSF = 0.0
 TopSF = 1.0
 QCDSF = 0.0
 
+import CMS_lumi
+
 isElectron = False
 isMuon = False
 lep = ''
+
+from Style import *
+
+thestyle = Style()
+ 
+HasCMSStyle = False
+style = None
+if os.path.isfile('tdrstyle.C'):
+ 	ROOT.gROOT.ProcessLine('.L tdrstyle.C')
+        ROOT.setTDRStyle()
+        print "Found tdrstyle.C file, using this style."
+        HasCMSStyle = True
+        if os.path.isfile('CMSTopStyle.cc'):
+ 		gROOT.ProcessLine('.L CMSTopStyle.cc+')
+ 		style = CMSTopStyle()
+ 		style.setupICHEPv1()
+ 		print "Found CMSTopStyle.cc file, use TOP style if requested in xml file."
+if not HasCMSStyle:
+ 	print "Using default style defined in cuy package."
+ 	thestyle.SetStyle()
+ 
+ROOT.gROOT.ForceStyle()
+ #############
 
 if len(sys.argv) > 1:
 	print sys.argv
@@ -63,8 +89,27 @@ def saveTemplatesToFile(templateList, varlist, outFileName):
 	outfile.Close()
 
 def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist, outDirName):
-	canvas = ROOT.TCanvas('c1','c1',640,800)
-	canvas.SetLeftMargin(.14)
+	H = 600; 
+	W = 800; 
+
+	canvas = ROOT.TCanvas('c1','c1',W,H)
+
+
+	# references for T, B, L, R
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvas.SetFillColor(0)
+	canvas.SetBorderMode(0)
+	canvas.SetFrameFillStyle(0)
+	canvas.SetFrameBorderMode(0)
+	canvas.SetLeftMargin( L/W )
+	canvas.SetRightMargin( R/W )
+	canvas.SetTopMargin( T/H )
+	canvas.SetBottomMargin( B/H )
+	canvas.SetTickx(0)
+	canvas.SetTicky(0)
 		
 	latex = ROOT.TLatex()
 	latex.SetNDC()
@@ -78,12 +123,12 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		legend.SetFillColor(ROOT.kWhite)
 		
 		if dataTemplate is not None:
-			legend.AddEntry(dataTemplate.histList[var], dataTemplate.name, 'pl')
+			legend.AddEntry(dataTemplate.histList[var], dataTemplate.legName, 'pl')
 		
 		# MC templates listed in the order they appear in legend
 		for mc in MCTemplateList[::-1]:
 			mcHist = mc.histList[var]
-			legend.AddEntry(mcHist, mc.name, 'f')
+			legend.AddEntry(mcHist, mc.legName, 'f')
 		
 		stack = ROOT.THStack('stack_'+var,var)
 		# reverse order for stack to be consistent with legend
@@ -114,7 +159,7 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		if dataTemplate is not None:
 			stack.GetXaxis().SetTitle(dataTemplate.histList[var].GetXaxis().GetTitle())
 			stack.GetYaxis().SetTitle(dataTemplate.histList[var].GetYaxis().GetTitle())
-			stack.GetYaxis().SetTitleOffset(1.8)
+#			stack.GetYaxis().SetTitleOffset(1.8)
 		stack.SetTitle('')
 
 		if dataTemplate is not None:
@@ -131,18 +176,29 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 			sigHist.Scale(zoom)
 			sigHist.Draw('HISTSAME')
 			if zoom != 1:
-				legend.AddEntry(sigHist, signal.name + ' x ' + str(zoom), 'f')
+				legend.AddEntry(sigHist, signal.legName + ' x ' + str(zoom), 'f')
 			else:
-				legend.AddEntry(sigHist, signal.name, 'f')
+				legend.AddEntry(sigHist, signal.legName, 'f')
 		if 'cut_flow' not in var:
 			legend.Draw()
+
+		channelText = ""
+		if isMuon: channelText = "#mu+jets"
+		if isElectron: channelText = "e+jets"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+
+		CMS_lumi.CMS_lumi(canvas, 2, 11)
+		canvas.Update();
+		canvas.RedrawAxis();
+		canvas.Print(outDirName+'/'+var+".pdf",".pdf");
+		canvas.Print(outDirName+'/'+var+".png",".png");
 		
-		latex.DrawLatex(canvas.GetLeftMargin(),0.94,'CMS Preliminary #sqrt{s} = 8 TeV')
-		canvas.SaveAs(outDirName+'/'+var+'.png')
 		
 def loadDataTemplate(varlist, inputDir, prefix):
 	templPrefix = inputDir+prefix
-	DataTempl = distribution('Data', [
+	DataTempl = distribution('Data', 'Data', [
 		(templPrefix+'Data_a.root', 1),
 		(templPrefix+'Data_b.root', 1),
 		(templPrefix+'Data_c.root', 1),
@@ -164,11 +220,11 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	#	(templPrefix+'WHIZARD.root', TopSF*gSF*TTgamma_xs/WHIZARD_num)
 	#	], varList, 98, fillStyle)
 	
-	MCtemplates['WHIZARD'] = distribution('TTGamma'+titleSuffix, [
+	MCtemplates['WHIZARD'] = distribution('TTGamma'+titleSuffix, 't#bar{t}+#gamma',[
 		(templPrefix+'TTGamma.root', TopSF*gSF*newTTgamma_xs/newTTgamma_num)
 		], varList, 97, fillStyle)
 	
-	MCtemplates['TTJets'] = distribution('TTJets'+titleSuffix, [
+	MCtemplates['TTJets'] = distribution('TTJets'+titleSuffix, 't#bar{t}+jets',[
 		(templPrefix+'TTJets1l.root', TopSF*gSF*TTJets1l_xs/TTJets1l_num),
 		(templPrefix+'TTJets2l.root', TopSF*gSF*TTJets2l_xs/TTJets2l_num),
 		(templPrefix+'TTJetsHad.root', TopSF*gSF*TTJetsHad_xs/TTJetsHad_num),
@@ -180,17 +236,17 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	nonWJetsSF = 1.0
 	#nonWJetsSF = WJetsSF
 	
-	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, [
+	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, 'W+#gamma', [
         (templPrefix+'Wgamma.root', nonWJetsSF*gSF*Wgamma_xs/Wgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
         ], varList, 90, fillStyle)
 
-	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, [
+	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, 'Z+#gamma', [
         (templPrefix+'Zgamma.root', nonWJetsSF*gSF*Zgamma_xs/Zgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
         ], varList, 90, fillStyle)
 
-	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, [
+	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, 'Single Top', [
 		(templPrefix+'SingleT_t.root',      nonWJetsSF*gSF*SingTopT_xs/SingTopT_num),
         (templPrefix+'SingleT_s.root',      nonWJetsSF*gSF*SingTopS_xs/SingTopS_num),
         (templPrefix+'SingleT_tw.root',     nonWJetsSF*gSF*SingToptW_xs/SingToptW_num),
@@ -199,13 +255,13 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
         (templPrefix+'SingleTbar_tw.root',  nonWJetsSF*gSF*SingTopbartW_xs/SingTopbartW_num),
 		], varList, 8, fillStyle)
 	
-	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, [
+	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, 'W+jets', [
         #(templPrefix+'WJets.root', WJetsSF*gSF*WJets_xs/WJets_num),
 		(templPrefix+'W3Jets.root', WJetsSF*gSF*W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', WJetsSF*gSF*W4Jets_xs/W4Jets_num),
 		], varList, 7, fillStyle)
 		
-	MCtemplates['ZJets'] = distribution('ZJets'+titleSuffix, [
+	MCtemplates['ZJets'] = distribution('ZJets'+titleSuffix, 'Z+jets', [
 		(templPrefix+'ZJets.root', nonWJetsSF*gSF*ZJets_xs/ZJets_num)], varList, 9, fillStyle)
 
 	

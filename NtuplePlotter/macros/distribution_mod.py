@@ -29,10 +29,10 @@ class distribution:
 			self.histList[histName].SetBinError(nBins, (lastBinErr**2 + overFlowErr**2)**0.5)
 
 
-	def __init__(self, name, inputFilesAndScales, histNameList, color=0, style=1001):
+	def __init__(self, name, legName, inputFilesAndScales, histNameList, color=0, style=1001):
 		self.name = name
+		self.legName = legName
 		self.histList = {}
-
 		for files,scale in inputFilesAndScales:
 			for filename in glob.glob(files):
 				print 'reading file ',filename

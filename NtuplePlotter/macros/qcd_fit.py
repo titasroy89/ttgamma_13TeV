@@ -11,6 +11,10 @@ setOtherMCconstantM3 = False
 
 M3BinWidth = 40.
 
+import CMS_lumi
+isElectron = False
+isMuon = False
+
 def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName='', savePlots = True):
 	# RooFit variables
 	sihihVar = RooRealVar(varname, varname, varmin, varmax)
@@ -45,7 +49,25 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 	
 	if plotName!='' and savePlots:
 		# plot results
-		c1 = TCanvas('c1', 'c1', 800, 600)
+		H = 600; 
+		W = 800; 
+
+		canvas = TCanvas('c1','c1',W,H)
+		T = 0.08*H
+		B = 0.12*H 
+		L = 0.12*W
+		R = 0.04*W
+		canvas.SetFillColor(0)
+		canvas.SetBorderMode(0)
+		canvas.SetFrameFillStyle(0)
+		canvas.SetFrameBorderMode(0)
+		canvas.SetLeftMargin( L/W )
+		canvas.SetRightMargin( R/W )
+		canvas.SetTopMargin( T/H )
+		canvas.SetBottomMargin( B/H )
+		canvas.SetTickx(0)
+		canvas.SetTicky(0)
+		
 		plotter = RooPlot('myplot','',sihihVar,varmin,varmax,20) # nBins is dummy
 		dataDataHist.plotOn(plotter, RooFit.Name('data'))
 		sumPdf.plotOn(plotter, RooFit.Name('sum'), RooFit.LineColor(kRed))
@@ -53,9 +75,10 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 			RooFit.LineColor(50))
 		sumPdf.plotOn(plotter, RooFit.Components('backgroundPdf'), RooFit.Name('background'), 
 			RooFit.LineColor(kBlue))
-		sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-c1.GetRightMargin(),.96-c1.GetTopMargin())) # fix
+		# sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-canvas.GetRightMargin(),.96-canvas.GetTopMargin())) # fix
 
-		leg = TLegend(.7,.55,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()-.1)
+#		leg = TLegend(.7,.55,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.1)
+		leg = TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*5,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
 		leg.SetFillColor(kWhite)
 		leg.SetLineColor(kWhite)
 		leg.AddEntry(plotter.findObject('data'), 'Data','p')
@@ -63,24 +86,28 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 		leg.AddEntry(plotter.findObject('background'), 'Monte Carlo','l')
 		leg.AddEntry(plotter.findObject('signal'), 'QCD','l')
 
-		labelcms = TPaveText(0.14,1.-c1.GetTopMargin(),0.6,1.05-c1.GetTopMargin(),"NDCBR")
-		labelcms.SetTextAlign(12);
-		labelcms.SetTextSize(0.045);
-		labelcms.SetFillColor(kWhite);
-		labelcms.SetFillStyle(0);
-		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
-		labelcms.SetBorderSize(0);
-
 
 #		c1.SetTickx(0)
 #		c1.SetTicky(0)
 		plotter.Draw()
 		plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("MET (GeV)")
+		plotter.GetYaxis().SetTitle("Events / 5 GeV")
 		leg.Draw()
-		labelcms.Draw()
-		c1.SaveAs(plotName)
-		c1.SaveAs(plotName.replace('png', 'pdf'))
+
+		channelText = ""
+		if isMuon: channelText = "#mu+jets"
+		if isElectron: channelText = "e+jets"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+		CMS_lumi.CMS_lumi(canvas, 2, 33)
+
+
+		canvas.Update()
+		canvas.RedrawAxis();
+		canvas.Print(plotName, ".png")
+		canvas.Print(plotName.replace('png', 'pdf'), ".pdf")
         
 	print 'fit returned value ',signalFractionVar.getVal(),' +- ',signalFractionVar.getError()
 	return (signalFractionVar.getVal(),signalFractionVar.getError())
@@ -159,7 +186,25 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 
         if plotName!='':
                 # plot results
-                c1 = TCanvas('c1', 'c1', 800, 600)
+		H = 600; 
+		W = 800; 
+
+		canvas = TCanvas('c1','c1',W,H)
+		T = 0.08*H
+		B = 0.12*H 
+		L = 0.12*W
+		R = 0.04*W
+		canvas.SetFillColor(0)
+		canvas.SetBorderMode(0)
+		canvas.SetFrameFillStyle(0)
+		canvas.SetFrameBorderMode(0)
+		canvas.SetLeftMargin( L/W )
+		canvas.SetRightMargin( R/W )
+		canvas.SetTopMargin( T/H )
+		canvas.SetBottomMargin( B/H )
+		canvas.SetTickx(0)
+		canvas.SetTicky(0)
+
                 plotter = RooPlot('myplot','',sihihVar,varmin,varmax,20) # nBins is dummy
                 dataDataHist.plotOn(plotter, RooFit.Name('data'))
                 sumPdf.plotOn(plotter, RooFit.Name('sum'), RooFit.LineColor(kRed))
@@ -173,10 +218,11 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 sumPdf.plotOn(plotter, RooFit.Components('qcdPdf'), RooFit.Name('qcd'),
                     RooFit.LineColor(50))
 
-#		sumPdf.paramOn(plotter,RooFit.Layout(0.5,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()), RooFit.FillColor(kWhite)) # fix
-		sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-c1.GetRightMargin(),.96-c1.GetTopMargin())) # fix
+#		sumPdf.paramOn(plotter,RooFit.Layout(0.5,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()), RooFit.FillColor(kWhite)) # fix
+#		sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-canvas.GetRightMargin(),.96-canvas.GetTopMargin())) # fix
 
-		leg = TLegend(.7,.48,.99-c1.GetRightMargin(),.99-c1.GetTopMargin()-.17)
+#		leg = TLegend(.7,.48,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.17)
+		leg = TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*6,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
 		leg.SetFillColor(kWhite)
 		leg.SetLineColor(kWhite)
 		leg.AddEntry(plotter.findObject('data'), 'Data','p')
@@ -186,23 +232,29 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 		leg.AddEntry(plotter.findObject('otherMC'), 'Other MC','l')
 		leg.AddEntry(plotter.findObject('qcd'), 'QCD','l')
 
-		labelcms = TPaveText(0.14,0.92,0.6,1.0,"NDCBR")
-		labelcms.SetTextAlign(12);
-		labelcms.SetTextSize(0.045);
-		labelcms.SetFillColor(kWhite);
-		labelcms.SetFillStyle(0);
-		labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV");
-		labelcms.SetBorderSize(0);
 
 		print 'chi2 = ',plotter.chiSquare('sum','data')
+
 
                 plotter.Draw()
                 plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("M3 (GeV)")
+		plotter.GetYaxis().SetTitle("Events / 10 GeV")
 		leg.Draw()
-		labelcms.Draw()
-                c1.SaveAs(plotName)
-                c1.SaveAs(plotName.replace('png','pdf'))
+
+		channelText = ""
+		if isMuon: channelText = "#mu+jets"
+		if isElectron: channelText = "e+jets"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+
+		CMS_lumi.CMS_lumi(canvas, 2, 33)
+
+		canvas.Update()
+		canvas.RedrawAxis();
+		canvas.Print(plotName, ".png")
+		canvas.Print(plotName.replace('png', 'pdf'), ".pdf")
         print 'fit returned value signal:',signalVar.getVal(),' +- ',signalVar.getError()
         
         return (signalVar.getVal(),signalVar.getError(),   bkgVar.getVal(),bkgVar.getError(), otherMCVar.getVal(),otherMCVar.getError(),qcdVar.getVal(),qcdVar.getError())

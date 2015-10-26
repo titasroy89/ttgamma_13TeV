@@ -12,6 +12,7 @@ import mcEventsTable
 ROOT.gROOT.SetBatch()
 #########
 #Style
+import CMS_lumi
 from Style import *
  
 thestyle = Style()
@@ -169,7 +170,28 @@ def saveTemplatesToFile(templateList, varlist, outFileName):
 	outfile.Close()
 
 def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist, outDirName):
-	canvas = ROOT.TCanvas('c1','c1',640,800)
+
+	H = 600; 
+	W = 800; 
+
+	canvas = ROOT.TCanvas('c1','c1',W,H)
+
+
+	# references for T, B, L, R
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvas.SetFillColor(0)
+	canvas.SetBorderMode(0)
+	canvas.SetFrameFillStyle(0)
+	canvas.SetFrameBorderMode(0)
+	canvas.SetLeftMargin( L/W )
+	canvas.SetRightMargin( R/W )
+	canvas.SetTopMargin( T/H )
+	canvas.SetBottomMargin( B/H )
+	canvas.SetTickx(0)
+	canvas.SetTicky(0)
 	
 	latex = ROOT.TLatex()
 	latex.SetNDC()
@@ -180,15 +202,15 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 	for var in varlist:
 		legend = ROOT.TLegend(0.71, 1 - 0.05*(1 + len(MCTemplateList) + len(SignalTemplateZoomList)), 0.95, 0.93)
 		legend.SetBorderSize(0)
-		legend.SetFillColor(10)
+		legend.SetFillColor(ROOT.kWhite)
 		
 		if dataTemplate is not None:
-			legend.AddEntry(dataTemplate.histList[var], dataTemplate.name, 'pl')
+			legend.AddEntry(dataTemplate.histList[var], dataTemplate.legName, 'pl')
 		
 		# MC templates listed in the order they appear in legend
 		for mc in MCTemplateList:
 			mcHist = mc.histList[var]
-			legend.AddEntry(mcHist, mc.name, 'f')
+			legend.AddEntry(mcHist, mc.legName, 'f')
 		
 		stack = ROOT.THStack('stack_'+var,var)
 		# reverse order for stack to be consistent with legend
@@ -235,21 +257,37 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 			sigHist.Scale(zoom)
 			sigHist.Draw('HISTSAME')
 			if zoom != 1:
-				legend.AddEntry(sigHist, signal.name + ' x ' + str(zoom), 'f')
+				legend.AddEntry(sigHist, signal.legName + ' x ' + str(zoom), 'f')
 			else:
-				legend.AddEntry(sigHist, signal.name, 'f')
+				legend.AddEntry(sigHist, signal.legName, 'f')
 		if 'cut_flow' not in var:
 			legend.Draw()
 	
                	ROOT.TGaxis.SetMaxDigits(3)	
-		latex.DrawLatex(0.3,0.93,'#splitline{L=19.7 fb^{-1} #sqrt{s} = 8 TeV}{CMS Preliminary}')
+
+		channelText = ""
+		if isMuon: channelText = "#mu+jets"
+		if isElectron: channelText = "e+jets"
+
+		CMS_lumi.extraText = channelText
+		CMS_lumi.writeExtraText = True
+
+		CMS_lumi.CMS_lumi(canvas, 2, 11)
+
+
 
 		if not isSyst:
-			canvas.SaveAs(outDirName+'/'+var+'.png')
+			canvas.Update();
+			canvas.RedrawAxis();
+#			canvas.GetFrame().Draw();
+
+			canvas.Print(outDirName+'/'+var+".pdf",".pdf");
+			canvas.Print(outDirName+'/'+var+".png",".png");
+
 		
 def loadDataTemplate(varlist, inputDir, prefix):
 	templPrefix = inputDir+prefix
-	DataTempl = distribution('Data', [
+	DataTempl = distribution('Data', 'Data', [
 		(templPrefix+'Data_a.root', 1),
 		(templPrefix+'Data_b.root', 1),
 		(templPrefix+'Data_c.root', 1),
@@ -260,7 +298,7 @@ def loadDataTemplate(varlist, inputDir, prefix):
 def loadQCDTemplate(varlist, inputDir, prefix):
 	templPrefix = inputDir+prefix
 	QCD_sf = QCDSF
-	QCDTempl = distribution('QCD', [
+	QCDTempl = distribution('QCD', 'QCD', [
 		(templPrefix+'Data_a.root', QCD_sf),
 		(templPrefix+'Data_b.root', QCD_sf),
 		(templPrefix+'Data_c.root', QCD_sf),
@@ -295,11 +333,11 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	#	(templPrefix+'WHIZARD.root', TopSF*gSF*TTgamma_xs/WHIZARD_num)
 	#	], varList, 98, fillStyle)
 	
-	MCtemplates['WHIZARD'] = distribution('TTGamma'+titleSuffix, [
+	MCtemplates['WHIZARD'] = distribution('TTGamma'+titleSuffix, 't#bar{t}+#gamma', [
 		(templPrefix+'TTGamma.root', TopSF*gSF*newTTgamma_xs/newTTgamma_num)
 		], varList, ROOT.kRed +1, fillStyle)
 	
-	MCtemplates['TTJets'] = distribution('TTJets'+titleSuffix, [
+	MCtemplates['TTJets'] = distribution('TTJets'+titleSuffix, 't#bar{t}+jets', [
 		(templPrefix+'TTJets1l.root', TopSF*gSF*TTJets1l_xs/TTJets1l_num),
 		(templPrefix+'TTJets2l.root', TopSF*gSF*TTJets2l_xs/TTJets2l_num),
 		(templPrefix+'TTJetsHad.root', TopSF*gSF*TTJetsHad_xs/TTJetsHad_num),
@@ -309,21 +347,21 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	###################################
 	nonWJetsSF = 1.0
 		
-	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, [
+	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, 'V+#gamma', [
         (templPrefix+'Zgamma.root', otherMCSF*gSF*Zgamma_xs/Zgamma_num),
         (templPrefix+'Wgamma.root', otherMCSF*WgammaSF*gSF*Wgamma_xs/Wgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
         ], varList, ROOT.kGray, fillStyle)
 
-	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, [
+	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, 'Z+#gamma', [
         (templPrefix+'Zgamma.root', otherMCSF*gSF*Zgamma_xs/Zgamma_num),
         ], varList, ROOT.kAzure+3, fillStyle)
 
-	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, [
+	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, 'W+#gamma', [
         (templPrefix+'Wgamma.root', otherMCSF*WgammaSF*gSF*Wgamma_xs/Wgamma_num),
         ], varList, ROOT.kGray, fillStyle)
 
-	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, [
+	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, 'Single Top', [
 		(templPrefix+'SingleT_t.root',      otherMCSF*gSF*SingTopT_xs/SingTopT_num),
         (templPrefix+'SingleT_s.root',      otherMCSF*gSF*SingTopS_xs/SingTopS_num),
         (templPrefix+'SingleT_tw.root',     otherMCSF*gSF*SingToptW_xs/SingToptW_num),
@@ -332,7 +370,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
         (templPrefix+'SingleTbar_tw.root',  otherMCSF*gSF*SingTopbartW_xs/SingTopbartW_num),
 		], varList, ROOT.kMagenta, fillStyle)
 	
-	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, [
+	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, 'W+jets', [
         #(templPrefix+'WJets.root', WJetsSF*gSF*WJets_xs/WJets_num),
 #		(templPrefix+'W2Jets.root', WJetsSF*gSF*W2Jets_xs/W2Jets_num),
 		(templPrefix+'W3Jets.root', WJetsSF*gSF*W3Jets_xs/W3Jets_num),
@@ -340,7 +378,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 		], varList, ROOT.kGreen -3, fillStyle)
 
 	######## Added back in the ZJetsSF scaling ######## 
-	MCtemplates['ZJets'] = distribution('ZJets'+titleSuffix, [
+	MCtemplates['ZJets'] = distribution('ZJets'+titleSuffix, 'Z+jets', [
 		(templPrefix+'ZJets.root',ZJetsSF*otherMCSF*gSF*ZJets_xs/ZJets_num)], varList, ROOT.kAzure-2, fillStyle)
 	return MCtemplates
 
@@ -348,20 +386,20 @@ def saveAccTemplates(inputDir, outFileName):
 	varList = ['MCcategory']
 	AccTemplates = {}
 	
-	AccTemplates['TTGamma'] = distribution('TTGamma_signal', [
+	AccTemplates['TTGamma'] = distribution('TTGamma_signal', '',[
 		(inputDir+'hist_1pho_rs_barrel_top_TTGamma.root', 1.0),
 		], varList, 97)
 		
-	AccTemplates['TTGamma_presel'] = distribution('TTGamma_presel', [
+	AccTemplates['TTGamma_presel'] = distribution('TTGamma_presel', '',[
 		(inputDir+'hist_1pho_top_TTGamma.root', 1.0),
 		], varList, 97)
-	AccTemplates['TTJets1l'] = distribution('TTJets1l_presel', [
+	AccTemplates['TTJets1l'] = distribution('TTJets1l_presel', '',[
 		(inputDir+'hist_1pho_top_TTJets1l.root', 1.0),
 		], varList ,11)
-	AccTemplates['TTJets2l'] = distribution('TTJets2l_presel', [
+	AccTemplates['TTJets2l'] = distribution('TTJets2l_presel', '',[
 		(inputDir+'hist_1pho_top_TTJets2l.root', 1.0),
 		], varList ,11)
-	AccTemplates['TTJetsHad'] = distribution('TTJetsHad_presel', [
+	AccTemplates['TTJetsHad'] = distribution('TTJetsHad_presel', '',[
 		(inputDir+'hist_1pho_top_TTJetsHad.root', 1.0),
 		], varList ,11)
 	

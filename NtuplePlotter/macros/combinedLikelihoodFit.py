@@ -9,7 +9,10 @@ mu_directory = "/uscms_data/d3/troy2012/ttgamma_muons/TTGammaSemiLep/NtuplePlott
 
 mu_directory = "/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/MuPlots/"
 
-barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3.root'
+e_directory = "/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/ratioFiles_ele/"
+mu_directory = "/uscms_data/d2/dnoonan/TTGammaElectrons/NtuplePlotter/macros/ratioFiles_mu/"
+
+barrelFileName_M3fitscaled = 'templates_barrel_scaled_afterPhotonM3_nominal.root'
 
 combined_ttgammaSig, combined_ttgammaSigErr, bestttgSF, bestttgSFErr, bestvgSF, bestvgSFErr, bestjgSF, bestjgSFErr  = 1,1,1,1,1,1,1,1
 
@@ -277,7 +280,28 @@ def calculateTTGamma():
 	out.Close()
 
 	ROOT.gStyle.SetOptFit(111)
-	ccc = ROOT.TCanvas('ccc','ccc',800,800)
+	ROOT.gStyle.SetOptStat(0)
+	H = 600; 
+	W = 800; 
+
+	canvas = ROOT.TCanvas('c1','c1',W,H)
+
+
+	# references for T, B, L, R
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvas.SetFillColor(0)
+	canvas.SetBorderMode(0)
+	canvas.SetFrameFillStyle(0)
+	canvas.SetFrameBorderMode(0)
+	canvas.SetLeftMargin( L/W )
+	canvas.SetRightMargin( R/W )
+	canvas.SetTopMargin( T/H )
+	canvas.SetBottomMargin( B/H )
+	canvas.SetTickx(0)
+	canvas.SetTicky(0)
 
 	ttghist.Draw()
 	# ttghist.GetXaxis().SetTitle('TTGamma Scale Factor')
@@ -291,52 +315,64 @@ def calculateTTGamma():
 	vghist.SetMinimum(0.0)
 	vghist.Fit('gaus')
 	fit = vghist.GetFunction('gaus')
-	ccc.SaveAs('Vgamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.Print('plots/Vgamma_SF_Lkhood.png', '.png')
+	canvas.Print('plots/Vgamma_SF_Lkhood.pdf', '.pdf')
 	bestVgSFErr = fit.GetParameter(2)
 	
 	jghist.Draw()
 	jghist.GetXaxis().SetTitle('Jet to Photon Scale Factor')
 	jghist.Fit('gaus')
 	fit = jghist.GetFunction('gaus')
-	ccc.SaveAs('jet_gamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.Print('plots/jet_gamma_SF_Lkhood.png', '.png')
+	canvas.Print('plots/jet_gamma_SF_Lkhood.pdf', '.pdf')
 	bestjgSFErr = fit.GetParameter(2)
 
 	ttghist.Draw()
 	ttghist.GetXaxis().SetTitle('TTGamma Scale Factor')
 	ttghist.Fit('gaus')
-	ccc.SaveAs('TTGamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.Print('plots/TTGamma_SF_Lkhood.png', '.png')
+	canvas.Print('plots/TTGamma_SF_Lkhood.pdf', '.pdf')
 	fit = ttghist.GetFunction('gaus')
 	bestttgSFErr = fit.GetParameter(2)
 
 	ttghist_2.Draw()
 	ttghist_2.GetXaxis().SetTitle('TTGamma Scale Factor')
 	ttghist_2.Fit('gaus')
-	ccc.SaveAs('TTGamma_SF_Lkhood_2.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.SaveAs('TTGamma_SF_Lkhood_2.png')
 
 	vghist_2.Draw()
 	vghist_2.GetXaxis().SetTitle('VGamma Scale Factor')
 	vghist_2.Fit('gaus')
-	ccc.SaveAs('Vgamma_SF_Lkhood_2.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.SaveAs('Vgamma_SF_Lkhood_2.png')
 
 	jghist_2.Draw()
 	jghist_2.GetXaxis().SetTitle('Jet To Photon Scale Factor')
 	jghist_2.Fit('gaus')
-	ccc.SaveAs('jet_gamma__SF_Lkhood_2.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.SaveAs('jet_gamma__SF_Lkhood_2.png')
 	
 	ttg_vg_hist.Draw("lego")
 	ttg_vg_hist.GetXaxis().SetTitle('TTGamma Scale Factor')
 	ttg_vg_hist.GetYaxis().SetTitle('VGamma Scale Factor')
-	ccc.SaveAs('TTGamma_VGamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	cavas.SaveAs('TTGamma_VGamma_SF_Lkhood.png')
 
 	vg_jg_hist.Draw("lego")
 	vg_jg_hist.GetXaxis().SetTitle('VGamma Scale Factor')
 	vg_jg_hist.GetYaxis().SetTitle('Jet To Photon Scale Factor')
-	ccc.SaveAs('VGamma_jetToGamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.SaveAs('VGamma_jetToGamma_SF_Lkhood.png')
 
 	jg_ttg_hist.Draw("lego")
 	jg_ttg_hist.GetXaxis().SetTitle('Jet To Photon Scale Factor')
 	jg_ttg_hist.GetYaxis().SetTitle('TTGamma Scale Factor')
-	ccc.SaveAs('jetToGamma_TTGamma_SF_Lkhood.png')
+	CMS_lumi.CMS_lumi(canvas, 2, 11)
+	canvas.SaveAs('jetToGamma_TTGamma_SF_Lkhood.png')
 	
 	ttgammaSig = bestttgSF*(e_pho['TTGamma'][0]+mu_pho['TTGamma'][0])
 	ttgammaSigErr = bestttgSFErr*(e_pho['TTGamma'][0]+mu_pho['TTGamma'][0])

@@ -53,7 +53,7 @@ print
 print result_ele
 
 
-likelihoodCombination.e_data['photnPurityErr'] = 0.0000000001
+likelihoodCombination.e_data['photnPurityErr'] = 1e-99
 result_photn_fixed_ele = likelihoodCombination.calculateTTGamma(eFile, muFile, efficiencies,saveFitPlots = False, verbose = False, progressBar = True)
 likelihoodCombination.e_data['photnPurityErr'] = e_photnPurityErr
 print
@@ -62,7 +62,7 @@ print
 print result_photn_fixed_ele
 print
 
-likelihoodCombination.e_data['M3_photon_topFracErr'] = 0.0000000001
+likelihoodCombination.e_data['M3_photon_topFracErr'] = 1e-99
 result_topFrac_fixed_ele = likelihoodCombination.calculateTTGamma(eFile, muFile, efficiencies,saveFitPlots = False, verbose = False, progressBar = True)
 likelihoodCombination.e_data['M3_photon_topFracErr'] = e_M3_photon_topFracErr
 print
@@ -71,7 +71,7 @@ print
 print result_topFrac_fixed_ele
 print
 
-likelihoodCombination.e_data['NdataErr'] = 0.0000000001
+likelihoodCombination.e_data['NdataErr'] = 1e-99
 result_Ndata_fixed_ele = likelihoodCombination.calculateTTGamma(eFile, muFile, efficiencies,saveFitPlots = False, verbose = False, progressBar = True)
 likelihoodCombination.e_data['NdataErr'] = e_NdataErr
 print
@@ -99,7 +99,7 @@ print
 print result_mu
 
 
-likelihoodCombination.mu_data['photnPurityErr'] = 0.0000000001
+likelihoodCombination.mu_data['photnPurityErr'] = 1e-99
 result_photn_fixed_mu = likelihoodCombination.calculateTTGamma(eFile, muFile, efficiencies,saveFitPlots = False, verbose = False, progressBar = True)
 likelihoodCombination.mu_data['photnPurityErr'] = mu_photnPurityErr
 print
@@ -108,7 +108,7 @@ print
 print result_photn_fixed_mu
 print
 
-likelihoodCombination.mu_data['M3_photon_topFracErr'] = 0.0000000001
+likelihoodCombination.mu_data['M3_photon_topFracErr'] = 1e-99
 result_topFrac_fixed_mu = likelihoodCombination.calculateTTGamma(eFile, muFile, efficiencies,saveFitPlots = False, verbose = False, progressBar = True)
 likelihoodCombination.mu_data['M3_photon_topFracErr'] = mu_M3_photon_topFracErr
 print
@@ -117,7 +117,7 @@ print
 print result_topFrac_fixed_mu
 print
 
-likelihoodCombination.mu_data['NdataErr'] = 0.0000000001
+likelihoodCombination.mu_data['NdataErr'] = 1e-99
 result_Ndata_fixed_mu = likelihoodCombination.calculateTTGamma(eFile, muFile, efficiencies,saveFitPlots = False, verbose = False, progressBar = True)
 likelihoodCombination.mu_data['NdataErr'] = mu_NdataErr
 print
@@ -144,6 +144,6 @@ total_mu = result_mu[2][0][1]
 photn_mu = result_photn_fixed_mu[2][0][1]
 topfrac_mu = result_topFrac_fixed_mu[2][0][1]
 nData_mu = result_Ndata_fixed_mu[2][0][1]
-print 'e photon:', (total_mu**2 - photn_mu**2)**0.5
-print 'e topFrac:', (total_mu**2 - topfrac_mu**2)**0.5
-print 'e nData:', (total_mu**2 - nData_mu**2)**0.5
+print 'mu photon:', (total_mu**2 - photn_mu**2)**0.5
+print 'mu topFrac:', (total_mu**2 - topfrac_mu**2)**0.5
+print 'mu nData:', (total_mu**2 - nData_mu**2)**0.5
