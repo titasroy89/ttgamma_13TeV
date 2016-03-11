@@ -14,6 +14,7 @@ M3BinWidth = 40.
 import CMS_lumi
 isElectron = False
 isMuon = False
+TGaxis.SetMaxDigits(3)
 
 def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName):
 	# RooFit variables
@@ -78,14 +79,16 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 #		sumPdf.paramOn(plotter) # fix
 
 		plotter.Draw()
-		plotter.GetYaxis().SetTitleOffset(1.4)
+#		plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("M3 (GeV)")
+		plotter.GetYaxis().SetTitle("Events / 40 GeV")
 		channelText = ""
 		if isMuon: channelText = "#mu+jets"
 		if isElectron: channelText = "e+jets"
 
-		CMS_lumi.extraText = channelText
+		CMS_lumi.channelText = channelText
 		CMS_lumi.writeExtraText = True
+		CMS_lumi.writeChannelText = True
 		CMS_lumi.CMS_lumi(canvas, 2, 33)
 
 
@@ -128,10 +131,18 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 qcdfname = ' qcd total'
                 otherMCfname = 'other MC total'
 
-	signalIntegral   = signalHist.Integral()
-	bkgIntegral      = backgroundHist.Integral()
-	qcdIntegral      = qcdHist.Integral()
-	otherMCIntegral  = otherMCHist.Integral()
+        lowfitBin = dataHist.FindBin(varmin+0.01)
+        highfitBin = dataHist.FindBin(varmax-0.01)
+
+	signalIntegral   = signalHist.Integral(lowfitBin, highfitBin)
+        bkgIntegral      = backgroundHist.Integral(lowfitBin, highfitBin)
+        qcdIntegral      = qcdHist.Integral(lowfitBin, highfitBin)
+        otherMCIntegral  = otherMCHist.Integral(lowfitBin, highfitBin)
+	# signalIntegral   = signalHist.Integral()
+	# bkgIntegral      = backgroundHist.Integral()
+	# qcdIntegral      = qcdHist.Integral()
+	# otherMCIntegral  = otherMCHist.Integral()
+
         signalVar = RooRealVar(sfname,sfname, signalIntegral,0.,5.*signalIntegral)
         bkgVar = RooRealVar(bkgfname,bkgfname, bkgIntegral,0.,5.*bkgIntegral)
         qcdVar = RooRealVar(qcdfname,qcdfname, qcdIntegral,0.5*qcdIntegral,1.5*qcdIntegral)
@@ -197,6 +208,7 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 #		sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-c1.GetRightMargin(),.96-c1.GetTopMargin())) # fix
 
 		leg = TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*6,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
+		leg = TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*5,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
 		leg.SetFillColor(kWhite)
 		leg.SetLineColor(kWhite)
 		leg.AddEntry(plotter.findObject('data'), 'Data','p')
@@ -207,7 +219,7 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 		leg.AddEntry(plotter.findObject('qcd'), 'QCD','l')
 
                 plotter.Draw()
-                plotter.GetYaxis().SetTitleOffset(1.4)
+#                plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("M3 (GeV)")
 		plotter.GetYaxis().SetTitle("Events / 40 GeV")
 		leg.Draw()
@@ -216,8 +228,9 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 		if isMuon: channelText = "#mu+jets"
 		if isElectron: channelText = "e+jets"
 
-		CMS_lumi.extraText = channelText
+		CMS_lumi.channelText = channelText
 		CMS_lumi.writeExtraText = True
+		CMS_lumi.writeChannelText = True
 		CMS_lumi.CMS_lumi(canvas, 2, 33)
 
 
@@ -317,7 +330,7 @@ def makenewFit_3templates(varname, varmin, varmax, signalHist, backgroundHist, o
 
 #		sumPdf.paramOn(plotter,RooFit.Layout(0.49,.97-c1.GetRightMargin(),.96-c1.GetTopMargin())) # fix
 
-		leg = TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*4,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
+		leg = TLegend(.7,.99-canvas.GetTopMargin()-.2-0.05*5,.99-canvas.GetRightMargin(),.99-canvas.GetTopMargin()-.2)
 		leg.SetFillColor(kWhite)
 		leg.SetLineColor(kWhite)
 		leg.AddEntry(plotter.findObject('data'), 'Data','p')
@@ -327,16 +340,18 @@ def makenewFit_3templates(varname, varmin, varmax, signalHist, backgroundHist, o
 		leg.AddEntry(plotter.findObject('otherMC'), 'Other MC','l')
 
                 plotter.Draw()
-                plotter.GetYaxis().SetTitleOffset(1.4)
+#                plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("M3 (GeV)")
+		plotter.GetYaxis().SetTitle("Events / 40 GeV")
 		leg.Draw()
 
 		channelText = ""
 		if isMuon: channelText = "#mu+jets"
 		if isElectron: channelText = "e+jets"
 
-		CMS_lumi.extraText = channelText
+		CMS_lumi.channelText = channelText
 		CMS_lumi.writeExtraText = True
+		CMS_lumi.writeChannelText = True
 		CMS_lumi.CMS_lumi(canvas, 2, 33)
 
 
@@ -403,7 +418,7 @@ def makenewFit_2templates(varname, varmin, varmax, signalHist, backgroundHist, d
                 sumPdf.paramOn(plotter) # fix
 
                 plotter.Draw()
-                plotter.GetYaxis().SetTitleOffset(1.4)
+#                plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("GeV")
                 c1.SaveAs(plotName)
 
@@ -534,9 +549,9 @@ def doM3fit_photon():
         otherMCHist.Rebin(binRebin)
 	QCDHist.Rebin(binRebin)
 
-	(m3Top, m3TopErr,m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr, m3QCD, m3QCDerr) = makenewFit(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, WJetsHist,otherMCHist, QCDHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
-        lowfitBin = DataHist.FindBin(0.01)
-        highfitBin = DataHist.FindBin(799.99)
+	(m3Top, m3TopErr,m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr, m3QCD, m3QCDerr) = makenewFit(varToFit+'(GeV), photon selection', 40.0,600.0, TopHist, WJetsHist,otherMCHist, QCDHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
+        lowfitBin = DataHist.FindBin(40.01)
+        highfitBin = DataHist.FindBin(599.99)
 
         dataInt = DataHist.Integral(lowfitBin,highfitBin)
         topInt = TopHist.Integral(lowfitBin,highfitBin)
@@ -546,6 +561,8 @@ def doM3fit_photon():
         TopSF = m3Top/ topInt
         TopSFerror = m3TopErr/ topInt
 
+	print dataInt
+	print
 	print
 	print '#'*80
 	print 'Total amount of Top events in fit:', m3Top, '+-', m3TopErr
@@ -633,13 +650,20 @@ def doM3fit_photon_3Templates():
 
 	DataHist.Rebin(binRebin)
 	TopHist.Rebin(binRebin)
-	WgHist.Rebin(binRebin)
+	WHist.Rebin(binRebin)
         otherMCHist.Rebin(binRebin)
 
-	(m3Top, m3TopErr,m3Wboson, m3WbosonErr, m3otherMC, m3otherMCerr) = makenewFit_3templates(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, WHist,otherMCHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
+	print '!@#$%', DataHist.Integral()
 
-        lowfitBin = DataHist.FindBin(0.01)
-        highfitBin = DataHist.FindBin(799.99)
+	varmin = 40.
+	varmax = 600.
+	(m3Top, m3TopErr,m3Wboson, m3WbosonErr, m3otherMC, m3otherMCerr) = makenewFit_3templates(varToFit+'(GeV), photon selection', varmin,varmax, TopHist, WHist,otherMCHist, DataHist, 'plots/'+varToFit+'_photon_fit.png')
+
+        lowfitBin = DataHist.FindBin(varmin+.01)
+        highfitBin = DataHist.FindBin(varmax-.01)
+
+	print lowfitBin
+	print highfitBin
 
         dataInt = DataHist.Integral(lowfitBin,highfitBin)
         topInt = TopHist.Integral(lowfitBin,highfitBin)
@@ -661,6 +685,10 @@ def doM3fit_photon_3Templates():
 	m3_topFracErr = m3TopErr/totMC	
 
 
+	print dataInt
+	print m3Top
+	print totMC
+	print m3_topFrac
 	print
 	print '#'*80
 	print 'Total amount of Top events in fit:', m3Top, '+-', m3TopErr
@@ -692,6 +720,7 @@ def doM3fit_photon_2Templates():
 
 	varToFit = 'M3'
 	DataHist = get1DHist(M3file_photon, 'Data_'+varToFit)
+
 	
 	# ttjets and ttgamma shapes after photon selection
 	TopHist = get1DHist(M3file_photon, 'TTJets_'+varToFit)
@@ -734,13 +763,16 @@ def doM3fit_photon_2Templates():
 
 	DataHist.Rebin(binRebin)
 	TopHist.Rebin(binRebin)
-	WgHist.Rebin(binRebin)
-        otherMCHist.Rebin(binRebin)
+	BkgHist.Rebin(binRebin)
+	# WgHist.Rebin(binRebin)
+        # otherMCHist.Rebin(binRebin)
 
-	(m3Top, m3TopErr,m3Bkg, m3BkgErr) = makenewFit_2templates(varToFit+'(GeV), photon selection', 0.0,800.0, TopHist, BkgHist,DataHist, 'plots/'+varToFit+'_photon_fit.png')
+	print '!@#$%', DataHist.Integral()
 
-        lowfitBin = DataHist.FindBin(0.01)
-        highfitBin = DataHist.FindBin(799.99)
+	(m3Top, m3TopErr,m3Bkg, m3BkgErr) = makenewFit_2templates(varToFit+'(GeV), photon selection', 40.0,600.0, TopHist, BkgHist,DataHist, 'plots/'+varToFit+'_photon_fit.pdf')
+
+        lowfitBin = DataHist.FindBin(40.01)
+        highfitBin = DataHist.FindBin(599.99)
 
         dataInt = DataHist.Integral(lowfitBin,highfitBin)
         topInt = TopHist.Integral(lowfitBin,highfitBin)
@@ -757,7 +789,7 @@ def doM3fit_photon_2Templates():
 	m3_topFrac = m3Top/totMC
 	m3_topFracErr = m3TopErr/totMC	
 
-
+	print dataInt
 	print
 	print '#'*80
 	print 'Total amount of Top events in fit:', m3Top, '+-', m3TopErr

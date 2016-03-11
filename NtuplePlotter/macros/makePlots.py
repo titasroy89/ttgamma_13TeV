@@ -12,6 +12,11 @@ import mcEventsTable
 mcEventsTable.egammaSF      = 1.458
 mcEventsTable.egammaSFerr      = 0.1985
 
+drawRatio = True
+padRatio = 0.25
+padOverlap = 0.05
+padGap = 0.01
+
 ROOT.gROOT.SetBatch()
 #########
 #Style
@@ -110,13 +115,17 @@ else:
 	print '#'*30
 	sys.exit(1)
 
+saveSystName = 'nominal'
+if isSyst: saveSystName = systematic
+
 if SaveOutput:
 	if isElectron: folder = 'ratioFiles_ele/'
 	if isMuon: folder = 'ratioFiles_mu/'
-	if isSyst:
-		sys.stdout = open(folder+'ratio_'+systematic+'.txt','w')
-	else:
-		sys.stdout = open(folder+'ratio_nominal.txt','w')
+	sys.stdout = open(folder+'ratio_'+saveSystName+'.txt','w')
+	# if isSyst:
+	# 	sys.stdout = open(folder+'ratio_'+systematic+'.txt','w')
+	# else:
+	# 	sys.stdout = open(folder+'ratio_nominal.txt','w')
 
 
  ######## Error checking that a lepton channel was selected'
@@ -178,6 +187,18 @@ if systematic == 'otherMC_down':
 # load cross-sections and N gen as global variables
 execfile('SF.py')
 
+
+ratioPlotRanges_barrel = {'M3':0.7,
+			  'photon1Et':0.7,
+			  
+			  }	
+
+ratioPlotRanges = {'M3':0.25,
+		   'photon1Et':0.25,
+		   
+		   }	
+
+
 # function definitions ####################################################
 
 def saveTemplatesToFile(templateList, varlist, outFileName):
@@ -190,7 +211,9 @@ def saveTemplatesToFile(templateList, varlist, outFileName):
 	outfile.Close()
 
 def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist, outDirName):
-#	canvas = ROOT.TCanvas('c1','c1',640,800) #old value, changed to match shape of fit plots
+	ratioRanges = ratioPlotRanges
+	if 'barrel' in outDirName:
+		ratioRanges = ratioPlotRanges_barrel
 
 	H = 600; 
 	W = 800; 
@@ -214,25 +237,81 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 	canvas.SetTickx(0)
 	canvas.SetTicky(0)
 
+
+	canvasRatio = ROOT.TCanvas('c1Ratio','c1Ratio',W,H)
+	# references for T, B, L, R
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvasRatio.SetFillColor(0)
+	canvasRatio.SetBorderMode(0)
+	canvasRatio.SetFrameFillStyle(0)
+	canvasRatio.SetFrameBorderMode(0)
+	canvasRatio.SetLeftMargin( L/W )
+	canvasRatio.SetRightMargin( R/W )
+	canvasRatio.SetTopMargin( T/H )
+	canvasRatio.SetBottomMargin( B/H )
+	canvasRatio.SetTickx(0)
+	canvasRatio.SetTicky(0)
+	pad1 = ROOT.TPad("p1","p1",0,padRatio-padOverlap,1,1)
+	pad2 = ROOT.TPad("p2","p2",0,0,1,padRatio+padOverlap)
+	pad1.SetLeftMargin( L/W )
+	pad1.SetRightMargin( R/W )
+	pad1.SetTopMargin( T/H/(1-padRatio) )
+	pad1.SetBottomMargin( (padOverlap+padGap)/(1-padRatio+padOverlap) )
+	pad2.SetLeftMargin( L/W )
+	pad2.SetRightMargin( R/W )
+	pad2.SetTopMargin( (padOverlap)/(padRatio+padOverlap) )
+	pad2.SetBottomMargin( B/H/padRatio )
+
+	pad1.SetFillColor(0)
+	pad1.SetBorderMode(0)
+	pad1.SetFrameFillStyle(0)
+	pad1.SetFrameBorderMode(0)
+	pad1.SetTickx(0)
+	pad1.SetTicky(0)
+
+	pad2.SetFillColor(0)
+	pad2.SetFillStyle(4000)
+	pad2.SetBorderMode(0)
+	pad2.SetFrameFillStyle(0)
+	pad2.SetFrameBorderMode(0)
+	pad2.SetTickx(0)
+	pad2.SetTicky(0)
+
+
+	ROOT.SetOwnership(canvas, False)
+	ROOT.SetOwnership(canvasRatio, False)
+	ROOT.SetOwnership(pad1, False)
+	ROOT.SetOwnership(pad2, False)
+
 	
-	latex = ROOT.TLatex()
-	latex.SetNDC()
-#	latex.SetTextAlign(12)
-	latex.SetTextSize(0.037)
-#	latex.SetLineWidth(2)
+	canvasRatio.cd()
+	pad1.Draw()
+	pad2.Draw()
+
 	
 	for var in varlist:
+		canvas.cd()
+		
 		legend = ROOT.TLegend(0.71, 0.9 - 0.05*(len(MCTemplateList) + len(SignalTemplateZoomList)), 0.94, 0.9)
 		legend.SetBorderSize(0)
 		legend.SetFillColor(0)
+
+		legendR = ROOT.TLegend(0.71, 1. - 0.1/(1.-padRatio) - 0.05/(1.-padRatio)*(len(MCTemplateList) + len(SignalTemplateZoomList)), 0.94, 1-0.1/(1.-padRatio))
+		legendR.SetBorderSize(0)
+		legendR.SetFillColor(0)
 		
 		if dataTemplate is not None:
 			legend.AddEntry(dataTemplate.histList[var], dataTemplate.legName, 'pl')
+			legendR.AddEntry(dataTemplate.histList[var], dataTemplate.legName, 'pl')
 		
 		# MC templates listed in the order they appear in legend
 		for mc in MCTemplateList:
 			mcHist = mc.histList[var]
 			legend.AddEntry(mcHist, mc.legName, 'f')
+			legendR.AddEntry(mcHist, mc.legName, 'f')
 		
 		stack = ROOT.THStack('stack_'+var,var)
 		# reverse order for stack to be consistent with legend
@@ -247,10 +326,10 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		if dataTemplate is not None:
 			if var == 'M3':
 				if 'barrel' in outDirName:				
-					dataTemplate.GetYaxis().SetTitle('Events / 40 GeV')
+					dataTemplate.histList[var].GetYaxis().SetTitle('Events / 40 GeV')
 					dataTemplate.histList[var].Rebin(4)
 				else:
-					dataTemplate.GetYaxis().SetTitle('Events / 10 GeV')
+					dataTemplate.histList[var].GetYaxis().SetTitle('Events / 10 GeV')
 			if dataTemplate.histList[var].GetMaximum() > stack.GetMaximum():
 				stack.SetMaximum(dataTemplate.histList[var].GetMaximum())
 
@@ -288,18 +367,9 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 				legend.AddEntry(sigHist, signal.legName, 'f')
 		if 'cut_flow' not in var:
 			legend.Draw()
-	
-               	# ROOT.TGaxis.SetMaxDigits(3)	
-		# labelcms = ROOT.TPaveText(0.14,1.-canvas.GetTopMargin(),0.6,1.05-canvas.GetTopMargin(),"NDCBR")
-		# labelcms.SetTextAlign(12);
-		# labelcms.SetTextSize(0.045);
-		# labelcms.SetFillColor(ROOT.kWhite);
-		# labelcms.SetFillStyle(0);
-		# if isMuon: labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV, #mu+jets");
-		# if isElectron: labelcms.AddText("CMS Preliminary, L=19.7 fb^{-1}, #sqrt{s} = 8 TeV, e+jets");
-		# labelcms.SetBorderSize(0);
-		# labelcms.Draw()
-		# latex.DrawLatex(0.3,0.93,'#splitline{L=19.7 fb^{-1} #sqrt{s} = 8 TeV}{CMS Preliminary}')
+
+               	ROOT.TGaxis.SetMaxDigits(3)	
+
 		channelText = ""
 		if isMuon: channelText = "#mu+jets"
 		if isElectron: channelText = "e+jets"
@@ -320,6 +390,102 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 			canvas.Print(outDirName+'/'+var+".png",".png");
 #			canvas.SaveAs(outDirName+'/'+var+'.png')
 		
+
+		####RATIO PLOT
+		if drawRatio:
+			ratio = dataTemplate.histList[var].Clone("temp")
+			ratio.Divide(stack.GetStack().Last())
+			# ratio = stack.GetStack().Last()
+        		# ratio.Divide(dataTemplate.histList[var])
+			
+        		canvasRatio.cd()
+        		pad1.cd()
+        
+        		stack.Draw('HIST')
+        		if 'ele1MVA' in var:
+        			stack.GetXaxis().SetRangeUser(-1.1,0.0)
+        
+        		if 'barrel' in outDirName and 'photon1SigmaIEtaIEta' in var:
+        			stack.GetXaxis().SetRangeUser(0.0,0.025)
+        		pad1.Update()
+			y2 = pad1.GetY2()
+			print y2
+			stack.SetMinimum(-0.02*y2)
+			pad1.Update()
+			
+			pad1.Update()
+        		if dataTemplate is not None:
+        			stack.GetXaxis().SetTitle('')
+        			stack.GetYaxis().SetTitle(dataTemplate.histList[var].GetYaxis().GetTitle())
+        		stack.SetTitle('')
+			stack.GetXaxis().SetLabelSize(0)
+			stack.GetYaxis().SetLabelSize(ROOT.gStyle.GetLabelSize()/(1.-padRatio))
+			stack.GetYaxis().SetTitleSize(ROOT.gStyle.GetTitleSize()/(1.-padRatio))
+			print stack.GetYaxis().GetTitleOffset()
+			stack.GetYaxis().SetTitleOffset(ROOT.gStyle.GetTitleYOffset()*(1.-padRatio))
+        
+        		if dataTemplate is not None:
+        			dataTemplate.histList[var].Draw('ESAME')
+        					
+        		for signal,zoom in SignalTemplateZoomList:
+        			sigHist = signal.histList[var].Clone()
+        			#sigHist.SetFillStyle(3244)
+        			sigHist.Scale(zoom)
+        			sigHist.Draw('HISTSAME')
+        			if zoom != 1:
+        				legendR.AddEntry(sigHist, signal.legName + ' x ' + str(zoom), 'f')
+        			else:
+        				legendR.AddEntry(sigHist, signal.legName, 'f')
+        		if 'cut_flow' not in var:
+        			legendR.Draw()
+        
+        		if dataTemplate is not None:
+        			ratio.GetXaxis().SetTitle(dataTemplate.histList[var].GetXaxis().GetTitle())
+        			ratio.GetYaxis().SetTitle('Data/MC')
+				ratio.GetYaxis().CenterTitle()
+        		ratio.SetTitle('')
+			ratio.GetXaxis().SetLabelSize(ROOT.gStyle.GetLabelSize()/(padRatio+padOverlap))
+			ratio.GetYaxis().SetLabelSize(ROOT.gStyle.GetLabelSize()/(padRatio+padOverlap))
+			ratio.GetXaxis().SetTitleSize(ROOT.gStyle.GetTitleSize()/(padRatio+padOverlap))
+			ratio.GetYaxis().SetTitleSize(ROOT.gStyle.GetTitleSize()/(padRatio+padOverlap))
+			# ratio.GetXaxis().SetTitleOffset(ROOT.gStyle.GetTitleXOffset()*(1-padRatio))
+			# ratio.GetXaxis().SetTitleOffset(ROOT.gStyle.GetTitleXOffset()*(1-padRatio))
+			ratio.GetYaxis().SetTitleOffset(ROOT.gStyle.GetTitleYOffset()*(padRatio+padOverlap))
+
+			ratio.GetYaxis().SetRangeUser(0.75,1.25)
+			if var in ratioRanges:
+				span = ratioRanges[var]
+				ratio.GetYaxis().SetRangeUser(1-span, 1+span)
+			ratio.GetYaxis().SetNdivisions(503)
+				
+        
+        		pad2.cd()
+        		ratio.SetMarkerStyle(2)		
+        		ratio.SetLineColor(ROOT.kBlack)
+			ratio.SetLineWidth(1)
+			oneLine = ROOT.TLine(ratio.GetXaxis().GetXmin(),1.,ratio.GetXaxis().GetXmax(),1.)
+			oneLine.SetLineColor(ROOT.kBlack)
+			oneLine.SetLineWidth(1)
+			oneLine.SetLineStyle(2)
+
+        		ratio.Draw()        		
+			oneLine.Draw("same")
+
+			pad2.Update()
+        		CMS_lumi.CMS_lumi(canvasRatio, 2, 11)
+        
+        		if not isSyst:
+        			canvasRatio.Update();
+        			canvasRatio.RedrawAxis();
+        #			canvas.GetFrame().Draw();
+        
+        			canvasRatio.Print(outDirName+'/'+var+"_ratio.pdf",".pdf");
+        			canvasRatio.Print(outDirName+'/'+var+"_ratio.png",".png");
+        #			canvas.SaveAs(outDirName+'/'+var+'.png')
+
+			# pad1.Clear()
+			# pad2.Clear()
+
 def loadDataTemplate(varlist, inputDir, prefix):
 	templPrefix = inputDir+prefix
 	DataTempl = distribution('Data', 'Data', [
@@ -383,9 +549,9 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	#return MCtemplates
 	###################################
 	nonWJetsSF = 1.0
-		
+
 #	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, [ ##changed
-	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, 'V+#gamma', [ 
+    	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, 'V+#gamma', [ 
         (templPrefix+'Zgamma.root', otherMCSF*gSF*Zgamma_xs/Zgamma_num),
         (templPrefix+'Wgamma.root', otherMCSF*WgammaSF*gSF*Wgamma_xs/Wgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
@@ -450,7 +616,7 @@ def saveAccTemplates(inputDir, outFileName):
 	saveTemplatesToFile(AccTemplates.values(), varList, outFileName)
 
 def saveTTgammaAccTemplates(inputDir, outFileName):
-	varList = ['MCcategory','genPhoRegionWeight_1l_2l']
+	varList = ['MCcategory','genPhoRegionWeight_1l_2l','MCcategoryfid','genPhoRegionWeight_1lfid']
 
 	print inputDir
 
@@ -472,13 +638,15 @@ def saveTTgammaAccTemplates(inputDir, outFileName):
 	saveTemplatesToFile(AccTemplates.values(), varList, outFileName)
 
 def saveNoMETTemplates(inputDir, inputData, outFileName, histName):
-	varList = ['MET','MET_low','M3',lep+'1RelIso','ele1MVA']
+	varList = ['MET','M3',lep+'1RelIso','ele1MVA']
 	DataTempl = loadDataTemplate(varList, inputData, histName)
 	MCTemplDict = loadMCTemplates(varList, inputDir, histName,'',1001)
 	MCTempl = []
 	MCTempl.append(MCTemplDict['WHIZARD'])
 	MCTempl.append(MCTemplDict['TTJets'])
 	MCTempl.append(MCTemplDict['Vgamma'])
+	MCTempl.append(MCTemplDict['Wgamma'])
+	MCTempl.append(MCTemplDict['Zgamma'])
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
@@ -487,7 +655,7 @@ def saveNoMETTemplates(inputDir, inputData, outFileName, histName):
 	saveTemplatesToFile([DataTempl] + MCTempl, varList, outFileName)
 
 def saveBarrelFitTemplates(inputDir, inputData,  outFileName):
-	varList = ['MET','MET_low','M3','photon1ChHadSCRIso', 'photon1ChHadRandIso', 'photon1_Sigma_ChSCRIso']
+	varList = ['MET','M3','photon1ChHadSCRIso', 'photon1ChHadRandIso', 'photon1_Sigma_ChSCRIso']
 	DataTempl_b = loadDataTemplate(varList, inputData, 'hist_1pho_barrel_top_') #change 
 	
 	MCTempl_b = loadMCTemplates(varList, inputDir, 'hist_1pho_barrel_top_','',1001)	#change
@@ -503,7 +671,7 @@ def savePreselTemplates(inputDir, qcdDir, inputData, outFileName):
 		print 'exiting'
 		return
 	
-	varList = ['MET','MET_low','M3',]
+	varList = ['MET','M3',]
 	DataTempl = loadDataTemplate(varList, inputData, 'hist_1pho_top_')#change
 	if QCDSF > 0.0001:
 		QCDTempl = loadQCDTemplate(varList, qcdDir, 'hist_1pho_top_') #change
@@ -515,6 +683,8 @@ def savePreselTemplates(inputDir, qcdDir, inputData, outFileName):
 	MCTempl.append(MCTemplDict['WHIZARD'])
 	MCTempl.append(MCTemplDict['TTJets'])
 	MCTempl.append(MCTemplDict['Vgamma'])
+	MCTempl.append(MCTemplDict['Wgamma'])
+	MCTempl.append(MCTemplDict['Zgamma'])
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
@@ -528,7 +698,9 @@ def makeQCDPlots(varList,qcdDir,outDir):
         MCTempl = []
         MCTempl.append(MCTemplDict['WHIZARD'])
         MCTempl.append(MCTemplDict['TTJets'])
-        MCTempl.append(MCTemplDict['Vgamma'])
+#        MCTempl.append(MCTemplDict['Vgamma'])
+	MCTempl.append(MCTemplDict['Wgamma'])
+	MCTempl.append(MCTemplDict['Zgamma'])
         MCTempl.append(MCTemplDict['SingleTop'])
         MCTempl.append(MCTemplDict['WJets'])
         MCTempl.append(MCTemplDict['ZJets'])
@@ -536,7 +708,7 @@ def makeQCDPlots(varList,qcdDir,outDir):
                 pass
         else:
         # save final templates, exactly as they are on the plots
-                saveTemplatesToFile([DataTempl] + MCTempl, ['MET','MET_low','M3','WtransMass',lep+'1RelIso','genPhoRegionWeight','MCcategory'], 'templates_presel_scaled_QCD.root')
+                saveTemplatesToFile([DataTempl] + MCTempl, ['MET','M3','WtransMass',lep+'1RelIso','genPhoRegionWeight','MCcategory'], 'templates_presel_scaled_QCD.root')
         plotTemplates( DataTempl, MCTempl, [], varList, outDir+'/presel')
 	return
 
@@ -549,7 +721,7 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl = []
 	MCTempl.append(MCTemplDict['WHIZARD'])
 	MCTempl.append(MCTemplDict['TTJets'])
-	MCTempl.append(MCTemplDict['Vgamma'])
+#	MCTempl.append(MCTemplDict['Vgamma'])
 	MCTempl.append(MCTemplDict['Wgamma'])
 	MCTempl.append(MCTemplDict['Zgamma'])
 	MCTempl.append(MCTemplDict['SingleTop'])
@@ -562,27 +734,36 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 		pass
 	else:	
 	# save final templates, exactly as they are on the plots
-		saveTemplatesToFile([DataTempl] + MCTempl, ['MET','MET_low','M3','WtransMass','genPhoRegionWeight','MCcategory'], 'templates_presel_scaled.root')
+		saveTemplatesToFile([DataTempl] + MCTempl, ['MET','M3','WtransMass','genPhoRegionWeight','MCcategory'], 'templates_presel_scaled.root')
  	print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
-	MCTempl.remove(MCTemplDict['Vgamma'])	
+#	MCTempl.remove(MCTemplDict['Vgamma'])	
 	plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
 	
+	del MCTempl
+	del MCTemplDict
 	
 	shortVarList = varList[:]
 	shortVarList.remove('cut_flow')
 	shortVarList.remove('genPhoRegionWeight')
 	shortVarList.append('ele1pho1Mass')
 
+
 	region = 'barrel'
 	# load templates
+	print 'HERE'
+	print region
 	DataTempl_b = loadDataTemplate(shortVarList, dataDir, 'hist_1pho_'+region+'_top_') #change
 	if QCDSF > 0.0001:
 		QCDTempl_b = loadQCDTemplate(shortVarList, qcdDir, 'hist_1pho_'+region+'_top_') #change
+	print 'HERE2'
+	print region
 	MCTemplDict_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_'+region+'_top_','',1001)#change
+	print 'HERE3'
+	print region
 	MCTempl_b = []
 	MCTempl_b.append(MCTemplDict_b['WHIZARD'])
 	MCTempl_b.append(MCTemplDict_b['TTJets'])
-	MCTempl_b.append(MCTemplDict_b['Vgamma'])
+#	MCTempl_b.append(MCTemplDict_b['Vgamma'])
 	MCTempl_b.append(MCTemplDict_b['Wgamma'])
 	MCTempl_b.append(MCTemplDict_b['Zgamma'])
 	MCTempl_b.append(MCTemplDict_b['SingleTop'])
@@ -590,6 +771,8 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl_b.append(MCTemplDict_b['ZJets'])
 	if QCDSF > 0.0001:
 		MCTempl_b.append(QCDTempl_b)
+	print 'HERE'
+	print region
 	
 	MCTempl_rs_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_rs_barrel_top_', '_signal', 1001)
 	MCTempl_fe_b = loadMCTemplates(shortVarList, inputDir, 'hist_1pho_fe_barrel_top_', '_electron', 3005)
@@ -597,11 +780,12 @@ def makeAllPlots(varList, inputDir, qcdDir, dataDir, outDirName):
  	print "SF after photon selection :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
 	# save final templates, exactly as they are on the plots and by categories
 	saveTemplatesToFile([DataTempl_b] + MCTempl_b + MCTempl_rs_b.values() + MCTempl_fe_b.values() + MCTempl_fjrb_b.values(), 
-		['MET','MET_low','M3','WtransMass','MCcategory','nJets','ele1pho1Mass'], 
+		['MET','M3','WtransMass','MCcategory','nJets','ele1pho1Mass'], 
 		'templates_barrel_scaled.root'
 		)
 	
-	MCTempl_b.remove(MCTemplDict_b['Vgamma'])
+#	MCTempl_b.remove(MCTemplDict_b['Vgamma'])
+	print "HERE"
 	plotTemplates( DataTempl_b, MCTempl_b, [], shortVarList, outDirName+'/'+region+'_samples')
 	
 	############################
@@ -625,7 +809,9 @@ def makePhotonSelectionPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	MCTempl_b = []
 	MCTempl_b.append(MCTemplDict_b['WHIZARD'])
 	MCTempl_b.append(MCTemplDict_b['TTJets'])
-	MCTempl_b.append(MCTemplDict_b['Vgamma'])
+#	MCTempl_b.append(MCTemplDict_b['Vgamma'])
+	MCTempl_b.append(MCTemplDict_b['Wgamma'])
+	MCTempl_b.append(MCTemplDict_b['Zgamma'])
 	MCTempl_b.append(MCTemplDict_b['SingleTop'])
 	MCTempl_b.append(MCTemplDict_b['WJets'])
 	MCTempl_b.append(MCTemplDict_b['ZJets'])
@@ -638,7 +824,7 @@ def makePhotonSelectionPlots(varList, inputDir, qcdDir, dataDir, outDirName):
  	print "SF after photon selection :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
 	# save final templates, exactly as they are on the plots and by categories
 	saveTemplatesToFile([DataTempl_b] + MCTempl_b + MCTempl_rs_b.values() + MCTempl_fe_b.values() + MCTempl_fjrb_b.values(), 
-		['MET','MET_low','M3','WtransMass','MCcategory','nJets'], 
+		['MET','M3','WtransMass','MCcategory','nJets'], 
 		'templates_barrel_scaled_afterPhotonM3.root'
 		)
 	
@@ -650,7 +836,8 @@ def makePhotonSelectionPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 
 
 varList_all = ['nVtx',
-			'MET','MET_low','Ht','WtransMass','M3', 
+#			'MET','MET_low','Ht','WtransMass','M3', 
+			'MET','Ht','WtransMass','M3', 
 			#'M3_0_30', 'M3_30_100', 'M3_100_200', 'M3_200_300', 'M3_300_up', #'M3minPt',
 			lep+'1Pt',lep+'1Eta',lep+'1RelIso',
 			'genPhoRegionWeight', 'MCcategory',
@@ -672,15 +859,22 @@ else:
 	outSuffix = ''
 
 if isElectron:
-	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins'+outSuffix+'/'
-#	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/QCD_bins/'
+# 	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins'+outSuffix+'/'
+# #	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/QCD_bins/'
+# 	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists/QCD_bins/'
+# 	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins/'
+	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto_Nov22/hist_bins'+outSuffix+'/'
 	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists/QCD_bins/'
-	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins/'
+	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists_looseVeto_Nov22/hist_bins/'
 if isMuon:
-	InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins'+outSuffix+'/'
-#	QCDHist =   '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/QCD_bins/'
+# 	InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins'+outSuffix+'/'
+# #	QCDHist =   '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/QCD_bins/'
+# 	QCDHist =   '/eos/uscms/store/user/dnoonan/MuHists/QCD_bins/'
+# 	DataHist =  '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins/'
+
+	InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto_Nov22/hist_bins'+outSuffix+'/'
 	QCDHist =   '/eos/uscms/store/user/dnoonan/MuHists/QCD_bins/'
-	DataHist =  '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins/'
+	DataHist =  '/eos/uscms/store/user/dnoonan/MuHists_looseVeto_Nov22/hist_bins/'
 
 ######## Added in a printout of histogram locations, for easier tracking later on ######## 
 
@@ -736,8 +930,15 @@ qcd_fit.M3BinWidth=10.
 
 qcd_fit.isElectron = isElectron
 qcd_fit.isMuon = isMuon
+if isSyst:
+	if isElectron:
+		QCDSF = 1.6040961272
+	if isMuon:
+		QCDSF = 0.683983420073
 
-QCDSF,QCDSFerror_met = qcd_fit.doQCDfit()
+else:
+	QCDSF,QCDSFerror_met = qcd_fit.doQCDfit()
+
 
 print "QCD SF from MET fit is :" , QCDSF
 #QCD_low_SF,QCD_low_SFerror = qcd_fit.doQCD_lowfit()
@@ -786,8 +987,13 @@ mcEventsTable.inputFileName = "templates_barrel_scaled.root"
 print 
 print 'Event count, photon selection, before M3 fit'
 print
-mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
+table = mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
+print table
 print
+
+tableFile = open('EventTables/%s_%s_PreM3.txt'%(lep, saveSystName),'w')
+tableFile.write(table)
+tableFile.close()
 
 
 if skipPhoton:
@@ -840,16 +1046,20 @@ saveNoMETTemplates(QCDHist, QCDHist, 'templates_barrel_nomet_qcd.root', 'hist_1p
 vgamma_fit.qcdMETfile = 'templates_barrel_nomet_qcd.root'
 vgamma_fit.normMETfile = 'templates_barrel_nomet.root'
 	
-QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon_NoMET()
+# QCDSF_photon,QCDSFerror_photon = vgamma_fit.doQCDfit_photon_NoMET()
 #QCD_low_SF_photon,QCD_low_SFerror_photon = vgamma_fit.doQCDlowfit_photon()
 
 mcEventsTable.inputFileName = "templates_barrel_scaled_afterPhotonM3.root"
 print 
 print 'Event count, photon selection, after M3 fit'
 print
-mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
-
+table = mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
+print table
 print
+
+tableFile = open('EventTables/%s_%s_AfterM3.txt'%(lep, saveSystName),'w')
+tableFile.write(table)
+tableFile.close()
 
 if skipCalc:
 	print '*'*80
@@ -896,4 +1106,9 @@ mcEventsTable.jetToPhotonSFerr = bestjgSFErr
 print 
 print 'Event count, photon selection, likelihood Scale Factors Applied'
 print
-mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
+table = mcEventsTable.printMCTable(TopSFErr/TopSF, WJetsSFErr/WJetsSF, WgammaSFErr/WgammaSF)
+print table
+
+tableFile = open('EventTables/%s_%s_Final.txt'%(lep, saveSystName),'w')
+tableFile.write(table)
+tableFile.close()

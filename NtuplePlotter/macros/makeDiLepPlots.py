@@ -16,6 +16,11 @@ isElectron = False
 isMuon = False
 lep = ''
 
+drawRatio = True
+padRatio = 0.25
+padOverlap = 0.15
+padGap = 0.01
+
 from Style import *
 
 thestyle = Style()
@@ -70,12 +75,36 @@ else:
 	sys.exit(1)
 
 
+systName = ''
+systematicsList = ['JEC_up',  'JER_up',  'Btag_up',  'elesmear_up',  'EleEff_up',  'musmear_up',  'MuEff_up',  
+		   'JEC_down','JER_down','Btag_down','elesmear_down','EleEff_down','musmear_down','MuEff_down',
+		   ]
+
+if len(sys.argv)==3:
+	systName = sys.argv[2]
+	if not systName in systematicsList:
+		print "Unknown systematics", systName
+		sys.exit(1)
+
 #import array
 #binarray = array.array('d')
 #binarray.fromlist([0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,300])
 
 # load cross-sections and N gen as global variables
 execfile('SF.py')
+
+
+ratioPlotRanges_barrel = {'M3':0.7,
+			  'photon1Et':0.7,
+			  lep+'1'+lep+'2Mass':0.7,
+
+			  }
+
+ratioPlotRanges = {'M3':0.25,
+		   'photon1Et':0.25,
+		   lep+'1'+lep+'2Mass':0.7,
+		       
+		   }
 
 # function definitions ####################################################
 
@@ -89,6 +118,12 @@ def saveTemplatesToFile(templateList, varlist, outFileName):
 	outfile.Close()
 
 def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist, outDirName):
+	ratioRanges = ratioPlotRanges
+	if 'barrel' in outDirName:
+		ratioRanges = ratioPlotRanges_barrel
+
+	ROOT.TGaxis.SetMaxDigits(3)	
+
 	H = 600; 
 	W = 800; 
 
@@ -117,18 +152,82 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 	latex.SetTextSize(0.037)
 	latex.SetLineWidth(2)
 	
+	canvasRatio = ROOT.TCanvas('c1Ratio','c1Ratio',W,H)
+	# references for T, B, L, R
+	T = 0.08*H
+	B = 0.12*H 
+	L = 0.12*W
+	R = 0.04*W
+	canvasRatio.SetFillColor(0)
+	canvasRatio.SetBorderMode(0)
+	canvasRatio.SetFrameFillStyle(0)
+	canvasRatio.SetFrameBorderMode(0)
+	canvasRatio.SetLeftMargin( L/W )
+	canvasRatio.SetRightMargin( R/W )
+	canvasRatio.SetTopMargin( T/H )
+	canvasRatio.SetBottomMargin( B/H )
+	canvasRatio.SetTickx(0)
+	canvasRatio.SetTicky(0)
+	pad1 = ROOT.TPad("p1","p1",0,padRatio-padOverlap,1,1)
+	pad2 = ROOT.TPad("p2","p2",0,0,1,padRatio+padOverlap)
+        pad1 = ROOT.TPad("p1","p1",0,max(padRatio-padOverlap+padGap/2,0),1,1)
+        pad2 = ROOT.TPad("p2","p2",0,0,1,padRatio+padOverlap-padGap/2)
+
+
+	pad1.SetLeftMargin( L/W )
+	pad1.SetRightMargin( R/W )
+	pad1.SetTopMargin( T/H/(1-padRatio) )
+	pad1.SetBottomMargin( (padOverlap+padGap)/(1-padRatio+padOverlap) )
+	pad2.SetLeftMargin( L/W )
+	pad2.SetRightMargin( R/W )
+	pad2.SetTopMargin( (padOverlap)/(padRatio+padOverlap) )
+	pad2.SetBottomMargin( B/H/(padRatio+padOverlap) )
+
+	pad1.SetFillColor(0)
+	pad1.SetBorderMode(0)
+	pad1.SetFrameFillStyle(0)
+	pad1.SetFrameBorderMode(0)
+	pad1.SetTickx(0)
+	pad1.SetTicky(0)
+
+	pad2.SetFillColor(0)
+	pad2.SetFillStyle(4000)
+	pad2.SetBorderMode(0)
+	pad2.SetFrameFillStyle(0)
+	pad2.SetFrameBorderMode(0)
+	pad2.SetTickx(0)
+	pad2.SetTicky(0)
+
+
+	ROOT.SetOwnership(canvas, False)
+	ROOT.SetOwnership(canvasRatio, False)
+	ROOT.SetOwnership(pad1, False)
+	ROOT.SetOwnership(pad2, False)
+	
+	canvasRatio.cd()
+	pad1.Draw()
+	pad2.Draw()
+
+	
 	for var in varlist:
-		legend = ROOT.TLegend(0.7, 0.99 - canvas.GetTopMargin() - 0.05*(1 + len(MCTemplateList) + len(SignalTemplateZoomList)), 0.99-canvas.GetRightMargin(), 0.99-canvas.GetTopMargin())
+		canvas.cd()
+		legend = ROOT.TLegend(0.71, 0.99 - canvas.GetTopMargin() - 0.05*(1 + len(MCTemplateList) + len(SignalTemplateZoomList)), 0.99-canvas.GetRightMargin(), 0.99-canvas.GetTopMargin())
 		legend.SetBorderSize(0)
 		legend.SetFillColor(ROOT.kWhite)
 		
+		legendR = ROOT.TLegend(0.71, 1. - 0.1/(1.-padRatio) - 0.05/(1.-padRatio)*(len(MCTemplateList) + len(SignalTemplateZoomList)), 0.94, 1-0.1/(1.-padRatio))
+		legendR.SetBorderSize(0)
+		legendR.SetFillColor(0)
+
 		if dataTemplate is not None:
 			legend.AddEntry(dataTemplate.histList[var], dataTemplate.legName, 'pl')
+			legendR.AddEntry(dataTemplate.histList[var], dataTemplate.legName, 'pl')
 		
 		# MC templates listed in the order they appear in legend
 		for mc in MCTemplateList[::-1]:
 			mcHist = mc.histList[var]
 			legend.AddEntry(mcHist, mc.legName, 'f')
+			legendR.AddEntry(mcHist, mc.legName, 'f')
 		
 		stack = ROOT.THStack('stack_'+var,var)
 		# reverse order for stack to be consistent with legend
@@ -159,6 +258,15 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		if dataTemplate is not None:
 			stack.GetXaxis().SetTitle(dataTemplate.histList[var].GetXaxis().GetTitle())
 			stack.GetYaxis().SetTitle(dataTemplate.histList[var].GetYaxis().GetTitle())
+			if 'mu1mu2Mass' in var:
+				stack.GetXaxis().SetTitle("M(#mu,#mu) (GeV)")
+				stack.GetXaxis().SetRangeUser(20,180)
+				dataTemplate.histList[var].GetXaxis().SetRangeUser(20,180)
+			if 'ele1ele2Mass' in var:
+				stack.GetXaxis().SetTitle("M(e,e) (GeV)")
+				stack.GetXaxis().SetRangeUser(20,180)
+				dataTemplate.histList[var].GetXaxis().SetRangeUser(20,180)
+				
 #			stack.GetYaxis().SetTitleOffset(1.8)
 		stack.SetTitle('')
 
@@ -183,18 +291,116 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 			legend.Draw()
 
 		channelText = ""
-		if isMuon: channelText = "#mu+jets"
-		if isElectron: channelText = "e+jets"
+		if isMuon: channelText = "#mu#mu"
+		if isElectron: channelText = "ee"
 
-		CMS_lumi.extraText = channelText
+		CMS_lumi.channelText = channelText
 		CMS_lumi.writeExtraText = True
-
+		CMS_lumi.writeChannelText = True
+		
 		CMS_lumi.CMS_lumi(canvas, 2, 11)
 		canvas.Update();
 		canvas.RedrawAxis();
 		canvas.Print(outDirName+'/'+var+".pdf",".pdf");
 		canvas.Print(outDirName+'/'+var+".png",".png");
 		
+		
+
+		####RATIO PLOT
+		if drawRatio:
+			ratio = dataTemplate.histList[var].Clone("temp")
+			ratio.Divide(stack.GetStack().Last())
+			# ratio = stack.GetStack().Last()
+        		# ratio.Divide(dataTemplate.histList[var])
+			
+        		canvasRatio.cd()
+        		pad1.cd()
+        
+        		stack.Draw('HIST')
+        		if 'ele1MVA' in var:
+        			stack.GetXaxis().SetRangeUser(-1.1,0.0)
+        
+        		if 'barrel' in outDirName and 'photon1SigmaIEtaIEta' in var:
+        			stack.GetXaxis().SetRangeUser(0.0,0.025)
+        		pad1.Update()
+			y2 = pad1.GetY2()
+			print y2
+			stack.SetMinimum(-0.02*y2)
+			pad1.Update()
+			
+			pad1.Update()
+        		if dataTemplate is not None:
+        			stack.GetXaxis().SetTitle('')
+        			stack.GetYaxis().SetTitle(dataTemplate.histList[var].GetYaxis().GetTitle())
+        		stack.SetTitle('')
+			stack.GetXaxis().SetLabelSize(0)
+			stack.GetYaxis().SetLabelSize(ROOT.gStyle.GetLabelSize()/(1.-padRatio+padOverlap))
+			stack.GetYaxis().SetTitleSize(ROOT.gStyle.GetTitleSize()/(1.-padRatio+padOverlap))
+			print stack.GetYaxis().GetTitleOffset()
+			stack.GetYaxis().SetTitleOffset(ROOT.gStyle.GetTitleYOffset()*(1.-padRatio+padOverlap))
+        
+        		if dataTemplate is not None:
+        			dataTemplate.histList[var].Draw('ESAME')
+        					
+        		for signal,zoom in SignalTemplateZoomList:
+        			sigHist = signal.histList[var].Clone()
+        			#sigHist.SetFillStyle(3244)
+        			sigHist.Scale(zoom)
+        			sigHist.Draw('HISTSAME')
+        			if zoom != 1:
+        				legendR.AddEntry(sigHist, signal.legName + ' x ' + str(zoom), 'f')
+        			else:
+        				legendR.AddEntry(sigHist, signal.legName, 'f')
+        		if 'cut_flow' not in var:
+        			legendR.Draw()
+        
+        		if dataTemplate is not None:
+        			ratio.GetXaxis().SetTitle(dataTemplate.histList[var].GetXaxis().GetTitle())
+        			ratio.GetYaxis().SetTitle('Data/Theory')
+				if 'mu1mu2Mass' in var:
+					ratio.GetXaxis().SetTitle("M(#mu,#mu) (GeV)")
+					print var
+				if 'ele1ele2Mass' in var:
+					ratio.GetXaxis().SetTitle("M(e,e) (GeV)")
+				ratio.GetYaxis().CenterTitle()
+        		ratio.SetTitle('')
+			ratio.GetXaxis().SetLabelSize(ROOT.gStyle.GetLabelSize()/(padRatio+padOverlap))
+			ratio.GetYaxis().SetLabelSize(ROOT.gStyle.GetLabelSize()/(padRatio+padOverlap))
+			ratio.GetXaxis().SetTitleSize(ROOT.gStyle.GetTitleSize()/(padRatio+padOverlap))
+			ratio.GetYaxis().SetTitleSize(ROOT.gStyle.GetTitleSize()/(padRatio+padOverlap))
+			# ratio.GetXaxis().SetTitleOffset(ROOT.gStyle.GetTitleXOffset()*(1-padRatio))
+			# ratio.GetXaxis().SetTitleOffset(ROOT.gStyle.GetTitleXOffset()*(1-padRatio))
+			ratio.GetYaxis().SetTitleOffset(ROOT.gStyle.GetTitleYOffset()*(padRatio+padOverlap))
+
+			ratio.GetYaxis().SetRangeUser(0.75,1.25)
+			if var in ratioRanges:
+				span = ratioRanges[var]
+				ratio.GetYaxis().SetRangeUser(1-span, 1+span)
+			ratio.GetYaxis().SetNdivisions(503)
+				
+        
+        		pad2.cd()
+        		ratio.SetMarkerStyle(2)		
+        		ratio.SetLineColor(ROOT.kBlack)
+			ratio.SetLineWidth(1)
+			oneLine = ROOT.TF1("oneLine","1",-999,9999)
+#			oneLine = ROOT.TLine(ratio.GetXaxis().GetXmin(),1.,ratio.GetXaxis().GetXmax(),1.)
+			oneLine.SetLineColor(ROOT.kBlack)
+			oneLine.SetLineWidth(1)
+			oneLine.SetLineStyle(2)
+
+        		ratio.Draw()        		
+			oneLine.Draw("same")
+
+			pad2.Update()
+        		CMS_lumi.CMS_lumi(canvasRatio, 2, 11)
+        
+			canvasRatio.Update();
+			canvasRatio.RedrawAxis();
+			
+			canvasRatio.Print(outDirName+'/'+var+"_ratio.pdf",".pdf");
+			canvasRatio.Print(outDirName+'/'+var+"_ratio.png",".png");
+
 		
 def loadDataTemplate(varlist, inputDir, prefix):
 	templPrefix = inputDir+prefix
@@ -222,13 +428,13 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	
 	MCtemplates['WHIZARD'] = distribution('TTGamma'+titleSuffix, 't#bar{t}+#gamma',[
 		(templPrefix+'TTGamma.root', TopSF*gSF*newTTgamma_xs/newTTgamma_num)
-		], varList, 97, fillStyle)
+		], varList, ROOT.kRed +1, fillStyle)
 	
 	MCtemplates['TTJets'] = distribution('TTJets'+titleSuffix, 't#bar{t}+jets',[
 		(templPrefix+'TTJets1l.root', TopSF*gSF*TTJets1l_xs/TTJets1l_num),
 		(templPrefix+'TTJets2l.root', TopSF*gSF*TTJets2l_xs/TTJets2l_num),
 		(templPrefix+'TTJetsHad.root', TopSF*gSF*TTJetsHad_xs/TTJetsHad_num),
-		], varList ,11, fillStyle)
+		], varList ,ROOT.kRed-7, fillStyle)
 	
 	###################################
 	#return MCtemplates
@@ -239,12 +445,12 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, 'W+#gamma', [
         (templPrefix+'Wgamma.root', nonWJetsSF*gSF*Wgamma_xs/Wgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
-        ], varList, 90, fillStyle)
+        ], varList, ROOT.kGray, fillStyle)
 
 	MCtemplates['Zgamma'] = distribution('Zgamma'+titleSuffix, 'Z+#gamma', [
         (templPrefix+'Zgamma.root', nonWJetsSF*gSF*Zgamma_xs/Zgamma_num),
     #    (templPrefix+'WWgamma.root', gSF*WWgamma_xs/WWgamma_num),
-        ], varList, 90, fillStyle)
+        ], varList, ROOT.kAzure+3, fillStyle)
 
 	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, 'Single Top', [
 		(templPrefix+'SingleT_t.root',      nonWJetsSF*gSF*SingTopT_xs/SingTopT_num),
@@ -253,16 +459,16 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
         (templPrefix+'SingleTbar_t.root',   nonWJetsSF*gSF*SingTopbarT_xs/SingTopbarT_num),
         (templPrefix+'SingleTbar_s.root',   nonWJetsSF*gSF*SingTopbarS_xs/SingTopbarS_num),
         (templPrefix+'SingleTbar_tw.root',  nonWJetsSF*gSF*SingTopbartW_xs/SingTopbartW_num),
-		], varList, 8, fillStyle)
+		], varList, ROOT.kMagenta, fillStyle)
 	
 	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, 'W+jets', [
         #(templPrefix+'WJets.root', WJetsSF*gSF*WJets_xs/WJets_num),
 		(templPrefix+'W3Jets.root', WJetsSF*gSF*W3Jets_xs/W3Jets_num),
 		(templPrefix+'W4Jets.root', WJetsSF*gSF*W4Jets_xs/W4Jets_num),
-		], varList, 7, fillStyle)
+		], varList, ROOT.kGreen-3, fillStyle)
 		
 	MCtemplates['ZJets'] = distribution('ZJets'+titleSuffix, 'Z+jets', [
-		(templPrefix+'ZJets.root', nonWJetsSF*gSF*ZJets_xs/ZJets_num)], varList, 9, fillStyle)
+		(templPrefix+'ZJets.root', nonWJetsSF*gSF*ZJets_xs/ZJets_num)], varList, ROOT.kAzure-2, fillStyle)
 
 	
 	# MCtemplates['Other'] = distribution('Diboson'+titleSuffix, [
@@ -286,7 +492,7 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	return MCtemplates
 
 
-def makeAllPlots(varList, inputDir, dataDir, outDirName):
+def makeAllPlots(varList, inputDir, dataDir, outDirName,savePlots = True):
 	# load templates PreSel	
 	DataTempl = loadDataTemplate(varList, dataDir, 'hist_1pho_top_')
 
@@ -303,7 +509,7 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 
 	saveTemplatesToFile([DataTempl] + MCTempl, ['MET',lep+'1'+lep+'2Mass'], outDirName+'/templates_presel.root')
 	
-	plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
+	if savePlots: plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
 	
 
 
@@ -334,19 +540,48 @@ varList_all = ['nVtx',
 
 
 if isElectron:
-	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle/'
-	DataHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle/'
+	if systName == '':
+		InputHist = '/uscms_data/d2/dnoonan/Electrons/TwoEleHists/hist_bins_twoEle/'
+		DataHist = '/uscms_data/d2/dnoonan/Electrons/TwoEleHists/hist_bins_twoEle/'
+		# InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto_Oct27/hist_bins_twoEle/'
+		# DataHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto_Oct27/hist_bins_twoEle/'
+		
+		makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/plots')
+		
+		InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto_Oct27/hist_bins_twoEle_zeroB/'
+		DataHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto_Oct27/hist_bins_twoEle_zeroB/'
+		
+		makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check_zeroB/plots')
+	else:
+		InputHist = '/uscms_data/d2/dnoonan/Electrons/TwoEleHists/hist_bins_twoEle_%s/'%systName
+		DataHist = '/uscms_data/d2/dnoonan/Electrons/TwoEleHists/hist_bins_twoEle/'
 
-	makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/plots')
+		if not os.path.exists('di_ele_cross_check/%s'%systName):
+			os.mkdir('di_ele_cross_check/%s'%systName)
+			os.mkdir('di_ele_cross_check/%s/plots'%systName)
+			os.mkdir('di_ele_cross_check/%s/plots/presel'%systName)
+		makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/%s/plots'%systName, savePlots = False)
 
-	InputHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle_zeroB/'
-	DataHist = '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins_twoEle_zeroB/'
-
-	makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check_zeroB/plots')
+		# makeAllPlots(varList_all, InputHist, DataHist, 'di_ele_cross_check/plots')
+		
 
 if isMuon:
-	InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins_twoMu/'
-	DataHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins_twoMu/'
+	if systName == '':
+		# InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto_Oct27/hist_bins_twoMu/'
+		# DataHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto_Oct27/hist_bins_twoMu/'
+		InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/TwoMuHists/hist_bins_twoMu/'
+		DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/TwoMuHists/hist_bins_twoMu/'
 
-	makeAllPlots(varList_all, InputHist, DataHist, 'di_mu_cross_check/plots')
+		makeAllPlots(varList_all, InputHist, DataHist, 'di_mu_cross_check/plots')
+	else:
+		InputHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/TwoMuHists/hist_bins_twoMu_%s/'%systName
+		DataHist = '/uscms_data/d2/dnoonan/TTGammaElectrons/TwoMuHists/hist_bins_twoMu/'
+#		DataHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto_Oct27/hist_bins_twoMu/'
+		
+		if not os.path.exists('di_mu_cross_check/%s'%systName):
+			os.mkdir('di_mu_cross_check/%s'%systName)
+			os.mkdir('di_mu_cross_check/%s/plots'%systName)
+			os.mkdir('di_mu_cross_check/%s/plots/presel'%systName)
+
+		makeAllPlots(varList_all, InputHist, DataHist, 'di_mu_cross_check/%s/plots'%systName, savePlots=False)
 

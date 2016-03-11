@@ -1,6 +1,27 @@
 import os
 import sys
 
+SystNames = {
+'Nsignal':'Likelihood fit uncertainty',
+'Btag': 'b-tagging scale factor',
+'EleFakeSF': 'Electron fake rate',
+'JEC': 'Jet energy scale',
+'JER': 'Jet energy resolution',
+'PU': 'Pileup',
+'QCD': 'Multijet estimate',
+'ZJetsSF': '\\ZJets scale factor',
+'EleEff': 'Electron efficiency',
+'elesmear': 'Electron energy scale',
+'otherMC': 'Background normalization',
+'pho': 'Photon energy scale',
+'toppt': 'Top \\pt reweighting',
+'musmear': 'Muon energy scale',
+'MuEff': 'Muon efficiency',
+'PDF': 'PDF',
+'Scale': 'Fact. and renorm. scale',
+'Matching': 'ME/PS matching thresh.',
+'TopMass': 'Top quark mass',
+}
 
 def getTable(args):
 
@@ -23,20 +44,38 @@ def getTable(args):
     temp = os.listdir(directory)
 
     fileList = list()
+    
+    systList = SystNames.keys()
+    systList.remove('Nsignal')
+    if 'ele' in directory:
+        systList.remove('musmear')
+        systList.remove('MuEff')
+    if 'mu' in directory:
+        systList.remove('elesmear')
+        systList.remove('EleEff')
+
+    systList.remove('PDF')
+    # systList.remove('Scale')
+    # systList.remove('Matching')
+    # systList.remove('TopMass')
+
+    for syst in systList:
+        fileList.append("%s/ratio_%s_up.txt"%(directory,syst))
+        fileList.append("%s/ratio_%s_down.txt"%(directory,syst))
 
 
-    for val in temp:
-        if 'ratio_' in val and not 'nominal' in val:
-            if 'ele' in directory and 'musmear' in val:
-                continue
-            elif 'ele' in directory and 'MuEff' in val:
-                continue
-            elif 'mu' in directory and 'elesmear' in val:
-                continue
-            elif 'mu' in directory and 'EleEff' in val:
-                continue
-            else:
-                fileList.append(val)
+    # for val in temp:
+    #     if 'ratio_' in val and not 'nominal' in val:
+    #         if 'ele' in directory and 'musmear' in val:
+    #             continue
+    #         elif 'ele' in directory and 'MuEff' in val:
+    #             continue
+    #         elif 'mu' in directory and 'elesmear' in val:
+    #             continue
+    #         elif 'mu' in directory and 'EleEff' in val:
+    #             continue
+    #         else:
+    #             fileList.append(val)
 
 
     nominalVal = 0
@@ -45,7 +84,7 @@ def getTable(args):
     nominalVisVal = 0
     signalVisUnc = 0
     
-    _file = file(directory+"ratio_nominal.txt","r")
+    _file = open(directory+"ratio_nominal.txt","r")
     isResult = False
     isVisResult = False
     for line in _file:
@@ -73,14 +112,14 @@ def getTable(args):
 
     for systFile in fileList:
 
-        systName = systFile.split('.')[0].split('_')[1:3]
+        systName = systFile.split('.')[0].split('_')[2:4]
 
         if not unc.has_key(systName[0]): 
             unc[systName[0]] = [[0,0],[0,0]]
             values[systName[0]] = [0,0]
             visvalues[systName[0]] = [0,0]
 
-        _file = file(directory+systFile,"r")
+        _file = open(systFile,"r")
         isResult = False
         for line in _file:
             if isResult:
@@ -119,18 +158,18 @@ def getTable(args):
             table += '\\hline\n'
         for w in sorted(unc.items(),key=lambda x: x[1][0][2],reverse=True):
             if twikiFormat:
-                table += "| %s  |  %.3f  |  %.3f  | \n" % (w[0], w[1][0][2], w[1][1][2])
+                table += "| %s  |  %.1f  |  %.1f  | \n" % (SystNames[w[0]], w[1][0][2], w[1][1][2])
             else:
-                table += "%s   & %.3f & %.3f \\\\ \n" % (w[0], w[1][0][2], w[1][1][2])
+                table += "%s   & %.1f & %.1f \\\\ \n" % (SystNames[w[0]], w[1][0][2], w[1][1][2])
     
     
         if not twikiFormat:
             table += '\\hline \n'
-            table += 'Total  &  %.3f  &  %.3f  \\\\ \n' % (total**0.5, totalVis**0.5)
+            table += 'Total  &  %.1f  &  %.1f  \\\\ \n' % (total**0.5, totalVis**0.5)
             table += '\\hline \n'
             table += '\\end{tabular} \n'
         else:
-            table += '| Total  |  %.3f  |  %.3f  | \n' % (total**0.5, totalVis**0.5)
+            table += '| Total  |  %.1f  |  %.1f  | \n' % (total**0.5, totalVis**0.5)
 
     else:
         if twikiFormat:
@@ -144,9 +183,9 @@ def getTable(args):
             table += '\\hline \n'
         for w in sorted(unc.items(),key=lambda x: x[1][0][2],reverse=True):
             if twikiFormat:
-                table +=  "| %s  |  %.3f  |  %.3f  |  %.3f  |  %.3f  | \n" % (w[0], w[1][0][0], w[1][0][1],  w[1][1][0], w[1][1][1])
+                table +=  "| %s  |  %.1f  |  %.1f  |  %.1f  |  %.1f  | \n" % (w[0], w[1][0][0], w[1][0][1],  w[1][1][0], w[1][1][1])
             else:
-                table +=  "%s   & %.3f & %.3f & %.3f & %.3f \\\\ \n" % (w[0], w[1][0][0], w[1][0][1],  w[1][1][0], w[1][1][1])
+                table +=  "%s   & %.1f & %.1f & %.1f & %.1f \\\\ \n" % (w[0], w[1][0][0], w[1][0][1],  w[1][1][0], w[1][1][1])
     
     
         if not twikiFormat:

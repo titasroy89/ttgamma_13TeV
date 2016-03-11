@@ -14,6 +14,7 @@ M3BinWidth = 40.
 import CMS_lumi
 isElectron = False
 isMuon = False
+TGaxis.SetMaxDigits(3)
 
 def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotName='', savePlots = True):
 	# RooFit variables
@@ -90,7 +91,7 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 #		c1.SetTickx(0)
 #		c1.SetTicky(0)
 		plotter.Draw()
-		plotter.GetYaxis().SetTitleOffset(1.4)
+#		plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("MET (GeV)")
 		plotter.GetYaxis().SetTitle("Events / 5 GeV")
 		leg.Draw()
@@ -99,8 +100,9 @@ def makeFit(varname, varmin, varmax, signalHist, backgroundHist, dataHist, plotN
 		if isMuon: channelText = "#mu+jets"
 		if isElectron: channelText = "e+jets"
 
-		CMS_lumi.extraText = channelText
+		CMS_lumi.channelText = channelText
 		CMS_lumi.writeExtraText = True
+		CMS_lumi.writeChannelText = True
 		CMS_lumi.CMS_lumi(canvas, 2, 33)
 
 
@@ -121,6 +123,7 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
         sihihArgSet = RooArgSet()
         sihihArgSet.add(sihihVar)
 
+
         # create PDFs
         signalDataHist = RooDataHist('signalDataHist','signal RooDataHist', sihihArgList, signalHist)
         signalPdf = RooHistPdf('signalPdf',varname+' of signal', sihihArgSet, signalDataHist)
@@ -135,9 +138,6 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
         otherMCPdf = RooHistPdf('otherMCPdf',varname+' of otherMC', sihihArgSet, otherMCDataHist)
 
 
- 
-        
-
         # data
         dataDataHist = RooDataHist('data '+varname, varname+' in Data', sihihArgList, dataHist)
 
@@ -150,10 +150,23 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
                 bkgfname = 'background total'
                 qcdfname = ' qcd total'
 		otherMCfname = 'other MC total'
-	signalIntegral   = signalHist.Integral()
-	bkgIntegral      = backgroundHist.Integral()
-	qcdIntegral      = qcdHist.Integral()
-	otherMCIntegral  = otherMCHist.Integral()
+
+        lowfitBin = dataHist.FindBin(varmin+0.01)
+        highfitBin = dataHist.FindBin(varmax-0.01)
+
+	signalIntegral   = signalHist.Integral(lowfitBin, highfitBin)
+        bkgIntegral      = backgroundHist.Integral(lowfitBin, highfitBin)
+        qcdIntegral      = qcdHist.Integral(lowfitBin, highfitBin)
+        otherMCIntegral  = otherMCHist.Integral(lowfitBin, highfitBin)
+
+	# signalIntegral   = signalHist.Integral()
+	# bkgIntegral      = backgroundHist.Integral()
+	# qcdIntegral      = qcdHist.Integral()
+	# otherMCIntegral  = otherMCHist.Integral()
+
+	# print signalIntegral
+	# print bkgIntegral
+
         signalVar = RooRealVar(sfname,sfname, signalIntegral,0.,5.*signalIntegral)
         bkgVar = RooRealVar(bkgfname,bkgfname, bkgIntegral,0.,5.*bkgIntegral)
         qcdVar = RooRealVar(qcdfname,qcdfname, qcdIntegral,0.5*qcdIntegral,1.5*qcdIntegral)
@@ -180,9 +193,10 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 
 
 	sumPdf = RooAddPdf('totalPdf','signal+background+qcd', listPdfs, listcoeff )
-        
+
         # fit
-        sumPdf.fitTo( dataDataHist, RooFit.InitialHesse(True),RooFit.Minos(True),RooFit.ExternalConstraints(constraints), RooFit.Extended(True), RooFit.SumW2Error(kFALSE), RooFit.PrintLevel(-1) )
+        sumPdf.fitTo( dataDataHist, RooFit.Range(varmin, varmax), RooFit.InitialHesse(True),RooFit.Minos(True),RooFit.ExternalConstraints(constraints), RooFit.Extended(True), RooFit.SumW2Error(kFALSE), RooFit.PrintLevel(-1) )
+#        sumPdf.fitTo( dataDataHist, RooFit.InitialHesse(True),RooFit.Minos(True),RooFit.ExternalConstraints(constraints), RooFit.Extended(True), RooFit.SumW2Error(kFALSE), RooFit.PrintLevel(-1) )
 
         if plotName!='':
                 # plot results
@@ -237,7 +251,7 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 
 
                 plotter.Draw()
-                plotter.GetYaxis().SetTitleOffset(1.4)
+#                plotter.GetYaxis().SetTitleOffset(1.4)
 		plotter.GetXaxis().SetTitle("M3 (GeV)")
 		plotter.GetYaxis().SetTitle("Events / 10 GeV")
 		leg.Draw()
@@ -246,8 +260,9 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 		if isMuon: channelText = "#mu+jets"
 		if isElectron: channelText = "e+jets"
 
-		CMS_lumi.extraText = channelText
+		CMS_lumi.channelText = channelText
 		CMS_lumi.writeExtraText = True
+		CMS_lumi.writeChannelText = True
 
 		CMS_lumi.CMS_lumi(canvas, 2, 33)
 
@@ -256,7 +271,7 @@ def makenewFit(varname, varmin, varmax, signalHist, backgroundHist, otherMCHist,
 		canvas.Print(plotName, ".png")
 		canvas.Print(plotName.replace('png', 'pdf'), ".pdf")
         print 'fit returned value signal:',signalVar.getVal(),' +- ',signalVar.getError()
-        
+
         return (signalVar.getVal(),signalVar.getError(),   bkgVar.getVal(),bkgVar.getError(), otherMCVar.getVal(),otherMCVar.getError(),qcdVar.getVal(),qcdVar.getError())
 
 
@@ -268,6 +283,8 @@ def get1DHist(filename, histname):
 	if filename not in openfiles:
 		openfiles[filename] = TFile(filename,'READ')
 	file = openfiles[filename]
+
+	print file, histname
 		
 	hist = file.Get(histname)
 	hist.SetDirectory(0)
@@ -402,13 +419,13 @@ def doM3fit(savePlots=False, plotName = ''):
 	TopHist.Add(get1DHist(M3file, 'TTGamma_'+varToFit))
 
 
-
 	WJHist = get1DHist(M3file, 'WJets_'+varToFit)
 	
         
 	otherMCHist= get1DHist(M3file, 'ZJets_'+varToFit)
 	otherMCHist.Add(get1DHist(M3file, 'SingleTop_'+varToFit))
-	otherMCHist.Add(get1DHist(M3file, 'Vgamma_'+varToFit))
+	otherMCHist.Add(get1DHist(M3file, 'Wgamma_'+varToFit))
+	otherMCHist.Add(get1DHist(M3file, 'Zgamma_'+varToFit))
 	
 	QCDHist = get1DHist(M3file, 'QCD_'+varToFit)
 
@@ -431,9 +448,9 @@ def doM3fit(savePlots=False, plotName = ''):
 	if plotName=='':
 		plotName = 'plots/'+varToFit+'_fit.png'
 
-	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 0.0, 800.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, plotName, savePlots)
-	lowfitBin = DataHist.FindBin(0.01)
-	highfitBin = DataHist.FindBin(799.99)
+	(m3Top, m3TopErr, m3Wjets, m3WjetsErr, m3otherMC, m3otherMCerr,m3QCD,m3QCDerr) = makenewFit(varToFit+'(GeV)', 40.0, 600.0, TopHist, WJHist, otherMCHist, QCDHist, DataHist, plotName, savePlots)
+	lowfitBin = DataHist.FindBin(40.01)
+	highfitBin = DataHist.FindBin(599.99)
 			
 	dataInt = DataHist.Integral(lowfitBin,highfitBin)
 	topInt = TopHist.Integral(lowfitBin,highfitBin)
@@ -442,6 +459,16 @@ def doM3fit(savePlots=False, plotName = ''):
 	otherMCInt = otherMCHist.Integral(lowfitBin,highfitBin)
 	TopSF = m3Top/ topInt
 	TopSFerror = m3TopErr/ topInt
+
+	print
+	print '#'*80
+	print 'Total amount of Top events before fit:', topInt
+	print 'Total amount of WJets events before fit:', WJInt
+	print 'Total amount of QCD events before fit:', QCDInt
+	print 'Total amount of Other MC events before fit:', otherMCInt
+	print '#'*80
+
+
 	
 	print
 	print '#'*80
@@ -467,5 +494,7 @@ def doM3fit(savePlots=False, plotName = ''):
 	print 'Correction to QCD scale factor: ', QCDSF, ' +-',QCDSFerror,'(fit error only)'
 	print 'Correction to OtherMC scale factor: ', otherMCSF, ' +-',otherMCSFerror,'(fit error only)'
 	print '#'*80
+
+
 	return (TopSF, TopSFerror, WJetsSF, WJetsSFerror, otherMCSF, otherMCSFerror, QCDSF, QCDSFerror)
 

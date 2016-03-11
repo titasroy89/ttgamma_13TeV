@@ -3,7 +3,7 @@ from ROOT import *
 
 latexFormat = True
 
-inputFileName = "templates_barrel_scaled_afterPhotonM3.root"
+inputFileName = "templates_barrel_scaled.root"
 
 photonGen = ['fake', 'electron', 'signal']
 
@@ -19,9 +19,51 @@ jetToPhotonSFerr = 0.
 egammaSF = 1.47
 egammaSFerr = 0.19
 
+def printPreselTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
+    samples =     ['TTGamma',  'TTJets',  'Wgamma',  'WJets',  'Zgamma',  'ZJets',  'SingleTop', 'QCD']
+    sampleNames = ['\\ttgamma','\\ttjets','\\Wgamma','\\Wjets','\\Zgamma','\\Zjets','Single Top', 'QCD Multijet'] 
+    inputFile = TFile(inputFileName,"READ")
+    values = []
+    valuesErrs = []
+    for s in samples:
+            histName = s + "_MET"
+            tempHist = inputFile.Get(histName)
+            err = ROOT.Double(0.0)
+            val = tempHist.IntegralAndError(-1,-1,err)
+            values.append(val)
+            valuesErrs.append(err)
+    tempHist = inputFile.Get("Data_MET")
+    dataErr = ROOT.Double(0.0)
+    dataTot = tempHist.IntegralAndError(-1,-1,dataErr)
+
+    inputFile.Close("R")
+    total = 0.
+    totalErr = 0.
+    
+    table = ''
+    table +=  '\\begin{tabular}{l c c c c} \n'
+    table +=  '\\hline\n'
+    table +=  'Sample & Events\\\\ \n'
+    table +=  '\\hline\n'
+    for i in range(len (values)):
+        table += '%s & $%.1f \\pm %.1f$ \\\\ \n' % (sampleNames[i], values[i], valuesErrs[i])
+        total += values[i]
+        totalErr += valuesErrs[i]**2
+
+    totalErr = totalErr**0.5
+    table += '\\hline \n'
+    table += "Totals & $%.1f \\pm %.1f$ \\\\ \n" % (total, totalErr)
+    table += "Data & & $%.1f \\pm %.1f$ \\\\ \n" % (dataTot, dataErr)
+    table += '\\hline \n'
+    table += '\\end{tabular} \n'
+    
+    return table
+
+
 def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
 
-    samples = ['TTGamma','TTJets', 'Wgamma', 'WJets', 'Zgamma', 'ZJets', 'SingleTop']
+    samples =     ['TTGamma',  'TTJets',  'Wgamma',  'WJets',  'Zgamma',  'ZJets',  'SingleTop']
+    sampleNames = ['\\ttgamma','\\ttjets','\\Wgamma','\\Wjets','\\Zgamma','\\Zjets','Single Top'] 
     inputFile = TFile(inputFileName,"READ")
     values = []
     valuesErrs = []
@@ -43,22 +85,22 @@ def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
             ## Apply TTgamma, Vgamma, and jetToPhoton scale factors
             if 'TTGamma' in s:
                 valSF *= ttgammaSF
-                err += (ttgammaSFerr/ttgammaSF)**2
+#                err += (ttgammaSFerr/ttgammaSF)**2
             if 'Wgamma' in s or 'Zgamma' in s:
                 valSF *= vgammaSF
-                err += (vgammaSFerr/vgammaSF)**2
+#                err += (vgammaSFerr/vgammaSF)**2
             if 'electron' in gen:
                 valSF *= egammaSF
-                err += (egammaSFerr/egammaSF)**2
+#                err += (egammaSFerr/egammaSF)**2
             if 'fake' in gen:
                 valSF *= jetToPhotonSF
-                err += (jetToPhotonSFerr/jetToPhotonSF)**2
-            if 'TTGamma' in s or 'TTJets' in s:
-                err += TopSFRelErr**2
-            if 'WJets' in s:
-                err += WJetsSFRelErr**2
-            if 'WGamma' in s:
-                err += WgammaSFRelErr**2
+#                err += (jetToPhotonSFerr/jetToPhotonSF)**2
+#            if 'TTGamma' in s or 'TTJets' in s:
+#                err += TopSFRelErr**2
+#            if 'WJets' in s:
+#                err += WJetsSFRelErr**2
+#            if 'WGamma' in s:
+#                err += WgammaSFRelErr**2
                 
 
             tempVal.append(val*valSF)
@@ -83,19 +125,23 @@ def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
     totals = [0.,0.,0.,0.]
     totalsErr = [0.,0.,0.,0.]
 
+    table = ''
+    table += '%f,%f,%f,%f,%f,%f,%f' %(TopSFRelErr, WJetsSFRelErr, WgammaSFRelErr, ttgammaSFerr/ttgammaSF, vgammaSFerr/vgammaSF, jetToPhotonSFerr/jetToPhotonSF, egammaSFerr/egammaSF)
+    table += '\n\n'
     samples.append('QCD')
-    if latexFormat:
-        print '\\begin{tabular}{l c c c c}'
-        print '\\hline'
-        print 'Sample & Total & Fake jet & Electron & Photon \\\\'
-        print '\\hline'
+    sampleNames.append('QCD multijet')
+    if latexFormat:        
+        table +=  '\\begin{tabular}{l c c c c} \n'
+        table +=  '\\hline\n'
+        table +=  'Sample & Total & Fake jet & Electron & Photon \\\\ \n'
+        table +=  '\\hline\n'
     else:
-        print '| *Sample* | *Total* | *Fake jet* | *Electron* | *Photon* |'
+        table += '| *Sample* | *Total* | *Fake jet* | *Electron* | *Photon* | \n'
     for i in range(len(values)):
         if latexFormat:
-            print "%s & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ \\\\" % (samples[i], (values[i][0]+values[i][1]+values[i][2]), (valuesErrs[i][0]**2+valuesErrs[i][1]**2+valuesErrs[i][2]**2)**0.5, values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
+            table += "%s & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ \\\\ \n" % (sampleNames[i], (values[i][0]+values[i][1]+values[i][2]), (valuesErrs[i][0]**2+valuesErrs[i][1]**2+valuesErrs[i][2]**2)**0.5, values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
         else:
-            print "| %s | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f |" % (samples[i], (values[i][0]+values[i][1]+values[i][2]), (valuesErrs[i][0]**2+valuesErrs[i][1]**2+valuesErrs[i][2]**2)**0.5, values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
+            table += "| %s | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | \n" % (sampleNames[i], (values[i][0]+values[i][1]+values[i][2]), (valuesErrs[i][0]**2+valuesErrs[i][1]**2+valuesErrs[i][2]**2)**0.5, values[i][0], valuesErrs[i][0], values[i][1], valuesErrs[i][1], values[i][2], valuesErrs[i][2])
 
         totals[0] += values[i][0]
         totals[0] += values[i][1]
@@ -116,15 +162,61 @@ def printMCTable(TopSFRelErr = 0., WJetsSFRelErr = 0., WgammaSFRelErr = 0.):
     totalsErr[2] = totalsErr[2]**0.5
     totalsErr[3] = totalsErr[3]**0.5
     if latexFormat:
-        print '\\hline'
-        print "Totals & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ \\\\" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
-        print 'Data & $%.1f \\pm %.1f$ &  -  &  -  \\\\' % (dataTot, dataErr)
-        print '\\hline'
-        print '\\end{tabular}'
+        table += '\\hline \n'
+        table += "Totals & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ & $%.1f \\pm %.1f$ \\\\ \n" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
+        table += 'Data & $%.1f \\pm %.1f$ &  -  &  -  \\\\ \n' % (dataTot, dataErr)
+        table += '\\hline \n'
+        table += '\\end{tabular} \n'
     else:
-        print "| Totals | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f |" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
-        print '| Data | %.1f +- %.1f |  -  |  -  | - |' % (dataTot, dataErr)
+        table += "| Totals | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | %.1f +- %.1f | \n" % (totals[0], totalsErr[0], totals[1], totalsErr[1], totals[2], totalsErr[2], totals[3], totalsErr[3])
+        table += '| Data | %.1f +- %.1f |  -  |  -  | - | \n' % (dataTot, dataErr)
 
-    return
+    return table
 
 #  LocalWords:  latexFormat
+
+
+def printMCTableCSV():
+    samples =     ['TTGamma',  'TTJets',  'Wgamma',  'WJets',  'Zgamma',  'ZJets',  'SingleTop']
+    sampleNames = ['\\ttgamma','\\ttjets','\\Wgamma','\\Wjets','\\Zgamma','\\Zjets','Single Top'] 
+    inputFile = TFile(inputFileName,"READ")
+    values = []
+    valuesErr = []
+    for s in samples:
+        tempVal = []
+        tempErr = []
+        for gen in photonGen:
+            valSF = 1.
+            if gen=='electron': valSF = egammaSF
+            histName = s + "_" + gen + "_MET"
+            tempHist = inputFile.Get(histName)
+            err = ROOT.Double(0.0)
+            val = tempHist.IntegralAndError(-1,-1,err)
+
+
+            tempVal.append(val*valSF)
+            tempErr.append(err*valSF)
+
+        values.append(tempVal)
+        valuesErr.append(tempErr)
+
+    tempHist = inputFile.Get("QCD_MET")
+    err = ROOT.Double(0.0)
+    val = tempHist.IntegralAndError(-1,-1,err)*jetToPhotonSF
+
+    values.append([val,0.,0.])
+    valuesErr.append([err,0.,0.])
+
+    tempHist = inputFile.Get("Data_MET")
+    dataErr = ROOT.Double(0.0)
+    dataTot = tempHist.IntegralAndError(-1,-1,dataErr)
+
+    inputFile.Close("R")
+
+    samples.append('QCD')
+    table = ''
+    for i in range(len(values)):
+        table += "%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n" % (samples[i], values[i][2],valuesErr[i][2], values[i][1],valuesErr[i][1], values[i][0],valuesErr[i][0])
+
+    table += '%f,%f,,\n'%(dataTot,dataErr)
+    return table

@@ -1,3 +1,4 @@
+import sys
 import glob
 import ROOT
 
@@ -33,10 +34,11 @@ class distribution:
 		self.name = name
 		self.legName = legName
 		self.histList = {}
-		for files,scale in inputFilesAndScales:
+		for files,scale in inputFilesAndScales:			
 			for filename in glob.glob(files):
 				print 'reading file ',filename
-				tf = ROOT.TFile(filename, 'READ')
+#				tf = ROOT.TFile(filename, 'READ')
+				tf = ROOT.TFile.Open(filename)
 				for histName in histNameList:
 					#print 'extracting histogram ',histName
 					tempHist = tf.Get(histName)
