@@ -86,8 +86,8 @@ void Selector::filter_photons(){
 		Pho03NeuHadIso.push_back( max(0., tree->phoPFNeuIso_->at(phoInd) - tree->rho2012_ * phoEffArea03NeuHad(eta) ));
 		
 		Pho03PhoIso.push_back( max(0., tree->phoPFPhoIso_->at(phoInd)  - tree->rho2012_ * phoEffArea03Pho(eta) ));
-		Pho03PhoSCRIso.push_back(   max(0., tree->phoSCRPhoIso_->at(phoInd) - tree->rho2012_ * phoEffArea03Pho(eta) );
-		Pho03RandPhoIso.push_back(  max(0., tree->phoRandConePhoIso_->at(phoInd) - tree->rho2012_ * phoEffArea03Pho(eta) );
+		Pho03PhoSCRIso.push_back(   max(0., tree->phoSCRPhoIso_->at(phoInd) - tree->rho2012_ * phoEffArea03Pho(eta) ));
+		Pho03RandPhoIso.push_back(  max(0., tree->phoRandConePhoIso_->at(phoInd) - tree->rho2012_ * phoEffArea03Pho(eta) ));
 		
 		// manual spike cleaning (was necessary before)
 		//if (dR(tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd), -1.76, 1.37) < 0.05) continue;

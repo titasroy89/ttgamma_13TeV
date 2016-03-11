@@ -66,6 +66,7 @@ public:
 	TH1F* cutFlowWeight;
 	TH1F* genPhoRegionWeight;
 	TH1F* genPhoRegionWeight_1l_2l;
+	TH1F* genPhoRegionWeight_1fiducial;
 	TH1F* genPhoMinDR;
 
 private:

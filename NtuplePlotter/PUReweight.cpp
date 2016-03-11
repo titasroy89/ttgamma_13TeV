@@ -21,7 +21,7 @@ PUReweight::PUReweight(int nFiles, char** fileNames, std::string PUfilename){
 	TH1F* mcPU = NULL;
 	for(int nmcfile = 0; nmcfile<nFiles; nmcfile++){
 		std::cout << "reading file " << std::string(fileNames[nmcfile]) << std::endl;
-		TFile* mcFile = new TFile(fileNames[nmcfile],"READ");
+		TFile* mcFile = TFile::Open(fileNames[nmcfile],"READ");
 		if(!(mcFile->Get("ggNtuplizer/hPU"))) {
 			std::cout << "no hPU histogram here!" << std::endl;
 			delete PUweightHist;
@@ -45,8 +45,10 @@ PUReweight::~PUReweight(){
 
 double PUReweight::getWeight(int nPUInfo, std::vector<int> *puBX, std::vector<int> *nPU){
 	double PUweight=0.0;
-	if(!PUweightHist) {std::cout << "you are calling getWeight by mistake" << std::endl; return 1.0;}
-
+	if(!PUweightHist) {
+	  std::cout << "you are calling getWeight by mistake" << std::endl; 
+	  return 1.0;}
+	
 	for(int puInd=0; puInd<nPUInfo; ++puInd){
 		if( puBX->at(puInd) == 0 ){
 			PUweight = PUweightHist->GetBinContent(PUweightHist->GetXaxis()->FindBin(nPU->at(puInd)));

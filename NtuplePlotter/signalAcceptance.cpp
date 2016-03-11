@@ -4,6 +4,7 @@
 #include"EventTree.h"
 #include"Selector.h"
 #include"EventPick.h"
+#include"TVector2.h"
 
 void saveHist(TH1F* hist, TFile* file);
 void doJER(EventTree* tree);
@@ -24,16 +25,67 @@ void fillCategory(EventTree* tree, TH1F* hist, double weight){
 	int MuM = 0;
 	int TauP = 0;
 	int TauM = 0;
+	int ElePfid = 0;
+	int EleMfid = 0;
+	int MuPfid = 0;
+	int MuMfid = 0;
+	int nNufid = 0;
+
+	int nPhofid = 0;
+	int nJetfid = 0;
+	int nBJetfid = 0;
+
+	TVector2 MET = TVector2(0,0);
+	TVector2 tempNu = TVector2(0,0);
+
 	for( int mcI = 0; mcI < tree->nMC_; ++mcI){
-		if(abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10){
-			if( tree->mcPID->at(mcI) == 11 ) EleP = 1;
-			if( tree->mcPID->at(mcI) == -11 ) EleM = 1;
-			if( tree->mcPID->at(mcI) == 13 ) MuP = 1;
-			if( tree->mcPID->at(mcI) == -13 ) MuM = 1;
-			if( tree->mcPID->at(mcI) == 15) TauP = 1;
-			if( tree->mcPID->at(mcI) == -15) TauM = 1;
-		}
+	  if(abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10){
+	    if( tree->mcPID->at(mcI) == 11 ) EleP = 1;
+	    if( tree->mcPID->at(mcI) == -11 ) EleM = 1;
+	    if( tree->mcPID->at(mcI) == 13 ) MuP = 1;
+	    if( tree->mcPID->at(mcI) == -13 ) MuM = 1;
+	    if( tree->mcPID->at(mcI) == 15) TauP = 1;
+	    if( tree->mcPID->at(mcI) == -15) TauM = 1;
+	  }
+	  if((abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10) || (abs(tree->mcMomPID->at(mcI))==15 && tree->mcParentage->at(mcI)==26)){		  
+	    if( tree->mcPID->at(mcI) == 11 ) {
+	      if (tree->mcPt->at(mcI) > 35 && (fabs(tree->mcEta->at(mcI)) < 2.5 && !(fabs(tree->mcEta->at(mcI)) > 1.4442 && fabs(tree->mcEta->at(mcI))<1.566))) ElePfid += 1;
+	    }
+	    if( tree->mcPID->at(mcI) == -11 ) {
+	      if (tree->mcPt->at(mcI) > 35 && (fabs(tree->mcEta->at(mcI)) < 2.5 && !(fabs(tree->mcEta->at(mcI)) > 1.4442 && fabs(tree->mcEta->at(mcI))<1.566))) EleMfid += 1;
+	    }
+	    if( tree->mcPID->at(mcI) == 13 ) {
+	      if (tree->mcPt->at(mcI) > 26 && fabs(tree->mcEta->at(mcI)) < 2.1) MuPfid += 1;
+	    }
+	    if( tree->mcPID->at(mcI) == -13 ) {
+	      if (tree->mcPt->at(mcI) > 26 && fabs(tree->mcEta->at(mcI)) < 2.1) MuMfid += 1;
+	    }
+	  }
+	  if( fabs(tree->mcPID->at(mcI)) == 12 || fabs(tree->mcPID->at(mcI)) == 14 || fabs(tree->mcPID->at(mcI)) == 16 ) {
+	    if (tree->mcPt->at(mcI) > 20){
+	      nNufid += 1;
+	      //cout << nNufid << "\t" << tree->run_ << tree->lumis_ << tree->event_ << "\t" << mcI << "\t" <<  tree->mcPt->at(mcI) << "\t" << tree->mcEta->at(mcI) << "\t" << tree->mcPhi->at(mcI) << endl;
+	    }
+	    tempNu.SetMagPhi(tree->mcPt->at(mcI),tree->mcPhi->at(mcI));
+	    MET += tempNu;
+	    //	    cout << nNufid << "\t" << tree->run_ << tree->lumis_ << tree->event_ << "\t" << mcI << "\t" << tree->mcPID->at(mcI) << "\t" <<  tree->mcPt->at(mcI) << "\t" << tree->mcEta->at(mcI) << "\t" << tree->mcPhi->at(mcI) << "\t" << MET.Mod() << endl;
+	  }
+
+	  if(tree->mcPID->at(mcI) == 22 && 
+	     (tree->mcParentage->at(mcI)==2 || tree->mcParentage->at(mcI)==10 || tree->mcParentage->at(mcI)==26) && 
+	     tree->mcPt->at(mcI) > 25 && 
+	     fabs(tree->mcEta->at(mcI)) < 1.4442){
+	    nPhofid += 1;
+	  }
+
+	  if( abs(tree->mcPID->at(mcI)) < 6 && (abs(tree->mcMomPID->at(mcI))==24 || abs(tree->mcMomPID->at(mcI))==6 ) && tree->mcPt->at(mcI) > 30 && abs(tree->mcEta->at(mcI))<2.4 ) {
+	    nJetfid += 1;
+	    if (abs(tree->mcMomPID->at(mcI))==6 && abs(tree->mcPID->at(mcI))==5){
+	      nBJetfid += 1;
+	    }
+	  }
 	}
+	
 	hist->Fill(1.0, weight); // Total
 	int nEle = EleP + EleM;
 	int nMu = MuP + MuM;
@@ -41,6 +93,96 @@ void fillCategory(EventTree* tree, TH1F* hist, double weight){
 	if( nEle + nMu + nTau == 0) hist->Fill(2.0, weight); // All Had
 	if( nEle + nMu + nTau == 1) hist->Fill(3.0, weight); // Single Lepton
 	if( nEle + nMu + nTau == 2) hist->Fill(4.0, weight); // Di Lepton
+
+	int nElefid = ElePfid + EleMfid;
+	int nMufid = MuPfid + MuMfid;
+
+	if ( nEle==1 && nMu==0 && nTau==0 ) hist->Fill(6.0, weight);
+	if ( nEle==0 && nMu==1 && nTau==0 ) hist->Fill(7.0, weight);
+	if ( nEle==0 && nMu==0 && nTau==1 ) hist->Fill(8.0, weight);
+	if ( nElefid==1 && nMufid==0) hist->Fill(9.0, weight); //Ejets final state (generated)
+	if ( nElefid==0 && nMufid==1) hist->Fill(10.0, weight); //Mujets final state (generated)
+
+	// if ( nElefid==1 && nMufid==0) hist->Fill(6.0, weight); //Ejets final state (generated)
+	// if ( nElefid==2 && nMufid==0) hist->Fill(7.0, weight); //Ejets final state (generated)
+	// if ( nElefid==0 && nMufid==1) hist->Fill(8.0, weight); //Mujets final state (generated)
+	// if ( nElefid==0 && nMufid==2) hist->Fill(9.0, weight); //Ejets final state (generated)
+	// if ( nElefid==1 && nMufid==1) hist->Fill(10.0, weight); //Ejets final state (generated)
+
+	int nJetsfid = 0;
+	int nBJetsfid = 0;
+	
+	if ((nElefid + nMufid)==1){
+	  // for ( int jetI = 0; jetI < tree->genJetPt_->size(); jetI++){
+	  //   if (tree->genJetPt_->at(jetI) >= 30 && fabs(tree->genJetEta_->at(jetI)) < 2.4) nJetsfid += 1;	    
+	  // }
+	  for ( int jetI = 0; jetI < tree->nJet_; jetI++){
+	    //	    if (tree->jetGenPt_->at(jetI) >= 30 && fabs(tree->jetGenEta_->at(jetI)) < 2.4) nJetsfid += 1;
+	    if (tree->jetGenJetPt_->at(jetI) >= 30 && fabs(tree->jetGenEta_->at(jetI)) < 2.4){
+	      nJetsfid += 1;
+	      if (abs(tree->jetGenPartonID_->at(jetI))==5) nBJetsfid += 1;
+	    }
+	  }
+	}
+
+
+	if(nElefid==1 && nMufid==0 && nJetsfid >=3){
+	  hist->Fill(11.0, weight);
+	  if (nBJetsfid >= 1){
+	    hist->Fill(12.0, weight);
+	    if (MET.Mod() > 20){
+	      //	    if (tree->genMET_ > 20){
+	      hist->Fill(13.0, weight);
+	      if (nPhofid > 0) hist->Fill(14.0, weight);
+	    }
+	  }
+	}
+
+
+	// //TESTING
+	// if(nElefid==0 && nMufid==1 && nJetsfid >=3){
+	//   hist->Fill(11.0, weight);
+	//   if (nNufid==1){
+	//     hist->Fill(12.0,weight);
+	//   }
+	//   if (nNufid > 0){
+	//     hist->Fill(13.0, weight);
+	//   }
+	//   if (MET.Mod() > 20) hist->Fill(14.0,weight);
+	//   if (nBJetsfid >= 1){
+	//     //	    hist->Fill(12.0, weight);
+	//     if (tree->genMET_ > 20){
+	//       //	      hist->Fill(13.0, weight);
+	//       // if (nPhofid > 0) hist->Fill(14.0, weight);
+	//     }
+	//   }
+	// }
+
+	if(nElefid==0 && nMufid==1 && nJetsfid >=3){
+	  hist->Fill(16.0, weight);
+	  if (nBJetsfid >= 1){
+	    hist->Fill(17.0, weight);
+	    //	    if (tree->genMET_ > 20){
+	    if (MET.Mod() > 20){
+	      hist->Fill(18.0, weight);
+	      if (nPhofid > 0) hist->Fill(19.0, weight);
+	    }
+	  }
+	}
+	// if(nElefid==0 && nMufid==1 && nJetfid >=3 && nBJetfid >= 1 && nNufid == 1) {
+	//   hist->Fill(12.0, weight);
+	//   if (nPhofid > 0) hist->Fill(15.0, weight);
+	// }
+
+	// if(nElefid==1 && nMufid==0 && nJetsfid >=3 && nNufid == 1){
+	//   hist->Fill(11.0, weight);
+	//   if (nPhofid > 0) hist->Fill(14.0, weight);
+	// }
+	// if(nElefid==0 && nMufid==1 && nJetsfid >=3 && nNufid == 1) {
+	//   hist->Fill(12.0, weight);
+	//   if (nPhofid > 0) hist->Fill(15.0, weight);
+	// }
+
 	return;
 }
 
@@ -50,13 +192,70 @@ int main(int ac, char** av){
 		return -1;
 	}
 	
-	TH1F* allCategory = new TH1F("allCategory","all Category",11,0.5,11.5);
-	TH1F* preselCategory = new TH1F("preselCategory","presel Category",11,0.5,11.5);
-	TH1F* photonCategory = new TH1F("photonCategory","reco photon Category",11,0.5,11.5);
+	TH1F* allCategory = new TH1F("allCategory","all Category",19,0.5,19.5);
+	allCategory->GetXaxis()->SetBinLabel(1,"Total");
+	allCategory->GetXaxis()->SetBinLabel(2,"AllHad");
+	allCategory->GetXaxis()->SetBinLabel(3,"1 lepton");
+	allCategory->GetXaxis()->SetBinLabel(4,"2 leptons");
+	allCategory->GetXaxis()->SetBinLabel(5,"");
+	allCategory->GetXaxis()->SetBinLabel(6,"1 e");
+	allCategory->GetXaxis()->SetBinLabel(7,"2 e");
+	allCategory->GetXaxis()->SetBinLabel(8,"1 #mu");
+	allCategory->GetXaxis()->SetBinLabel(9,"2 #mu");
+	allCategory->GetXaxis()->SetBinLabel(10,"1 e 1 #mu");
+	allCategory->GetXaxis()->SetBinLabel(11,"1 e, 3 jets");
+	allCategory->GetXaxis()->SetBinLabel(12,"1 e, 3 jets 1 b");
+	allCategory->GetXaxis()->SetBinLabel(13,"1 e, 3 jets 1 b, MET");
+	allCategory->GetXaxis()->SetBinLabel(14,"1 e, 3 jets 1 b, MET, 1 pho");
+	allCategory->GetXaxis()->SetBinLabel(16,"1 #mu, 3 jets");
+	allCategory->GetXaxis()->SetBinLabel(17,"1 #mu, 3 jets 1 b");
+	allCategory->GetXaxis()->SetBinLabel(18,"1 #mu, 3 jets 1 b, MET");
+	allCategory->GetXaxis()->SetBinLabel(19,"1 #mu, 3 jets 1 b, MET, 1 pho");
+
+	TH1F* preselCategory = new TH1F("preselCategory","presel Category",19,0.5,19.5);
+	preselCategory->GetXaxis()->SetBinLabel(1,"Total");
+	preselCategory->GetXaxis()->SetBinLabel(2,"AllHad");
+	preselCategory->GetXaxis()->SetBinLabel(3,"1 lepton");
+	preselCategory->GetXaxis()->SetBinLabel(4,"2 leptons");
+	preselCategory->GetXaxis()->SetBinLabel(5,"");
+	preselCategory->GetXaxis()->SetBinLabel(6,"1 e");
+	preselCategory->GetXaxis()->SetBinLabel(7,"2 e");
+	preselCategory->GetXaxis()->SetBinLabel(8,"1 #mu");
+	preselCategory->GetXaxis()->SetBinLabel(9,"2 #mu");
+	preselCategory->GetXaxis()->SetBinLabel(10,"1 e 1 #mu");
+	preselCategory->GetXaxis()->SetBinLabel(11,"1 e, 3 jets");
+	preselCategory->GetXaxis()->SetBinLabel(12,"1 e, 3 jets 1 b");
+	preselCategory->GetXaxis()->SetBinLabel(13,"1 e, 3 jets 1 b, MET");
+	preselCategory->GetXaxis()->SetBinLabel(14,"1 e, 3 jets 1 b, MET, 1 pho");
+	preselCategory->GetXaxis()->SetBinLabel(16,"1 #mu, 3 jets");
+	preselCategory->GetXaxis()->SetBinLabel(17,"1 #mu, 3 jets 1 b");
+	preselCategory->GetXaxis()->SetBinLabel(18,"1 #mu, 3 jets 1 b, MET");
+	preselCategory->GetXaxis()->SetBinLabel(19,"1 #mu, 3 jets 1 b, MET, 1 pho");
 	
-	TH1F* VisAllCategory = new TH1F("VisAllCategory","all Category, Vis",11,0.5,11.5);
-	TH1F* VisPreselCategory = new TH1F("VisPreselCategory","presel Category, Vis",11,0.5,11.5);
-	TH1F* VisPhotonCategory = new TH1F("VisPhotonCategory","reco photon Category, Vis",11,0.5,11.5);
+
+	TH1F* photonCategory = new TH1F("photonCategory","reco photon Category",19,0.5,19.5);
+	photonCategory->GetXaxis()->SetBinLabel(1,"Total");
+	photonCategory->GetXaxis()->SetBinLabel(2,"AllHad");
+	photonCategory->GetXaxis()->SetBinLabel(3,"1 lepton");
+	photonCategory->GetXaxis()->SetBinLabel(4,"2 leptons");
+	photonCategory->GetXaxis()->SetBinLabel(5,"");
+	photonCategory->GetXaxis()->SetBinLabel(6,"1 e");
+	photonCategory->GetXaxis()->SetBinLabel(7,"2 e");
+	photonCategory->GetXaxis()->SetBinLabel(8,"1 #mu");
+	photonCategory->GetXaxis()->SetBinLabel(9,"2 #mu");
+	photonCategory->GetXaxis()->SetBinLabel(10,"1 e 1 #mu");
+	photonCategory->GetXaxis()->SetBinLabel(11,"1 e, 3 jets");
+	photonCategory->GetXaxis()->SetBinLabel(12,"1 e, 3 jets 1 b");
+	photonCategory->GetXaxis()->SetBinLabel(13,"1 e, 3 jets 1 b, MET");
+	photonCategory->GetXaxis()->SetBinLabel(14,"1 e, 3 jets 1 b, MET, 1 pho");
+	photonCategory->GetXaxis()->SetBinLabel(16,"1 #mu, 3 jets");
+	photonCategory->GetXaxis()->SetBinLabel(17,"1 #mu, 3 jets 1 b");
+	photonCategory->GetXaxis()->SetBinLabel(18,"1 #mu, 3 jets 1 b, MET");
+	photonCategory->GetXaxis()->SetBinLabel(19,"1 #mu, 3 jets 1 b, MET, 1 pho");
+	
+	TH1F* VisAllCategory = new TH1F("VisAllCategory","all Category, Vis",15,0.5,15.5);
+	TH1F* VisPreselCategory = new TH1F("VisPreselCategory","presel Category, Vis",15,0.5,15.5);
+	TH1F* VisPhotonCategory = new TH1F("VisPhotonCategory","reco photon Category, Vis",15,0.5,15.5);
 	
 	
 	TH1F* dROtherGen = new TH1F("dROtherGen", "dROtherGen", 800, 0.0, 4.0);
@@ -94,7 +293,6 @@ int main(int ac, char** av){
 
 		selectorLoose->process_objects(tree);
 		evtPickLoose->process_event(tree, selectorLoose, PUweight);
-
 		// fill the histograms
 		fillCategory(tree, allCategory, PUweight);
 		if(evtPickLoose->passPreSel) fillCategory(tree, preselCategory, PUweight);

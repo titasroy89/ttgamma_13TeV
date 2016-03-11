@@ -1,4 +1,5 @@
 #include<iostream>
+#include<string>
 
 #include"EventTree.h"
 #include"Selector.h"
@@ -10,6 +11,15 @@
 #include"TRandom3.h"
 // temporary solution
 #include"JECvariation.cpp"
+//#include"JECvariationNew.cpp"
+
+//#include"/uscms_data/d2/dnoonan/LHAPDF/local/include/LHAPDF/LHAPDF.h"
+
+
+//#include"LHAPDF/LHAPDF.h"
+
+// using namespace LHAPDF;
+// using namespace std;
 
 int jecvar012_g = 1; // 0:down, 1:norm, 2:up
 int jervar012_g = 1; // 0:down, 1:norm, 2:up
@@ -23,6 +33,10 @@ int toppt012_g = 1; // 0:down, 1:norm, 2: up
 
 int top_sample_g = 0; // 0: no ttbar, 1: ttjets_1l, 2: ttjets_2l, 3: ttjets_had
 
+int pdfweight_g = 1; //0:down, 1:norm, 2: up
+
+//vector<LHAPDF::PDF*> pdfs;
+
 double topPtWeight(EventTree* tree);
 double getMuEff(EventTree* tree, EventPick* evt );
 double getEleEff(EventTree* tree, EventPick* evt);
@@ -34,6 +48,8 @@ double JERcorrection(double eta);
 bool overlapWHIZARD(EventTree* tree);
 bool overlapMadGraph(EventTree* tree);
 bool overlapISRFSR(EventTree* tree);
+//double pdfWeight(EventTree* tree, int pdfNum);
+double WjetsBRreweight(EventTree* tree);
 
 int main(int ac, char** av){
 	if(ac < 4){
@@ -67,16 +83,30 @@ int main(int ac, char** av){
 	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "Pileup_observed_69300_p5.root";}
 	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "Pileup_observed_69300_m5.root";}
 	if( outDirName.find("toppt_up") != std::string::npos) {systematics=true; toppt012_g = 2;}
-	if( outDirName.find("toppt_down") != std::string::npos) {systematics=true; toppt012_g = 0;}
+	if( outDirName.find("toppt_down") != std::string::npos) {systematics=true; toppt012_g = 0;}	
+	if( outDirName.find("PDF") != std::string::npos) {systematics=true; pdfweight_g=2;}
+
+	int pdfNum = 0;
+	if( pdfweight_g==2 ){
+	  string tempNum = "";
+	  for (int i = outDirName.find("PDF_")+4;i <outDirName.length(); i++){
+	    if (outDirName[i]=='_' || outDirName[i]=='/'){i+outDirName.length();}
+	    tempNum += outDirName[i];
+	  }
+	  pdfNum = atoi(tempNum.c_str());
+	  std::cout << "PDF number: " << pdfNum << endl;
+	}
 
 	std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << "  MuEff: " << mueff012_g << "  BtagVar: " << btagvar012_g << "  ";
 	std::cout << "  PhoSmear: " << phosmear012_g << "  muSmear: " << musmear012_g << "  pileup: " << PUfilename << "  ";
 	std::cout << "  topPt: " << toppt012_g << std::endl;
 	// book HistCollect
 	HistCollect* looseCollect = new HistCollect("1pho",std::string("top_")+av[1]);
-	looseCollect->fillEndcap = false;
+	//	looseCollect->fillEndcap = false;
+	looseCollect->fillEndcap = true;
 	HistCollect* looseCollectNoMET = new HistCollect("1phoNoMET",std::string("top_")+av[1]);
-	looseCollectNoMET->fillEndcap = false;	
+	//	looseCollectNoMET->fillEndcap = false;	
+	looseCollectNoMET->fillEndcap = true;	
 	//HistCollect* fourjCollect = new HistCollect("1pho4j",std::string("top4j_")+av[1]);
 	// HistCollect for tight Photon ID
 	//HistCollect* tightCollect = new HistCollect("1photight",std::string("top_")+av[1]);
@@ -144,18 +174,30 @@ int main(int ac, char** av){
 	if( std::string(av[1]).find("WHIZARD") != std::string::npos) WHIZARD = true;
 
 	bool MGttgamma = false;
-	if( std::string(av[1]).find("TTgamma") != std::string::npos) MGttgamma = true;
+	if( std::string(av[1]).find("TTGamma") != std::string::npos) MGttgamma = true;
+	if (MGttgamma) std::cout << "THIS IS TTGAMMA" << std::endl;
 
 	bool doOverlapRemoval = false;
 	bool doOverlapRemovalWZ = false;
+	bool doInvertedOverlapRemoval = false;
+	bool skipOverlap = false;
 	if( std::string(av[1]).find("TTJets") != std::string::npos) doOverlapRemoval = true;
 	if( std::string(av[1]).find("ZJets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("WJets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W2Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W3Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W4Jets") != std::string::npos) doOverlapRemovalWZ = true;
-	
+	if( std::string(av[1]).find("Invert") != std::string::npos) doInvertedOverlapRemoval = true;
+	if( std::string(av[1]).find("SkipOverlap") != std::string::npos) skipOverlap = true;
+
+	if(skipOverlap){
+	  doOverlapRemoval = false;
+	  doOverlapRemovalWZ = false;
+	  doInvertedOverlapRemoval = false;
+	}
 	if(doOverlapRemoval) std::cout << "########## Will apply overlap removal ###########" << std::endl;
+	if(doOverlapRemovalWZ) std::cout << "########## Will apply WZ overlap removal ###########" << std::endl;
+	if(doInvertedOverlapRemoval) std::cout << "########## Will invert overlap removal ###########" << std::endl;
 
 	EventTree* tree = new EventTree(ac-3, av+3);
 	double PUweight = 1.0;
@@ -167,8 +209,7 @@ int main(int ac, char** av){
 	tree->GetEntry(0);
 	isMC = !(tree->isData_);
 	JECvariation* jecvar;
-	//	jecvar = new JECvariation("./jecAK5PF/Summer12_V7", isMC);
-	jecvar = new JECvariation("./jecAK5PF/Summer13_V5", isMC);
+	jecvar = new JECvariation("./jecAK5PF/Summer12_V7", isMC);
 
 	// we don't need systematics variations for Data
 	if(!isMC && systematics) {
@@ -177,6 +218,12 @@ int main(int ac, char** av){
 		return 0;
 	}
 	
+
+	//	LHAPDF::PDFSet set("CT10nnlo");
+	//	pdfs = set.mkPDFs();
+
+	// initPDFSet(1, "cteq66.LHgrid");
+
 	Long64_t nEntr = tree->GetEntries();
 	for(Long64_t entry=0; entry<nEntr; entry++){
 		if(entry%10000 == 0) std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
@@ -199,11 +246,24 @@ int main(int ac, char** av){
 			doMuSmearing(tree);
 		}
 		// do overlap removal here: overlapMadGraph(tree) or overlapWHIZARD(tree)
-		if( isMC && doOverlapRemoval && overlapMadGraph(tree)){
-			//std::cout << "overlap!" << std::endl;
-			// overlapping part, not needed
-			continue;
+		if( isMC && doOverlapRemoval){
+		  if (!doInvertedOverlapRemoval){
+		    if (overlapMadGraph(tree)){
+		      continue;
+		    }
+		  }
+		  if (doInvertedOverlapRemoval){
+		    if (!overlapMadGraph(tree)){
+		      continue;
+		    }
+		  }
 		}
+		    
+		// if( isMC && doOverlapRemoval && overlapMadGraph(tree)){
+		// 	//std::cout << "overlap!" << std::endl;
+		// 	// overlapping part, not needed
+		// 	continue;
+		// }
 		if( isMC && doOverlapRemovalWZ && overlapISRFSR(tree)){
 			continue;
 		}
@@ -236,6 +296,18 @@ int main(int ac, char** av){
 		// top pt reweighting
 		if(isMC){
 			evtWeight *= topPtWeight(tree);
+		}
+
+		// if(isMC && pdfweight_g!=1){
+		  
+		//   double tempWeight = pdfWeight(tree,pdfNum);
+		//   evtWeight *= tempWeight;
+		//   // cout << tempWeight << endl;
+		// }
+
+		if(isMC && MGttgamma){
+		  double tempWeight = WjetsBRreweight(tree);
+		  evtWeight *= tempWeight;
 		}
 
 		// fill the histograms
@@ -443,7 +515,8 @@ void doJER(EventTree* tree){
 	//std::cout << "before correction MET " << tree->pfMET_ << " " << tree->pfMETPhi_ << "    ";
 	// scale jets
 	for(int jetInd = 0; jetInd < tree->nJet_ ; ++jetInd){
-		if(tree->jetPt_->at(jetInd) < 20) continue;
+	        // This is changed, previously was 20 GeV (was this from 2011 recommendation?) 
+		if(tree->jetPt_->at(jetInd) < 10) continue;   
 		if(tree->jetGenJetIndex_->at(jetInd)>0){
 			TLorentzVector tjet;
 			tjet.SetPtEtaPhiM(tree->jetPt_->at(jetInd), tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), 0.0);
@@ -466,14 +539,20 @@ void doJER(EventTree* tree){
 
 double JERcorrection(double JetEta){
 	double eta = TMath::Abs(JetEta);
-	static const double corr[5] = {1.052, 1.057, 1.096, 1.134, 1.288};
-	static const double corrDown[5] = {0.990, 1.001, 1.032, 1.042, 1.089};
-	static const double corrUp[5] = {1.115, 1.114, 1.161, 1.228, 1.488};
+	// static const double corr[5] = {1.052, 1.057, 1.096, 1.134, 1.288};
+	// static const double corrDown[5] = {0.990, 1.001, 1.032, 1.042, 1.089};
+	// static const double corrUp[5] = {1.115, 1.114, 1.161, 1.228, 1.488};
+	static const double corr[7] = {1.079, 1.099, 1.121, 1.208, 1.254, 1.395, 1.056};
+	static const double corrDown[7] = {1.053, 1.071, 1.092, 1.162, 1.192, 1.332, 0.865};
+	static const double corrUp[7] = {1.105, 1.127, 1.150, 1.254, 1.316, 1.458, 1.247};
+
 	int region = 0;
 	if( eta >= 0.5 ) region++;
 	if( eta >= 1.1 ) region++;
 	if( eta >= 1.7 ) region++;
 	if( eta >= 2.3 ) region++;
+	if( eta >= 2.8 ) region++;
+	if( eta >= 3.2 ) region++;
 	if(jervar012_g == 0) return corrDown[region];
 	if(jervar012_g == 1) return corr[region];
 	if(jervar012_g == 2) return corrUp[region];
@@ -576,5 +655,100 @@ double getBtagSF(EventTree* tree, EventPick* evt){
 		prod *= 1.0 - SFb;
 	}
 	return 1.0 - prod;
+}
+
+// double pdfWeight(EventTree* tree, int pdfNum){
+//   if( pdfweight_g==1){ return 1.;  } 
+//   if (pdfNum >= pdfs.size() || pdfNum < 1){return 1.;}
+
+//   double id1 = tree->pdf_[0];
+//   double id2 = tree->pdf_[1];
+//   double x1  = tree->pdf_[2];
+//   double x2  = tree->pdf_[3];
+//   double q   = tree->pdf_[6];
+
+//   double pdfweightMin = 999.;
+//   double pdfweightMax = 0.;
+
+//   double xpdf1 = pdfs[0]->xfxQ(id1, x1, q);
+//   double xpdf2 = pdfs[0]->xfxQ(id2, x2, q);
+
+//   // LHAPDF::usePDFMember(1,0);
+//   // double xpdf1 = LHAPDF::xfx(1, x1, q, id1);
+//   // double xpdf2 = LHAPDF::xfx(1, x2, q, id2);
+//   double w0 = xpdf1 * xpdf2;
+
+//   double xpdf1_new = pdfs[pdfNum]->xfxQ(id1, x1, q);
+//   double xpdf2_new = pdfs[pdfNum]->xfxQ(id2, x2, q);
+//   // LHAPDF::usePDFMember(1,0);
+//   // double xpdf1_new = LHAPDF::xfx(1, x1, q, id1);
+//   // double xpdf2_new = LHAPDF::xfx(1, x2, q, id2);
+//   double weight = xpdf1_new * xpdf2_new / w0;
+//   return weight;
+
+//   // for(int i=1; i < pdfs.size(); ++i){
+//   //   double xpdf1_new = pdfs[i]->xfxQ(id1, x1, q);
+//   //   double xpdf2_new = pdfs[i]->xfxQ(id2, x2, q);
+//   //   // LHAPDF::usePDFMember(1,0);
+//   //   // double xpdf1_new = LHAPDF::xfx(1, x1, q, id1);
+//   //   // double xpdf2_new = LHAPDF::xfx(1, x2, q, id2);
+//   //   double weight = xpdf1_new * xpdf2_new / w0;
+//   //   if(weight > pdfweightMax) pdfweightMax=weight;
+//   //   if(weight < pdfweightMin) pdfweightMin=weight;
+//   // }
+
+//   // if( pdfweight_g==0){ return pdfweightMin;}
+//   // if( pdfweight_g==2){ return pdfweightMax;}
+// }
+
+
+double WjetsBRreweight(EventTree* tree){
+
+  int countLeps = 0;
+  //Need to try to avoid double counting of tau's (check if momPt is the same before counting, since status flag isn't there)
+  double tauMomPt1 = -1.;
+  double tauMomPt2 = -1.;
+  //  std::cout << "-------------------" << std::endl;
+  for(int mcInd=0; mcInd<tree->nMC_; ++mcInd){
+    if( (TMath::Abs(tree->mcPID->at(mcInd)) == 11 ||
+	 TMath::Abs(tree->mcPID->at(mcInd)) == 13 ||
+	 TMath::Abs(tree->mcPID->at(mcInd)) == 15 ) &&
+	TMath::Abs(tree->mcMomPID->at(mcInd)) == 24 &&
+	TMath::Abs(tree->mcGMomPID->at(mcInd)) == 6) {
+      if (TMath::Abs(tree->mcPID->at(mcInd)) == 15){
+	if (tauMomPt1==-1.){
+	  tauMomPt1 = tree->mcMomPt->at(mcInd);
+	  countLeps += 1;
+	}
+	else if (tauMomPt2==-1.){
+	  if (tree->mcMomPt->at(mcInd)!=tauMomPt1) {
+	    tauMomPt2 = tree->mcMomPt->at(mcInd);
+	    countLeps += 1;
+	  }
+	}
+	else{
+	  if (tree->mcMomPt->at(mcInd)!=tauMomPt1 && tree->mcMomPt->at(mcInd)!=tauMomPt2) {
+	    countLeps += 1;
+	  }
+	}
+      }
+      else {
+	countLeps += 1;
+      }
+      //      std::cout << tree->mcPID->at(mcInd) << "\t" << tree->mcMomPID->at(mcInd) << "\t" << tree->mcGMomPID->at(mcInd) << "\t" << tree->mcMomPt->at(mcInd) << "\t" << tree->mcIndex->at(mcInd) << std::endl;
+    }
+  }
+  double reweight=1.;
+  if (countLeps==0){reweight = .6741*.6741*9./4.;}
+  else if(countLeps==1){reweight = .6741*.3259*2*9./4.;}
+  else if(countLeps==2){reweight = .3259*.3259*9.;}
+  else {
+    std::cout << "MORE THAN TWO LEPTONS???????" << std::endl;
+    std::cout << countLeps << std::endl;
+  }
+
+  //  std::cout << reweight << std::endl;
+  return reweight;
+
 }
 

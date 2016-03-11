@@ -29,6 +29,8 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	puTrue_ = new vector<float>;
 	chain->SetBranchStatus("puTrue",1);
 	chain->SetBranchAddress("puTrue", &puTrue_);
+	chain->SetBranchStatus("pdf",1);
+	chain->SetBranchAddress("pdf", &pdf_);
 	//chain->SetBranchStatus("",1);
 	
 	// event
@@ -56,6 +58,10 @@ EventTree::EventTree(int nFiles, char** fileNames){
 
 	chain->SetBranchStatus("pfMET*",1);
 	chain->SetBranchStatus("pfType01MET*",1);
+
+	chain->SetBranchStatus("genMET",1);    // FIXME
+	chain->SetBranchAddress("genMET", &genMET_); // FIXME
+
 	
 	// electrons	
 	
@@ -401,7 +407,7 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	mcPt = new vector<float>;
 	chain->SetBranchStatus("mcPt",1);
 	chain->SetBranchAddress("mcPt", &mcPt);
-	
+
 	mcEta = new vector<float>;
 	chain->SetBranchStatus("mcEta",1);
 	chain->SetBranchAddress("mcEta", &mcEta);
@@ -425,6 +431,10 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	mcGMomPID = new vector<int>;
 	chain->SetBranchStatus("mcGMomPID",1);
 	chain->SetBranchAddress("mcGMomPID", &mcGMomPID);
+
+	mcMomPt = new vector<float>;
+	chain->SetBranchStatus("mcMomPt",1);
+	chain->SetBranchAddress("mcMomPt", &mcMomPt);
 	
 	mcDecayType = new vector<int>;
 	chain->SetBranchStatus("mcDecayType",1);
@@ -433,10 +443,14 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	mcIndex = new vector<int>;
 	chain->SetBranchStatus("mcIndex",1);
 	chain->SetBranchAddress("mcIndex", &mcIndex);
+
+	mcStatus = new vector<int>;
+	chain->SetBranchStatus("mcStatus",1);
+	chain->SetBranchAddress("mcStatus", &mcStatus);
 	
-	mcMomPt = new vector<float>;
-	chain->SetBranchStatus("mcMomPt",1);
-	chain->SetBranchAddress("mcMomPt", &mcMomPt);
+	// // mcMomPt = new vector<float>;
+	// // chain->SetBranchStatus("mcMomPt",1);
+	// // chain->SetBranchAddress("mcMomPt", &mcMomPt);
 	
 	mcMomEta = new vector<float>;
 	chain->SetBranchStatus("mcMomEta",1);

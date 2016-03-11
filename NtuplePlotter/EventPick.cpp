@@ -23,6 +23,19 @@ EventPick::EventPick(std::string titleIn){
 	genPhoRegionWeight_1l_2l->SetDirectory(0);
 	histVector.push_back(genPhoRegionWeight_1l_2l);
 
+	genPhoRegionWeight_1fiducial = new TH1F("genPhoRegionWeight_1lfid","GenPhoton passing fiducial cuts with 1 or 2 gen leptons passing fiducial cuts: barrel 0 or endcap 1",8,-0.5,7.5);
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(1,"1 e, barrel pho");
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(2,"1 e, endcap pho");
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(3,"1 e, topSel, barrel pho");
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(4,"1 e, topSel, endcap pho");
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(5,"1 #mu, barrel pho");
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(6,"1 #mu, endcap pho");
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(7,"1 #mu, topSel, barrel pho");
+	genPhoRegionWeight_1fiducial->GetXaxis()->SetBinLabel(8,"1 #mu, topSel, endcap pho");
+
+	genPhoRegionWeight_1fiducial->SetDirectory(0);
+	histVector.push_back(genPhoRegionWeight_1fiducial);
+
 	genPhoMinDR = new TH1F("genPhoMinDR", "Min DR between gen photon and other gen particles", 100, 0., 1.);
 	genPhoMinDR->SetDirectory(0);
 	histVector.push_back(genPhoMinDR);
@@ -214,6 +227,59 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	  if(foundGenPhotonEndcap) genPhoRegionWeight_1l_2l->Fill(1.0, weight);
 	}	  
 
+	
+	int ElePfid = 0;
+	int EleMfid = 0;
+	int MuPfid = 0;
+	int MuMfid = 0;
+	int nNufid = 0;
+	for( int mcI = 0; mcI < tree->nMC_; ++mcI){
+	  if((abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10) || (abs(tree->mcMomPID->at(mcI))==15 && tree->mcParentage->at(mcI)==26)){		  
+	    if( tree->mcPID->at(mcI) == 11 ) {
+	      if (tree->mcPt->at(mcI) > 35 && (fabs(tree->mcEta->at(mcI)) < 2.5 && !(fabs(tree->mcEta->at(mcI)) > 1.4442 && fabs(tree->mcEta->at(mcI))<1.566))) ElePfid += 1;
+	    }
+	    if( tree->mcPID->at(mcI) == -11 ) {
+	      if (tree->mcPt->at(mcI) > 35 && (fabs(tree->mcEta->at(mcI)) < 2.5 && !(fabs(tree->mcEta->at(mcI)) > 1.4442 && fabs(tree->mcEta->at(mcI))<1.566))) EleMfid += 1;
+	    }
+	    if( tree->mcPID->at(mcI) == 13 ) {
+	      if (tree->mcPt->at(mcI) > 26 && fabs(tree->mcEta->at(mcI)) < 2.1) MuPfid += 1;
+	    }
+	    if( tree->mcPID->at(mcI) == -13 ) {
+	      if (tree->mcPt->at(mcI) > 26 && fabs(tree->mcEta->at(mcI)) < 2.1) MuMfid += 1;
+	    }
+	  }
+	  if( fabs(tree->mcPID->at(mcI)) == 12 || fabs(tree->mcPID->at(mcI)) == 14 || fabs(tree->mcPID->at(mcI)) == 16 ) {
+	    if (tree->mcPt->at(mcI) > 20) nNufid += 1;
+	  }
+	}
+	int nElefid = ElePfid + EleMfid;
+	int nMufid = MuPfid + MuMfid;
+	int nJetsfid = 0;
+	if ((nElefid + nMufid)==1 && nNufid == 1){
+	  for ( int jetI = 0; jetI < tree->nJet_; jetI++){
+	    if (tree->jetGenPt_->at(jetI) >= 30) {
+	      if ( fabs(tree->jetGenEta_->at(jetI)) < 2.4) nJetsfid += 1;
+	    }
+	  }
+	}
+	
+
+	if (nElefid==1 && nMufid==0){
+	  if(foundGenPhotonBarrel) genPhoRegionWeight_1fiducial->Fill(0.0, weight);
+	  if(foundGenPhotonEndcap) genPhoRegionWeight_1fiducial->Fill(1.0, weight);
+	  if(nJetsfid >=3 && nNufid == 1){
+	    if (foundGenPhotonBarrel) genPhoRegionWeight_1fiducial->Fill(2.0, weight);
+	    if (foundGenPhotonEndcap) genPhoRegionWeight_1fiducial->Fill(3.0, weight);
+	  }
+	}	  
+	if (nElefid==0 && nMufid==1){
+	  if(foundGenPhotonBarrel) genPhoRegionWeight_1fiducial->Fill(4.0, weight);
+	  if(foundGenPhotonEndcap) genPhoRegionWeight_1fiducial->Fill(5.0, weight);
+	  if(nJetsfid >=3 && nNufid == 1){
+	    if (foundGenPhotonBarrel) genPhoRegionWeight_1fiducial->Fill(6.0, weight);
+	    if (foundGenPhotonEndcap) genPhoRegionWeight_1fiducial->Fill(7.0, weight);
+	  }
+	}	  
 
 	if(passPreSel && !(tree->isData_)){
 	  double minDR = 999.;

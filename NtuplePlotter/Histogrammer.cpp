@@ -130,6 +130,28 @@ Histogrammer::Histogrammer(std::string titleIn){
 	hists["MCcategory"]->GetXaxis()->SetBinLabel(9,"2 #mu");
 	hists["MCcategory"]->GetXaxis()->SetBinLabel(10,"1 #tau");
 	hists["MCcategory"]->GetXaxis()->SetBinLabel(11,"2 #tau");
+
+	make_hist("MCcategoryfid","MC category fiducial region",19,0.5,19.5,"category","Events");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(1,"Total");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(2,"AllHad");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(3,"1 lepton");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(4,"2 leptons");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(5,"");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(6,"1 e");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(7,"2 e");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(8,"1 #mu");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(9,"2 #mu");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(10,"1 e 1 #mu");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(11,"1 e, 3 jets");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(12,"1 e, 3 jets 1 b");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(13,"1 e, 3 jets 1 b, MET");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(14,"1 e, 3 jets 1 b, MET, 1 pho");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(16,"1 #mu, 3 jets");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(17,"1 #mu, 3 jets 1 b");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(18,"1 #mu, 3 jets 1 b, MET");
+	hists["MCcategoryfid"]->GetXaxis()->SetBinLabel(19,"1 #mu, 3 jets 1 b, MET, 1 pho");
+	
+
 }
 
 void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree, double weight){
@@ -192,15 +214,16 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		int TauP = 0;
 		int TauM = 0;
 		for( int mcI = 0; mcI < tree->nMC_; ++mcI){
-			if(abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10){
-				if( tree->mcPID->at(mcI) == 11 ) EleP = 1;
-				if( tree->mcPID->at(mcI) == -11 ) EleM = 1;
-				if( tree->mcPID->at(mcI) == 13 ) MuP = 1;
-				if( tree->mcPID->at(mcI) == -13 ) MuM = 1;
-				if( tree->mcPID->at(mcI) == 15) TauP = 1;
-				if( tree->mcPID->at(mcI) == -15) TauM = 1;
-			}
+		  if(abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10){
+		    if( tree->mcPID->at(mcI) == 11 )  EleP = 1;
+		    if( tree->mcPID->at(mcI) == -11 ) EleM = 1;
+		    if( tree->mcPID->at(mcI) == 13 )  MuP = 1;
+		    if( tree->mcPID->at(mcI) == -13 ) MuM = 1;
+		    if( tree->mcPID->at(mcI) == 15)   TauP = 1;
+		    if( tree->mcPID->at(mcI) == -15)  TauM = 1;		    
+		  }
 		}
+
 		hists["MCcategory"]->Fill(1.0, weight); // Total
 		int nEle = EleP + EleM;
 		int nMu = MuP + MuM;
@@ -215,6 +238,112 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		if(nEle==0 && nMu==2 && nTau==0) hists["MCcategory"]->Fill(9.0, weight); // 2 mu
 		if(nEle==0 && nMu==0 && nTau==1) hists["MCcategory"]->Fill(10.0, weight); // 1 tau
 		if(nEle==0 && nMu==0 && nTau==2) hists["MCcategory"]->Fill(11.0, weight); // 2 tau
+
+		//Count the number of electrons and muons for the fiducial cross section measurement
+		int ElePfid = 0;
+		int EleMfid = 0;
+		int MuPfid = 0;
+		int MuMfid = 0;
+		int nNufid = 0;
+		int nPhofid = 0;
+
+		TVector2 MET = TVector2(0,0);
+		TVector2 tempNu = TVector2(0,0);
+
+		for( int mcI = 0; mcI < tree->nMC_; ++mcI){
+		  if((abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10) || (abs(tree->mcMomPID->at(mcI))==15 && tree->mcParentage->at(mcI)==26)){		  
+		    if( tree->mcPID->at(mcI) == 11 ) {
+		      if (tree->mcPt->at(mcI) > 35 && (fabs(tree->mcEta->at(mcI)) < 2.5 && !(fabs(tree->mcEta->at(mcI)) > 1.4442 && fabs(tree->mcEta->at(mcI))<1.566))) ElePfid += 1;
+		    }
+		    if( tree->mcPID->at(mcI) == -11 ) {
+		      if (tree->mcPt->at(mcI) > 35 && (fabs(tree->mcEta->at(mcI)) < 2.5 && !(fabs(tree->mcEta->at(mcI)) > 1.4442 && fabs(tree->mcEta->at(mcI))<1.566))) EleMfid += 1;
+		    }
+		    if( tree->mcPID->at(mcI) == 13 ) {
+		      if (tree->mcPt->at(mcI) > 26 && fabs(tree->mcEta->at(mcI)) < 2.1) MuPfid += 1;
+		    }
+		    if( tree->mcPID->at(mcI) == -13 ) {
+		      if (tree->mcPt->at(mcI) > 26 && fabs(tree->mcEta->at(mcI)) < 2.1) MuMfid += 1;
+		    }
+		  }
+		  if( fabs(tree->mcPID->at(mcI)) == 12 || fabs(tree->mcPID->at(mcI)) == 14 || fabs(tree->mcPID->at(mcI)) == 16 ) {
+		      if (tree->mcPt->at(mcI) > 20) nNufid += 1;
+		      tempNu.SetMagPhi(tree->mcPt->at(mcI),tree->mcPhi->at(mcI));
+		      MET += tempNu;
+		  }
+
+		  if(tree->mcPID->at(mcI) == 22 && 
+		     (tree->mcParentage->at(mcI)==2 || tree->mcParentage->at(mcI)==10 || tree->mcParentage->at(mcI)==26) && 
+		     tree->mcPt->at(mcI) > 25 && 
+		     fabs(tree->mcEta->at(mcI)) < 1.4442){
+		    nPhofid += 1;
+		  }
+		  
+		}
+		if (ElePfid > 1 || EleMfid > 1 || MuPfid > 1 || MuMfid > 1 ){ cout << "SAME SIGN DILEPTON" << endl;}
+
+		int nElefid = ElePfid + EleMfid;
+		int nMufid = MuPfid + MuMfid;
+
+		int nJetsfid = 0;
+		int nBJetsfid = 0;
+
+		if ((nElefid + nMufid)==1){
+		  for ( int jetI = 0; jetI < tree->nJet_; jetI++){
+		    if (tree->jetGenJetPt_->at(jetI) >= 30 && fabs(tree->jetGenEta_->at(jetI)) < 2.4){
+		      nJetsfid += 1;
+		      if (abs(tree->jetGenPartonID_->at(jetI))==5) nBJetsfid += 1;
+		    }
+		  }
+		}
+
+
+		hists["MCcategoryfid"]->Fill(1.0, weight); // Total
+		if( nElefid + nMufid == 0) hists["MCcategoryfid"]->Fill(2.0, weight); // All Had
+		if( nElefid + nMufid == 1) hists["MCcategoryfid"]->Fill(3.0, weight); // Single Lepton
+		if( nElefid + nMufid == 2) hists["MCcategoryfid"]->Fill(4.0, weight); // Di Lepton
+		
+		if(nElefid==1 && nMufid==0) hists["MCcategoryfid"]->Fill(6.0, weight); // 1 e
+		if(nElefid==2 && nMufid==0) hists["MCcategoryfid"]->Fill(7.0, weight); // 2 e
+		if(nElefid==0 && nMufid==1) hists["MCcategoryfid"]->Fill(8.0, weight); // 1 mu
+		if(nElefid==0 && nMufid==2) hists["MCcategoryfid"]->Fill(9.0, weight); // 2 mu
+		if(nElefid==1 && nMufid==1) hists["MCcategoryfid"]->Fill(9.0, weight); // 1 e 1 mu
+
+
+
+		if(nElefid==1 && nMufid==0 && nJetsfid >=3){
+		  hists["MCcategoryfid"]->Fill(11.0, weight);
+		  if (nBJetsfid >= 1){
+		    hists["MCcategoryfid"]->Fill(12.0, weight);
+		    //if (tree->genMET_ > 20){
+		    if (MET.Mod() > 20){
+		      hists["MCcategoryfid"]->Fill(13.0, weight);
+		      if (nPhofid > 0) hists["MCcategoryfid"]->Fill(14.0, weight);
+		    }
+		  }
+		}
+		
+		if(nElefid==0 && nMufid==1 && nJetsfid >=3){
+		  hists["MCcategoryfid"]->Fill(16.0, weight);
+		  if (nBJetsfid >= 1){
+		    hists["MCcategoryfid"]->Fill(17.0, weight);
+		    //if (tree->genMET_ > 20){
+		    if (MET.Mod() > 20){
+		      //	    if (nNufid == 1){
+		      hists["MCcategoryfid"]->Fill(18.0, weight);
+		      if (nPhofid > 0) hists["MCcategoryfid"]->Fill(19.0, weight);
+		    }
+		  }
+		}
+
+		// if(nElefid==1 && nMufid==0 && nJetsfid >=3 && nNufid == 1){
+		//   hists["MCcategoryfid"]->Fill(11.0, weight);
+		//   if (nPhofid > 0) hists["MCcategoryfid"]->Fill(14.0, weight);
+		// }
+		// if(nElefid==0 && nMufid==1 && nJetsfid >=3 && nNufid == 1){
+		//   hists["MCcategoryfid"]->Fill(12.0, weight);
+		//   if (nPhofid > 0) hists["MCcategoryfid"]->Fill(15.0, weight);
+		// }
+
 		//std::cout << "EleP " << EleP << "  EleM " << EleM << "  MuP " << MuP << "  MuM " << MuM << "  TauP " << TauP << "  TauM " << TauM << std::endl;
 	}
 
