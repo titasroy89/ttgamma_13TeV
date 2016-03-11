@@ -79,10 +79,16 @@ WWgamma_xs        = 1.44 #0.528 # PREP
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
 
+TTJets_xs = 239.
 #Top_xs            = 239 # new measurement #227 #CMS measurement
 TTJets1l_xs       = 104.7 # 239*0.676*(1-0.676)*2
 TTJets2l_xs       = 25.09 # 239*(1-0.676)*(1-0.676)
 TTJetsHad_xs      = 109.2 # 239*0.676*0.676
+
+#NEWEST TTBAR CX IS 244.9, NOT 239
+# TTJets1l_xs       = 244.9*0.676*(1-0.676)*2
+# TTJets2l_xs       = 244.9*(1-0.676)*(1-0.676)
+# TTJetsHad_xs      = 244.9*0.676*0.676
 
 TTgamma_xs        = 0.9081 * 2  # https://twiki.cern.ch/twiki/bin/view/CMS/WhizardMCTeeTeeGamma
 newTTgamma_xs     = 0.033 * 9 + 0.148 * 12 + 0.8 # 2l(NLO) + l+jets(NLO) + all_had (approx)  

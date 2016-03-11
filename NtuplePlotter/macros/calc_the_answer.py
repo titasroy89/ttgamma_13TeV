@@ -160,17 +160,18 @@ def doTheCalculation():
  	print 'NdataErr             = ', signal_finder.NdataErr             
 
 	
-	ttgammaSig,ttgammaSigErr, bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr = signal_finder.calculateTTGamma()
+	ttgammaSig,ttgammaSigErr, ttgammaFull,ttgammaFullErr, bestttgSF, bestttgSFErr, bestvgammaSF, bestvgammaSFErr, bestjgSF, bestjgSFErr = signal_finder.calculateTTGamma()
 	
 	#################################################
 	
 	xsRatio = ttgammaSig / phoAcc / TTGamma_topEffAcc / topPreselInt * TTJets_topEffAcc
 	xsRatioRelErr = (   (ttgammaSigErr/ttgammaSig)**2 + 
-						(phoAccErr/phoAcc)**2 + 
-						(TTGamma_topEffAccErr/TTGamma_topEffAcc)**2 +
-						(topPreselErr/topPreselInt)**2 +
-						(TTJets_topEffAccErr/TTJets_topEffAcc)**2
-					)**0.5
+			    (phoAccErr/phoAcc)**2 + 
+			    (TTGamma_topEffAccErr/TTGamma_topEffAcc)**2 +
+			    (topPreselErr/topPreselInt)**2 +
+			    (TTJets_topEffAccErr/TTJets_topEffAcc)**2
+			    )**0.5
+
 	print '*'*80
 	print 'final answer: cross section ratio:'
 	print xsRatio,' +-',xsRatio*xsRatioRelErr

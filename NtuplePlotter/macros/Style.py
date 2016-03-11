@@ -40,9 +40,11 @@ class Style:
 	ROOT.gStyle.SetTextSize(0.09)
 	ROOT.gStyle.SetLabelFont(42,"xyz")
 	ROOT.gStyle.SetTitleFont(42,"xyz")
-	ROOT.gStyle.SetLabelSize(0.045,"xyz") #0.035
-	ROOT.gStyle.SetTitleSize(0.045,"xyz")
-	ROOT.gStyle.SetTitleOffset(1.5,"y")
+	# ROOT.gStyle.SetLabelSize(0.045,"xyz") #0.035
+	# ROOT.gStyle.SetTitleSize(0.045,"xyz")
+	ROOT.gStyle.SetLabelSize(0.055,"xyz") #0.035
+	ROOT.gStyle.SetTitleSize(0.055,"xyz")
+	ROOT.gStyle.SetTitleOffset(1.18,"y")
     
 	# use bold lines and markers
 	ROOT.gStyle.SetMarkerStyle(8)
