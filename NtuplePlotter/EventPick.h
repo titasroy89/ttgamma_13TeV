@@ -14,6 +14,7 @@ class EventPick{
 public:
 	EventPick(std::string titleIn);
 	~EventPick();
+	
 	void process_event(const EventTree* inp_tree, const Selector* inp_selector, double weight=1.0);
 	void print_cutflow();
 	
@@ -22,6 +23,7 @@ public:
 	// selected object indices
 	std::vector<int> Electrons;
 	std::vector<int> ElectronsLoose;
+	std::vector<int> ElectronsMedium;
 	std::vector<int> Muons;
 	std::vector<int> MuonsLoose;
 	std::vector<int> Jets;
@@ -55,11 +57,12 @@ public:
 	int Npho_ge;
 	int NlooseMuVeto_le;
 	int NlooseEleVeto_le;
+	int NmediumEleVeto_le;
 	
 	// variables showing passing or failing selections
 	bool passPreSel; // passed preselection
 	bool passAll; // single flag: event passed all cuts: preselection + photon
-	
+	bool passFirstcut; // pass the sync cut	
 	// histograms
 	std::vector<TH1F*> histVector;
 	TH1F* cutFlow;

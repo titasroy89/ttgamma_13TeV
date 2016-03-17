@@ -1,6 +1,6 @@
 #include<iostream>
 #include<string>
-
+#include"JECvariation.h"
 #include"EventTree.h"
 #include"Selector.h"
 #include"EventPick.h"
@@ -15,38 +15,20 @@ int main(int ac, char** av){
 		return -1;
 	}
 	// input: dealing with TTree first
+	bool isMC = true;
 	EventTree* tree = new EventTree(ac-2, av+2);
 	Selector* selector = new Selector();
-	selector->jet_Pt_cut = 20;
-	// selector->mu_RelIso_range[0] = 0.25; 
-	// selector->mu_RelIso_range[1] = 1.;
-	// std::cout << "muon antiselection is on" << std::endl;
-	//	selector->mu_Iso_MVA_invert = true;
+	selector->jet_Pt_cut = 30;
 	EventPick* evtPick = new EventPick("nominal");
-       //needed for the QCD and otherwise
         evtPick->MET_cut = -1.0;	
-	// antiselection for QCD fit
+	JECvariation* JEC = new JECvariation("./Summer15_25nsV6_MC/Summer15_25nsV6", isMC);
 	std::string outDirName(av[1]);
-	if( outDirName.find("QCD") != std::string::npos){
-		std::cout << "muon antiselection is on" << std::endl;
-		selector->mu_Iso_invert = true;
-	}
-
-	evtPick->NBjet_ge = 0;
 	
-	if( outDirName.find("twoEle") != std::string::npos){
-	        std::cout << "selecting events with 2 electrons" << std::endl;
-	        evtPick->Nele_eq = 2;
-	}
 
-	if( outDirName.find("twoMu") != std::string::npos){
-	        std::cout << "selecting events with 2 muons" << std::endl;
-	        evtPick->Nmu_eq = 2;
-	}
+	evtPick->NBjet_ge = 1;
+	
 
 		
-	// add more branches to be saved
-	//tree->chain->SetBranchStatus("*",1);
 
 	TFile* outFile = new TFile( av[1] ,"RECREATE" );
 	TDirectory* ggDir = outFile->mkdir("ggNtuplizer","ggNtuplizer");
@@ -54,26 +36,26 @@ int main(int ac, char** av){
 	TTree* newTree = tree->chain->CloneTree(0);
 	
 	Long64_t nEntr = tree->GetEntries();
-	for(Long64_t entry=0; entry<nEntr; entry++){
-		if(entry%10000 == 0) std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
-		//if(entry == 1000000) break;
+	for(Long64_t entry= 0; entry < nEntr; entry++){
+		
+		if(entry%1000 == 0) {
+			std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
+		}
 		tree->GetEntry(entry);
 		selector->process_objects(tree);
-		evtPick->process_event(tree, selector);
+		//std::cout << " after selector " << std::endl;
+		JEC->applyJEC(tree,1);
+		evtPick->process_event(tree,selector);
+		
 		// make selection here
 		if( evtPick->passPreSel )
 			newTree->Fill();
+		
+	        //std::cout << "finished with entry " <<  entry << std::endl;	
 	}
-//	for(Long64_t entry=0; entry<10000; entry++){
-//		if(entry%100 == 0) std::cout<<"processing entry " << entry << " out of " << nEntr << std::endl;
-//		tree->GetEntry(entry);
-//		selector->process_objects(tree);
-//		evtPick->process_event(tree, selector);
-//		if( evtPick->passPreSel )
-//			newTree->Fill();
-//	}
+
 	newTree->Write();
-	
+	evtPick->print_cutflow();
 	std::map<std::string, TH1F*> histMap;
 	// copy histograms
 	for(int fileInd = 2; fileInd < ac; ++fileInd){

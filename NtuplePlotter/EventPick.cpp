@@ -46,17 +46,19 @@ EventPick::EventPick(std::string titleIn){
 	veto_lep_jet_dR = 0.5;
 	veto_pho_jet_dR = 0.7;
 	veto_pho_lep_dR = 0.7;
-	MET_cut = 20.0;
+	MET_cut = 40.0;
 	no_trigger = false;
-	Jet_Pt_cut_1 = 55;
-	Njet_ge = 3;
+	Jet_Pt_cut_1 = 30;
+	Njet_ge = 1;
 	NBjet_ge = 1;
-	Nele_eq = 0;
+	Nele_eq = 1;
 	Nmu_eq = 1;
 	NEleVeto_le = 0;
 	Npho_ge = 1;
 	NlooseMuVeto_le = 0;
 	NlooseEleVeto_le = 0;
+	NlooseMuVeto_le = 0;
+	NmediumEleVeto_le = 0;
 }
 
 EventPick::~EventPick(){
@@ -75,14 +77,16 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	for(std::vector<int>::const_iterator jetInd = selector->Jets.begin(); jetInd != selector->Jets.end(); jetInd++){
 		bool goodJet = true;
 		
-		for(std::vector<int>::const_iterator eleInd = selector->Electrons.begin(); eleInd != selector->Electrons.end(); eleInd++)
-			if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
+	//	for(std::vector<int>::const_iterator eleInd = selector->Electrons.begin(); eleInd != selector->Electrons.end(); eleInd++)
+	//		if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
 		
-		for(std::vector<int>::const_iterator muInd = selector->Muons.begin(); muInd != selector->Muons.end(); muInd++)
-			if(dR_jet_mu(*jetInd, *muInd) < veto_jet_dR) goodJet = false;
-		
-		for(std::vector<int>::const_iterator eleInd = selector->ElectronsLoose.begin(); eleInd != selector->ElectronsLoose.end(); eleInd++)
-			if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
+	//	for(std::vector<int>::const_iterator muInd = selector->Muons.begin(); muInd != selector->Muons.end(); muInd++)
+	//		if(dR_jet_mu(*jetInd, *muInd) < veto_jet_dR) goodJet = false;
+//		
+	//	for(std::vector<int>::const_iterator eleInd = selector->ElectronsLoose.begin(); eleInd != selector->ElectronsLoose.end(); eleInd++)
+	//		if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
+	//	for(std::vector<int>::const_iterator eleInd = selector->ElectronsMedium.begin(); eleInd != selector->ElectronsMedium.end(); eleInd++)
+          //              if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
 		//for(int phoVi = 0; phoVi < selector->PhotonsPresel.size(); phoVi++){
 		//	if(selector->PhoPassChHadIso.at(phoVi) && 
 		//	selector->PhoPassPhoIso.at(phoVi) &&
@@ -90,7 +94,6 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 		//	dR_jet_pho(*jetInd, selector->PhotonsPresel.at(phoVi)) < 0.1)
 		//		goodJet = false;
 		//}
- 
 		if(goodJet) Jets.push_back(*jetInd);
 		
 		// take care of bJet collection
@@ -101,36 +104,45 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	// keep electrons that are not close to jets (veto_lep_jet_dR)
 	for(std::vector<int>::const_iterator eleInd = selector->Electrons.begin(); eleInd != selector->Electrons.end(); eleInd++){
 		bool goodEle = true;
-		for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
-			double drje = dR_jet_ele(jetInd, *eleInd);
-			if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drje && drje < veto_lep_jet_dR) goodEle = false;
-		}
+	//	for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
+	//		double drje = dR_jet_ele(jetInd, *eleInd);
+	//		if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drje && drje < veto_lep_jet_dR) goodEle = false;
+	//	}
 		if(goodEle) Electrons.push_back(*eleInd);
 	}
 	
-	// loose electrons
+	//loose electrons
 	for(std::vector<int>::const_iterator eleInd = selector->ElectronsLoose.begin(); eleInd != selector->ElectronsLoose.end(); eleInd++){
 		bool goodEle = true;
-		for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
-			double drje = dR_jet_ele(jetInd, *eleInd);
-			if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drje && drje < veto_lep_jet_dR) goodEle = false;
-		}
+	//	for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
+	//		double drje = dR_jet_ele(jetInd, *eleInd);
+	//		if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drje && drje < veto_lep_jet_dR) goodEle = false;
+	//	}
 		if(goodEle) ElectronsLoose.push_back(*eleInd);
 	}
-	// do cleaning of muons that are close to jets
+	//medium electrons
+	 for(std::vector<int>::const_iterator eleInd = selector->ElectronsMedium.begin(); eleInd != selector->ElectronsMedium.end(); eleInd++){
+                bool goodEle = true;
+        //        for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
+          //              double drje = dR_jet_ele(jetInd, *eleInd);
+            //            if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drje && drje < veto_lep_jet_dR) goodEle = false;
+              //  }
+                if(goodEle) ElectronsMedium.push_back(*eleInd);
+        }
+	 //do cleaning of muons that are close to jets
 	for(std::vector<int>::const_iterator muInd = selector->Muons.begin(); muInd != selector->Muons.end(); muInd++){
 		bool goodMu = true;
-		for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
-			double drjmu = dR_jet_mu(jetInd, *muInd);
-			if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drjmu && drjmu < veto_lep_jet_dR) goodMu = false;
-		}
+	//	for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
+	//		double drjmu = dR_jet_mu(jetInd, *muInd);
+	//		if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drjmu && drjmu < veto_lep_jet_dR) goodMu = false;
+	//	}
 		if(goodMu) Muons.push_back(*muInd);
 	}
 	
-	// photon cleaning:
+	 //photon cleaning:
 	for(int phoVi = 0; phoVi < selector->PhotonsPresel.size(); phoVi++){
 		bool goodPhoton = true;
-		// remove photons close to jets
+		 //remove photons close to jets
 		for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
 			double drjp = dR_jet_pho(jetInd, selector->PhotonsPresel.at(phoVi));
 			if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drjp && drjp < veto_pho_jet_dR) goodPhoton = false;
@@ -155,28 +167,35 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	cutFlow->Fill(0.0); // Input events
 	cutFlowWeight->Fill(0.0,weight);
 	passPreSel = true;
-	if(passPreSel && tree->IsVtxGood_>=0 && (no_trigger || tree->HLT_[tree->HLTIndex_[18]])) {cutFlow->Fill(1); cutFlowWeight->Fill(1,weight);}
+	passFirstcut = true;
+	if( passPreSel && tree->IsVtxGood_>=0 && (no_trigger || tree->HLT_[tree->HLTIndex_[18]])) {cutFlow->Fill(1); cutFlowWeight->Fill(1,weight);}
 	else passPreSel = false;
-	if(passPreSel && Muons.size() == Nmu_eq) {cutFlow->Fill(2); cutFlowWeight->Fill(2,weight);}
-	else passPreSel = false;
-	if(passPreSel && selector->MuonsLoose.size() <= NlooseMuVeto_le) {cutFlow->Fill(3); cutFlowWeight->Fill(3,weight);}
-	else passPreSel = false;
-	//	if(passPreSel && selector->Electrons.size() <= NEleVeto_le) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
-	if(passPreSel && selector->Electrons.size() <= NEleVeto_le && selector->ElectronsLoose.size() <= NlooseEleVeto_le) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
-	else passPreSel = false;
-	if(passPreSel && Jets.size() >= Njet_ge ) {cutFlow->Fill(5); cutFlowWeight->Fill(5,weight);}
-	 else passPreSel = false;
-	if(passPreSel && bJets.size() >= NBjet_ge) {cutFlow->Fill(6); cutFlowWeight->Fill(6,weight);}
-	else passPreSel = false;
-	if(passPreSel && tree->pfMET_ > MET_cut) {cutFlow->Fill(7); cutFlowWeight->Fill(7,weight);}
-	else passPreSel = false;
+	if(passFirstcut && Muons.size() == Nmu_eq) {cutFlow->Fill(2); cutFlowWeight->Fill(2,weight);}
+	else passFirstcut = false;
+	if(passFirstcut && selector->MuonsLoose.size() <=  NlooseMuVeto_le ) {cutFlow->Fill(3); cutFlowWeight->Fill(3,weight);}
+	else passFirstcut = false;
+		//if(passPreSel && selector->Electrons.size() <= NEleVeto_le) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
+	if(passFirstcut && selector->Electrons.size() <= NEleVeto_le && selector->Electrons.size() <= NlooseEleVeto_le) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
+	else passFirstcut = false;
+	if(passFirstcut && Jets.size() >= Njet_ge ) {cutFlow->Fill(5); cutFlowWeight->Fill(5,weight);}
+	 else passFirstcut = false;
+	if(passFirstcut && Jets.size() >= 2 ) {cutFlow->Fill(6); cutFlowWeight->Fill(6,weight);}
+         else passFirstcut = false;
+	 if(passFirstcut && Jets.size() >= 3 ) {cutFlow->Fill(7); cutFlowWeight->Fill(7,weight);}
+         else passFirstcut = false;
+	  if(passFirstcut && Jets.size() >= 4 &&bJets.size() >= 1 ) {cutFlow->Fill(8); cutFlowWeight->Fill(8,weight);}
+         else passFirstcut = false;
+	if(passFirstcut && bJets.size() == 1) {cutFlow->Fill(9); cutFlowWeight->Fill(9,weight);}
+	else passFirstcut = false;
+	//if(passFirstcut && tree->pfMET_ > MET_cut) {cutFlow->Fill(7); cutFlowWeight->Fill(7,weight);}
+	//else passFirstcut = false;
 	
 	// require >=1 photon
-	if(passPreSel && Photons.size() >= Npho_ge){
-		cutFlow->Fill(8);
-		cutFlowWeight->Fill(8,weight);
-		passAll = true;
-	}
+	//if(passPreSel && Photons.size() >= Npho_ge){
+	//	cutFlow->Fill(8);
+	//	cutFlowWeight->Fill(8,weight);
+	//	passAll = true;
+//	}
 
 	// saving information about Gen Level photons, if any
 	// Save it only if PreSelection passed
@@ -299,32 +318,39 @@ void EventPick::print_cutflow(){
 	std::cout << "Cut-Flow for the event selector: " << title << std::endl;
 	std::cout << "Input Events                 " << cutFlow->GetBinContent(1) << std::endl;
 	std::cout << "Passing Trigger and PV       " << cutFlow->GetBinContent(2) << std::endl;
-	std::cout << "Events with ==" << Nmu_eq << " muon     " << cutFlow->GetBinContent(3) << std::endl;
+	std::cout << "Events with = " << Nmu_eq << " muon     " << cutFlow->GetBinContent(3) << std::endl;
 	std::cout << "Events with <= " << NlooseMuVeto_le << " loose muons " << cutFlow->GetBinContent(4) << std::endl;
 	std::cout << "Events with <= " << NEleVeto_le << " electrons " << cutFlow->GetBinContent(5) << std::endl;
 	std::cout << "Events with >= " << Njet_ge << " jets        " << cutFlow->GetBinContent(6) << std::endl;
-	std::cout << "Events with >= " << NBjet_ge << " b-tag       " << cutFlow->GetBinContent(7) << std::endl;
-	std::cout << "Events passing MET cut       " << cutFlow->GetBinContent(8) << std::endl;
-	std::cout << "Events with >=" << Npho_ge << " photon       " << cutFlow->GetBinContent(9) << std::endl;
+	std::cout << "Events with >= " << Njet_ge+1 << " jets        " << cutFlow->GetBinContent(7) << std::endl;
+ 	std::cout << "Events with >= " << Njet_ge+2 << " jets     " << cutFlow->GetBinContent(8) << std::endl;
+	std::cout << "Events with >= " << Njet_ge+3 << " jets and >= 1 b-tag jets   " << cutFlow->GetBinContent(9) << std::endl;
+	std::cout << "Events with = " << NBjet_ge+1 << " b-tag       " << cutFlow->GetBinContent(10) << std::endl;
+//	std::cout << "Events passing MET cut       " << cutFlow->GetBinContent(8) << std::endl;
+//	std::cout << "Events with >=" << Npho_ge << " photon       " << cutFlow->GetBinContent(9) << std::endl;
 	std::cout << std::endl;
 }
 
 void EventPick::set_cutflow_labels(TH1F* hist){
 	hist->GetXaxis()->SetBinLabel(1,"Input");
 	hist->GetXaxis()->SetBinLabel(2,"Trigger");
-	hist->GetXaxis()->SetBinLabel(3,"Electron");
+	hist->GetXaxis()->SetBinLabel(3,"Muons");
 	hist->GetXaxis()->SetBinLabel(4,"Loose Mu");
 	hist->GetXaxis()->SetBinLabel(5,"Loose Ele");
 	hist->GetXaxis()->SetBinLabel(6,"N jets");
-	hist->GetXaxis()->SetBinLabel(7,"N b-tags");
-	hist->GetXaxis()->SetBinLabel(8,"MET");
-	hist->GetXaxis()->SetBinLabel(9,"Photon");
+	hist->GetXaxis()->SetBinLabel(7,"N jets");
+	hist->GetXaxis()->SetBinLabel(8,"N jets");
+	hist->GetXaxis()->SetBinLabel(9,"N jets");
+	hist->GetXaxis()->SetBinLabel(10,"N b-tags");
+	//hist->GetXaxis()->SetBinLabel(11,"MET");
+	//hist->GetXaxis()->SetBinLabel(12,"Photon");
 	//hist->GetXaxis()->SetBinLabel(1,"");
 }
 
 void EventPick::clear_vectors(){
 	Electrons.clear();
 	ElectronsLoose.clear();
+	ElectronsMedium.clear();
 	Muons.clear();
 	MuonsLoose.clear();
 	Jets.clear();

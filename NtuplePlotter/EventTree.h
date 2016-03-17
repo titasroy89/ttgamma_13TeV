@@ -221,11 +221,12 @@ public:
 	vector<int>*    eleMissHits_;
 	vector<float>*  eleConvDist_;
 	vector<float>*  eleConvDcot_;
-	vector<int>*    eleConvVtxFit_;
+	vector<int>*    eleEtaseedAtVtx_;
 	vector<float>*  eleIP3D_;
 	vector<float>*  eleIP3DErr_;
-	vector<float>*  eleIDMVANonTrig_;
-	vector<float>*  eleIDMVATrig_;
+	vector<float>*  eleIDMVANonTrg_;
+	vector<unsigned short>*    eleIDbit_;
+	vector<float>*  eleIDMVATrg_;
 	vector<int>*    eleID2012_0_;
 	vector<int>*    eleID2012_1_;
 	vector<int>*    eleID2012_2_;
@@ -249,9 +250,9 @@ public:
 	vector<float>*  eleBremCorrEt_;
 	vector<float>*  eleFullCorrE_;
 	vector<float>*  eleFullCorrEt_;
-	vector<float>*  elePFChIso03_;
-	vector<float>*  elePFPhoIso03_;
-	vector<float>*  elePFNeuIso03_;
+	vector<float>*  elePFChIso_;
+	vector<float>*  elePFPhoIso_;
+	vector<float>*  elePFNeuIso_;
 	vector<float>*  elePFChIso04_;
 	vector<float>*  elePFPhoIso04_;
 	vector<float>*  elePFNeuIso04_;
@@ -334,17 +335,17 @@ public:
 	vector<float>*  phoPFChIso_;
 	vector<float>*  phoPFPhoIso_;
 	vector<float>*  phoPFNeuIso_;
-	vector<float>*  phoSCRChIso_;
-	vector<float>*  phoSCRPhoIso_;
+	vector<float>*  phoPFChIsoFrix7_;
+	vector<float>*  phoPFPhoIsoFrix7_;
 	vector<float>*  phoSCRNeuIso_;
-	vector<float>*  phoSCRChIso04_;
-	vector<float>*  phoSCRPhoIso04_;
+	vector<float>*  phoPFChIsoFrix704_;
+	vector<float>*  phoPFPhoIsoFrix704_;
 	vector<float>*  phoSCRNeuIso04_;
-	vector<float>*  phoRandConeChIso_;
-	vector<float>*  phoRandConePhoIso_;
+	vector<float>*  phoPFChIsoFrix6_;
+	vector<float>*  phoPFPhoIsoFrix6_;
 	vector<float>*  phoRandConeNeuIso_;
-	vector<float>*  phoRandConeChIso04_;
-	vector<float>*  phoRandConePhoIso04_;
+	vector<float>*  phoPFChIsoFrix604_;
+	vector<float>*  phoPFPhoIsoFrix604_;
 	vector<float>*  phoRandConeNeuIso04_;
 	vector<float>*  phoSeedTime_;
 	vector<float>*  phoLICTD_;
@@ -415,7 +416,7 @@ public:
 	vector<float>*  phoSCBrem_;
 	vector<int>*    phoOverlap_;
 	vector<int>*    phohasPixelSeed_;
-	vector<int>*    phoIsConv_;
+	vector<int>*    phoSeedBCE_;
 	vector<int>*    phoEleVeto_;
 	Int_t    phoESDetId_[maxP][2];
 	Float_t  phoESHits_[maxP][3][62];
@@ -535,13 +536,13 @@ public:
 	vector<float>*  muIsoHcal_;
 	vector<float>*  muChi2NDF_;
 	vector<float>*  muInnerChi2NDF_;
-	vector<float>*  muPFIsoR04_CH_;
-	vector<float>*  muPFIsoR04_NH_;
-	vector<float>*  muPFIsoR04_Pho_;
-	vector<float>*  muPFIsoR04_PU_;
+	vector<float>*  muPFChIso_;
+	vector<float>*  muPFNeuIso_;
+	vector<float>*  muPFPhoIso_;
+	vector<float>*  muPFPUIso_;
 	vector<float>*  muPFIsoR04_CPart_;
-	vector<float>*  muPFIsoR04_NHHT_;
-	vector<float>*  muPFIsoR04_PhoHT_;
+	vector<float>*  muPFNeuIsoHT_;
+	vector<float>*  muPFPhoIsoHT_;
 	vector<float>*  muPFIsoR03_CH_;
 	vector<float>*  muPFIsoR03_NH_;
 	vector<float>*  muPFIsoR03_Pho_;
@@ -562,11 +563,11 @@ public:
 	vector<float>*  muInnerDzGV_;
 	vector<float>*  muInnerPt_;
 	vector<float>*  muInnerPtErr_;
-	vector<int>*    muNumberOfValidTrkLayers_; 
+	vector<int>*    muTrkLayers_; 
 	vector<int>*    muNumberOfValidTrkHits_;
 	vector<int>*    muNumberOfValidPixelLayers_;
-	vector<int>*    muNumberOfValidPixelHits_;
-	vector<int>*    muNumberOfValidMuonHits_;
+	vector<int>*    muPixelHits_;
+	vector<int>*    muMuonHits_;
 	vector<int>*    muStations_;
 	vector<int>*    muChambers_;
 	vector<float>*  muIP3D_;
@@ -901,7 +902,7 @@ public:
 	Float_t  rho25_muPFiso_;
 	Float_t  rho25_elePFiso_;
 	Float_t  rho2011_;
-	Float_t  rho2012_;
+	Float_t  rho_;
 	
 	//QGtag
 	Float_t  QGTag_MLP_;
@@ -937,16 +938,16 @@ public:
 	vector<float>*  jetRawEn_;
 	vector<float>*  jetCharge_;
 	vector<float>*  jetArea_;
-	vector<float>*  jetCHF_;
-	vector<float>*  jetNHF_;
-	vector<float>*  jetCEF_;
-	vector<float>*  jetNEF_;
-	vector<int>*    jetNCH_;
+	vector<float>*  AK8JetCHF_;
+	vector<float>*  AK8JetNHF_;
+	vector<float>*  AK8JetCEF_;
+	vector<float>*  AK8JetNEF_;
+	vector<int>*    AK8JetNCH_;
 	vector<float>*  jetHFHAE_;
 	vector<float>*  jetHFEME_;
 	vector<int>*    jetPartonID_;
-	vector<int>*    jetNConstituents_;
-	vector<float>*  jetCombinedSecondaryVtxBJetTags_; // recommended
+	vector<int>*    AK8Jetnconstituents_;
+	vector<float>*  jetpfCombinedInclusiveSecondaryVertexV2BJetTags_; // recommended
 	vector<float>*  jetCombinedSecondaryVtxMVABJetTags_;
 	vector<float>*  jetJetProbabilityBJetTags_;
 	vector<float>*  jetJetBProbabilityBJetTags_;
@@ -1034,7 +1035,7 @@ public:
 	vector<float>* jetLowPtGenPt_;
 	vector<float>* jetLowPtGenEta_;
 	vector<float>* jetLowPtGenPhi_;
-	
+	vector<bool>* jetPFLooseID_;	
 	// Converted Photon Collection
 	Int_t    nConv_;
 	vector<int>*    convBarrel_;

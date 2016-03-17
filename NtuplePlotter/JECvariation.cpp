@@ -1,34 +1,17 @@
 #include"JetMETObjects/JetCorrectorParameters.h"
 #include"JetMETObjects/FactorizedJetCorrector.h"
 #include"JetMETObjects/JetCorrectionUncertainty.h"
-
+#include"JECvariation.h"
 #include<iostream>
 
-class JECvariation{
-public:
-	JECvariation(std::string inputPrefix, bool isMC);
-	~JECvariation();
-	
-	void applyJEC(EventTree* tree, int scaleDownNormUp012);
-
-private:
-	JetCorrectionUncertainty *jecUnc;
-
-	JetCorrectorParameters *ResJetPar;
-	JetCorrectorParameters *L3JetPar;
-	JetCorrectorParameters *L2JetPar;
-	JetCorrectorParameters *L1JetPar;
-
-	FactorizedJetCorrector *JetCorrector;
-};
 
 JECvariation::JECvariation(std::string inputPrefix, bool isMC){
 	if( isMC ){
-		jecUnc = new JetCorrectionUncertainty((inputPrefix+"_MC_Uncertainty_AK5PF.txt").c_str());
-		ResJetPar = new JetCorrectorParameters((inputPrefix+"_MC_L2L3Residual_AK5PF.txt").c_str());
-		L3JetPar  = new JetCorrectorParameters((inputPrefix+"_MC_L3Absolute_AK5PF.txt").c_str());
-		L2JetPar  = new JetCorrectorParameters((inputPrefix+"_MC_L2Relative_AK5PF.txt").c_str());
-		L1JetPar  = new JetCorrectorParameters((inputPrefix+"_MC_L1FastJet_AK5PF.txt").c_str());
+		jecUnc = new JetCorrectionUncertainty((inputPrefix+"_MC_Uncertainty_AK4PF.txt").c_str());
+		ResJetPar = new JetCorrectorParameters((inputPrefix+"_MC_L2L3Residual_AK4PF.txt").c_str());
+		L3JetPar  = new JetCorrectorParameters((inputPrefix+"_MC_L3Absolute_AK4PF.txt").c_str());
+		L2JetPar  = new JetCorrectorParameters((inputPrefix+"_MC_L2Relative_AK4PF.txt").c_str());
+		L1JetPar  = new JetCorrectorParameters((inputPrefix+"_MC_L1FastJet_AK4PF.txt").c_str());
 	}
 	else{
 		jecUnc = new JetCorrectionUncertainty((inputPrefix+"_DATA_Uncertainty_AK5PF.txt").c_str());
@@ -49,9 +32,11 @@ JECvariation::~JECvariation(){
 
 }
 
-void JECvariation::applyJEC(EventTree* tree, int scaleDownNormUp012){
-	if(scaleDownNormUp012 == 1) return; 
 
+void JECvariation::applyJEC(EventTree* tree, int scaleDownNormUp012){
+	if(scaleDownNormUp012 == 1) return;
+	//bool JECapplied false; 
+	std::cout << "starting to apply JEC " << std::endl;
 	TLorentzVector tMET;
 	tMET.SetPtEtaPhiM(tree->pfMET_,0.0,tree->pfMETPhi_,0.0);
 
@@ -60,7 +45,7 @@ void JECvariation::applyJEC(EventTree* tree, int scaleDownNormUp012){
 		JetCorrector->setJetEta(tree->jetEta_->at(jetInd));
 		JetCorrector->setJetPt(tree->jetRawPt_->at(jetInd));
 		JetCorrector->setJetA(tree->jetArea_->at(jetInd));
-		JetCorrector->setRho(tree->rho2012_);
+		JetCorrector->setRho(tree->rho_);
 		
 		double correction = JetCorrector->getCorrection();
 		//std::cout << tree->jetPt_->at(jetInd) << "  " << tree->jetRawPt_->at(jetInd) << "  " << tree->jetPt_->at(jetInd)/tree->jetRawPt_->at(jetInd) << "  " << correction << std::endl;
@@ -87,6 +72,7 @@ void JECvariation::applyJEC(EventTree* tree, int scaleDownNormUp012){
 		
 		tjet.SetPtEtaPhiM(tree->jetPt_->at(jetInd), tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), 0.0);		       
 		tMET-=tjet;
+		
 	}
 	tree->pfMET_ = tMET.Pt();
 	tree->pfMETPhi_ = tMET.Phi();

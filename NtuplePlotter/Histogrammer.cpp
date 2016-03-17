@@ -377,7 +377,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		hists["ele1Pt"]->Fill( tree->elePt_->at(ind), weight );
 		hists["ele1Eta"]->Fill( tree->eleSCEta_->at(ind), weight );
 		hists["ele1RelIso"]->Fill( selector->Ele03RelIso[ind], weight );
-		hists["ele1MVA"]->Fill( tree->eleIDMVATrig_->at(ind), weight );
+		hists["ele1MVA"]->Fill( tree->eleIDMVATrg_->at(ind), weight );
 		hists["ele1D0"]->Fill( tree->eleD0_->at(ind), weight );
 		hists["ele1Dz"]->Fill( tree->eleDz_->at(ind), weight );
 		hists["ele1EoverP"]->Fill( tree->eleEoverP_->at(ind), weight );
@@ -432,7 +432,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		int ind = selEvent->Photons[0];
 		hists["photon1Et"]->Fill( tree->phoEt_->at(ind), weight );
 		hists["photon1Eta"]->Fill( tree->phoEta_->at(ind), weight );
-		hists["photon1IsConv"]->Fill( tree->phoIsConv_->at(ind), weight );
+		hists["photon1IsConv"]->Fill( tree->phoSeedBCE_->at(ind), weight );
 		
 		hists["photon1ChHadIso"]->Fill( selector->Pho03ChHadIso[ind], weight );
 		hists["photon1ChHadSCRIso"]->Fill( selector->Pho03ChHadSCRIso[ind], weight );

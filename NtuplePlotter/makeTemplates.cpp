@@ -10,7 +10,7 @@
 
 #include"TRandom3.h"
 // temporary solution
-#include"JECvariation.cpp"
+#include"JECvariation.h"
 //#include"JECvariationNew.cpp"
 
 //#include"/uscms_data/d2/dnoonan/LHAPDF/local/include/LHAPDF/LHAPDF.h"
@@ -209,7 +209,7 @@ int main(int ac, char** av){
 	tree->GetEntry(0);
 	isMC = !(tree->isData_);
 	JECvariation* jecvar;
-	jecvar = new JECvariation("./jecAK5PF/Summer12_V7", isMC);
+	jecvar = new JECvariation("./Summer15_25nsV6_MC", isMC);
 
 	// we don't need systematics variations for Data
 	if(!isMC && systematics) {

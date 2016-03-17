@@ -27,6 +27,7 @@ class Selector{
 public:
 	Selector();
 	~Selector();
+	
 	void process_objects(const EventTree* inp_tree);
 	
 	// selected object indices
@@ -36,6 +37,7 @@ public:
 	std::vector<bool> PhoPassSih;
 	std::vector<int> Electrons;
 	std::vector<int> ElectronsLoose;
+	std::vector<int> ElectronsMedium;
 	std::vector<int> Muons;
 	std::vector<int> MuonsLoose;
 	std::vector<int> Jets;
@@ -59,9 +61,15 @@ public:
 	// electrons
 	double ele_Pt_cut;
 	double ele_PtLoose_cut;
+	double ele_Eta;
+	double mu_Eta_loose;
+	double mu_Eta_tight;
+	double mu_Pt_cut;
+	double ele_Ptmedium_cut;
 	double ele_RelIso_range[2];
 	double ele_RelIsoLoose_cut;
 	double ele_MVA_range[2];
+	double ele_cutbased_range[2];
 	double ele_MVALoose_cut;
 	double ele_Dxy_cut;
 	int    ele_MissInnHit_cut;

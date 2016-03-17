@@ -82,24 +82,32 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("elePhi",1);
 	chain->SetBranchAddress("elePhi", &elePhi_);
 
-	elePFChIso03_ = new vector<float>;
-	chain->SetBranchStatus("elePFChIso03",1);
-	chain->SetBranchAddress("elePFChIso03", &elePFChIso03_);
+	elePFChIso_ = new vector<float>;
+	chain->SetBranchStatus("elePFChIso",1);
+	chain->SetBranchAddress("elePFChIso", &elePFChIso_);
 
-	elePFNeuIso03_ = new vector<float>;
-	chain->SetBranchStatus("elePFNeuIso03",1);
-	chain->SetBranchAddress("elePFNeuIso03", &elePFNeuIso03_);
+	elePFNeuIso_ = new vector<float>;
+	chain->SetBranchStatus("elePFNeuIso",1);
+	chain->SetBranchAddress("elePFNeuIso", &elePFNeuIso_);
 
-	elePFPhoIso03_ = new vector<float>;
-	chain->SetBranchStatus("elePFPhoIso03",1);
-	chain->SetBranchAddress("elePFPhoIso03", &elePFPhoIso03_);
+	elePFPhoIso_ = new vector<float>;
+	chain->SetBranchStatus("elePFPhoIso",1);
+	chain->SetBranchAddress("elePFPhoIso", &elePFPhoIso_);
 
-	chain->SetBranchStatus("rho2012",1);
-	chain->SetBranchAddress("rho2012", &rho2012_);
+	chain->SetBranchStatus("rho",1);
+	chain->SetBranchAddress("rho", &rho_);
 
-	eleIDMVATrig_ = new vector<float>;
-	chain->SetBranchStatus("eleIDMVATrig",1);
-	chain->SetBranchAddress("eleIDMVATrig", &eleIDMVATrig_);
+	eleIDMVATrg_ = new vector<float>;
+	chain->SetBranchStatus("eleIDMVATrg",1);
+	chain->SetBranchAddress("eleIDMVATrg", &eleIDMVATrg_);
+        
+	eleIDMVANonTrg_ = new vector<float>;
+        chain->SetBranchStatus("eleIDMVANonTrg",1);
+        chain->SetBranchAddress("eleIDMVANonTrg", &eleIDMVANonTrg_); 
+        
+	eleIDbit_ = new vector<unsigned short>;
+        chain->SetBranchStatus("eleIDbit",1);
+        chain->SetBranchAddress("eleIDbit", &eleIDbit_);
 
 	eleD0_ = new vector<float>;
 	chain->SetBranchStatus("eleD0",1);
@@ -109,9 +117,9 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("eleMissHits",1);
 	chain->SetBranchAddress("eleMissHits", &eleMissHits_);
 
-	eleConvVtxFit_ = new vector<int>;
-	chain->SetBranchStatus("eleConvVtxFit",1);
-	chain->SetBranchAddress("eleConvVtxFit", &eleConvVtxFit_);
+	eleEtaseedAtVtx_ = new vector<int>;
+	chain->SetBranchStatus("eleEtaseedAtVtx",1);
+	chain->SetBranchAddress("eleEtaseedAtVtx", &eleEtaseedAtVtx_);
 
 	eleDz_ = new vector<float>;
 	chain->SetBranchStatus("eleDz",1);
@@ -144,17 +152,17 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("eleHoverE",1);
 	chain->SetBranchAddress("eleHoverE", &eleHoverE_);
 
-	eleIsoTrkDR03_ = new vector<float>;
-	chain->SetBranchStatus("eleIsoTrkDR03",1);
-	chain->SetBranchAddress("eleIsoTrkDR03", &eleIsoTrkDR03_);
+	//eleIsoTrkDR03_ = new vector<float>;
+	//chain->SetBranchStatus("eleIsoTrkDR03",1);
+	//chain->SetBranchAddress("eleIsoTrkDR03", &eleIsoTrkDR03_);
 
-	eleIsoEcalDR03_ = new vector<float>;
-	chain->SetBranchStatus("eleIsoEcalDR03",1);
-	chain->SetBranchAddress("eleIsoEcalDR03", &eleIsoEcalDR03_);
+	//eleIsoEcalDR03_ = new vector<float>;
+	//chain->SetBranchStatus("eleIsoEcalDR03",1);
+	//chain->SetBranchAddress("eleIsoEcalDR03", &eleIsoEcalDR03_);
 
-	eleIsoHcalDR03_ = new vector<float>;
-	chain->SetBranchStatus("eleIsoHcalDR03",1);
-	chain->SetBranchAddress("eleIsoHcalDR03", &eleIsoHcalDR03_);
+	//eleIsoHcalDR03_ = new vector<float>;
+	//chain->SetBranchStatus("eleIsoHcalDR03",1);
+	//chain->SetBranchAddress("eleIsoHcalDR03", &eleIsoHcalDR03_);
 
 	eleGenIndex_ = new vector<int>;
 	chain->SetBranchStatus("eleGenIndex",1);
@@ -174,17 +182,17 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("muChi2NDF", 1);
 	chain->SetBranchAddress("muChi2NDF",&muChi2NDF_);
 
-	muNumberOfValidTrkLayers_ = new vector<int>;
-	chain->SetBranchStatus("muNumberOfValidTrkLayers",1);
-	chain->SetBranchAddress("muNumberOfValidTrkLayers",&muNumberOfValidTrkLayers_);
+	muTrkLayers_ = new vector<int>;
+	chain->SetBranchStatus("muTrkLayers",1);
+	chain->SetBranchAddress("muTrkLayers",&muTrkLayers_);
 		
-	muNumberOfValidMuonHits_ = new vector<int>;
-	chain->SetBranchStatus("muNumberOfValidMuonHits",1);
-	chain->SetBranchAddress("muNumberOfValidMuonHits", &muNumberOfValidMuonHits_);
+	muMuonHits_ = new vector<int>;
+	chain->SetBranchStatus("muMuonHits",1);
+	chain->SetBranchAddress("muMuonHits", &muMuonHits_);
 
-	muNumberOfValidPixelHits_ = new vector<int>;
-	chain->SetBranchStatus("muNumberOfValidPixelHits",1);
-	chain->SetBranchAddress("muNumberOfValidPixelHits",&muNumberOfValidPixelHits_);
+	muPixelHits_ = new vector<int>;
+	chain->SetBranchStatus("muPixelHits",1);
+	chain->SetBranchAddress("muPixelHits",&muPixelHits_);
 	
 	muDz_ = new vector<float>;
 	chain->SetBranchStatus("muDz",1);
@@ -213,21 +221,21 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("muPhi",1);
 	chain->SetBranchAddress("muPhi", &muPhi_);
 	
-	muPFIsoR04_CH_ = new vector<float>;
-	chain->SetBranchStatus("muPFIsoR04_CH",1);
-	chain->SetBranchAddress("muPFIsoR04_CH", &muPFIsoR04_CH_);
+	muPFChIso_ = new vector<float>;
+	chain->SetBranchStatus("muPFChIso",1);
+	chain->SetBranchAddress("muPFChIso", &muPFChIso_);
 	
-	muPFIsoR04_NH_ = new vector<float>;
-	chain->SetBranchStatus("muPFIsoR04_NH",1);
-	chain->SetBranchAddress("muPFIsoR04_NH", &muPFIsoR04_NH_);
+	muPFNeuIso_ = new vector<float>;
+	chain->SetBranchStatus("muPFNeuIso",1);
+	chain->SetBranchAddress("muPFNeuIso", &muPFNeuIso_);
 	
-	muPFIsoR04_Pho_ = new vector<float>;
-	chain->SetBranchStatus("muPFIsoR04_Pho",1);
-	chain->SetBranchAddress("muPFIsoR04_Pho", &muPFIsoR04_Pho_);
+	muPFPhoIso_ = new vector<float>;
+	chain->SetBranchStatus("muPFPhoIso",1);
+	chain->SetBranchAddress("muPFPhoIso", &muPFPhoIso_);
 
-	muPFIsoR04_PU_ = new vector<float>;
-	chain->SetBranchStatus("muPFIsoR04_PU",1);
-	chain->SetBranchAddress("muPFIsoR04_PU", &muPFIsoR04_PU_);
+	muPFPUIso_ = new vector<float>;
+	chain->SetBranchStatus("muPFPUIso",1);
+	chain->SetBranchAddress("muPFPUIso", &muPFPUIso_);
 
 	muType_ = new vector<int>;
 	chain->SetBranchStatus("muType",1);
@@ -257,38 +265,42 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	jetEn_ = new vector<float>;
 	chain->SetBranchStatus("jetEn",1);
 	chain->SetBranchAddress("jetEn", &jetEn_);
+	
+	jetPFLooseID_ = new vector<bool>;
+	chain->SetBranchStatus("jetPFLooseId",1);
+        chain->SetBranchAddress("jetPFLooseId", &jetPFLooseID_);
 
 	jetArea_ = new vector<float>;
 	chain->SetBranchStatus("jetArea",1);
 	chain->SetBranchAddress("jetArea", &jetArea_);
 
-	jetNConstituents_ = new vector<int>;
-	chain->SetBranchStatus("jetNConstituents",1);
-	chain->SetBranchAddress("jetNConstituents", &jetNConstituents_);
+	AK8Jetnconstituents_ = new vector<int>;
+	chain->SetBranchStatus("AK8Jetnconstituents",1);
+	chain->SetBranchAddress("AK8Jetnconstituents", &AK8Jetnconstituents_);
 	
 	jetNCharged_ = new vector<float>;
 	chain->SetBranchStatus("jetNCharged",1);
 	chain->SetBranchAddress("jetNCharged", &jetNCharged_);
 
-	jetCEF_ = new vector<float>;	
-	chain->SetBranchStatus("jetCEF",1);
-	chain->SetBranchAddress("jetCEF", &jetCEF_);
+	AK8JetCEF_ = new vector<float>;	
+	chain->SetBranchStatus("AK8JetCEF",1);
+	chain->SetBranchAddress("AK8JetCEF", &AK8JetCEF_);
 
-	jetNHF_ = new vector<float>;
-	chain->SetBranchStatus("jetNHF",1);
-	chain->SetBranchAddress("jetNHF", &jetNHF_);
+	AK8JetNHF_ = new vector<float>;
+	chain->SetBranchStatus("AK8JetNHF",1);
+	chain->SetBranchAddress("AK8JetNHF", &AK8JetNHF_);
 	
-	jetNEF_ = new vector<float>;
-	chain->SetBranchStatus("jetNEF",1);
-	chain->SetBranchAddress("jetNEF", &jetNEF_);
+	AK8JetNEF_ = new vector<float>;
+	chain->SetBranchStatus("AK8JetNEF",1);
+	chain->SetBranchAddress("AK8JetNEF", &AK8JetNEF_);
 	
-	jetCHF_ = new vector<float>;
-	chain->SetBranchStatus("jetCHF",1);
-	chain->SetBranchAddress("jetCHF", &jetCHF_);
+	AK8JetCHF_ = new vector<float>;
+	chain->SetBranchStatus("AK8JetCHF",1);
+	chain->SetBranchAddress("AK8JetCHF", &AK8JetCHF_);
 
-	jetCombinedSecondaryVtxBJetTags_ = new vector<float>;
-	chain->SetBranchStatus("jetCombinedSecondaryVtxBJetTags",1);
-	chain->SetBranchAddress("jetCombinedSecondaryVtxBJetTags", &jetCombinedSecondaryVtxBJetTags_);
+	jetpfCombinedInclusiveSecondaryVertexV2BJetTags_ = new vector<float>;
+	chain->SetBranchStatus("jetpfCombinedInclusiveSecondaryVertexV2BJetTags",1);
+	chain->SetBranchAddress("jetpfCombinedInclusiveSecondaryVertexV2BJetTags", &jetpfCombinedInclusiveSecondaryVertexV2BJetTags_);
 	
 	jetCombinedSecondaryVtxMVABJetTags_ = new vector<float>;
 	chain->SetBranchStatus("jetCombinedSecondaryVtxMVABJetTags",1);
@@ -339,9 +351,9 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("phoPhi",1);
 	chain->SetBranchAddress("phoPhi", &phoPhi_);
 	
-	phoIsConv_ = new vector<int>;
-	chain->SetBranchStatus("phoIsConv",1);
-	chain->SetBranchAddress("phoIsConv", &phoIsConv_);
+	phoSeedBCE_ = new vector<int>;
+	chain->SetBranchStatus("phoSeedBCE",1);
+	chain->SetBranchAddress("phoSeedBCE", &phoSeedBCE_);
 	
 	phohasPixelSeed_ = new vector<int>;
 	chain->SetBranchStatus("phohasPixelSeed",1);
@@ -371,21 +383,21 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("phoPFPhoIso",1);
 	chain->SetBranchAddress("phoPFPhoIso", &phoPFPhoIso_);
 
-	phoSCRPhoIso_ = new vector<float>;
-	chain->SetBranchStatus("phoSCRPhoIso",1);
-	chain->SetBranchAddress("phoSCRPhoIso", &phoSCRPhoIso_);
+	phoPFPhoIsoFrix7_ = new vector<float>;
+	chain->SetBranchStatus("phoPFPhoIsoFrix7",1);
+	chain->SetBranchAddress("phoPFPhoIsoFrix7", &phoPFPhoIsoFrix7_);
 
-	phoSCRChIso_ = new vector<float>;
-	chain->SetBranchStatus("phoSCRChIso",1);
-	chain->SetBranchAddress("phoSCRChIso", &phoSCRChIso_);
+	phoPFChIsoFrix7_ = new vector<float>;
+	chain->SetBranchStatus("phoPFChIsoFrix7",1);
+	chain->SetBranchAddress("phoPFChIsoFrix7", &phoPFChIsoFrix7_);
 	
-	phoRandConePhoIso_ = new vector<float>;
-	chain->SetBranchStatus("phoRandConePhoIso",1);
-	chain->SetBranchAddress("phoRandConePhoIso", &phoRandConePhoIso_);
+	phoPFPhoIsoFrix6_ = new vector<float>;
+	chain->SetBranchStatus("phoPFPhoIsoFrix6",1);
+	chain->SetBranchAddress("phoPFPhoIsoFrix6", &phoPFPhoIsoFrix6_);
 	
-	phoRandConeChIso_ = new vector<float>;
-	chain->SetBranchStatus("phoRandConeChIso",1);
-	chain->SetBranchAddress("phoRandConeChIso", &phoRandConeChIso_);
+	phoPFChIsoFrix6_ = new vector<float>;
+	chain->SetBranchStatus("phoPFChIsoFrix6",1);
+	chain->SetBranchAddress("phoPFChIsoFrix6", &phoPFChIsoFrix6_);
 
 	phoGenIndex_ = new vector<int>;
 	chain->SetBranchStatus("phoGenIndex",1);
