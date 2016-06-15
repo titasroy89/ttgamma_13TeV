@@ -6,6 +6,7 @@
 #include<set>
 #include<iostream>
 #include<TH1F.h>
+#include<TH1D.h>
 
 #include"EventTree.h"
 #include"Selector.h"
@@ -62,22 +63,25 @@ public:
 	// variables showing passing or failing selections
 	bool passPreSel; // passed preselection
 	bool passAll; // single flag: event passed all cuts: preselection + photon
-	bool passFirstcut; // pass the sync cut	
+	bool passSkim; // pass the skim cuts	
 	// histograms
-	std::vector<TH1F*> histVector;
-	TH1F* cutFlow;
-	TH1F* cutFlowWeight;
-	TH1F* genPhoRegionWeight;
-	TH1F* genPhoRegionWeight_1l_2l;
-	TH1F* genPhoRegionWeight_1fiducial;
-	TH1F* genPhoMinDR;
+	std::vector<TH1D*> histVector;
+	
+	TH1D* genPhoRegionWeight;
+	TH1D* genPhoRegionWeight_1l_2l;
+	TH1D* genPhoRegionWeight_1fiducial;
+	TH1D* genPhoMinDR;
+
+        TH1D* cutFlow;
+        TH1D* cutFlowWeight;
+
 
 private:
 	const EventTree* tree;
 	const Selector* selector;
 	
 	void clear_vectors();
-	void set_cutflow_labels(TH1F* hist);
+	void set_cutflow_labels(TH1D* hist);
 	double dR_jet_ele(int jetInd, int eleInd);
 	double dR_jet_mu(int jetInd, int muInd);
 	double dR_jet_pho(int jetInd, int phoInd);

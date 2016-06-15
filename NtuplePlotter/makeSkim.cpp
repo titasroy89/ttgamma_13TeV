@@ -8,6 +8,8 @@
 #include<TTree.h>
 #include<TDirectory.h>
 #include<TObject.h>
+#include<TH1F.h>
+#include<TCanvas.h>
 
 int main(int ac, char** av){
 	if(ac < 3){
@@ -26,32 +28,40 @@ int main(int ac, char** av){
 	
 
 	evtPick->NBjet_ge = 1;
+
+	TCanvas *c1 = new TCanvas("c1","A Simple Graph Example",1000,500);
+        c1->SetFillColor(42);
+        c1->SetGrid();
 	
-
-		
-
-	TFile* outFile = new TFile( av[1] ,"RECREATE" );
+	//TFile *theFile = TFile::Open("root://cmsxrootd.fnal.gov//store/user/jjesus/rootFile.root");
+	TFile* outFile = TFile::Open( av[1] ,"RECREATE" );
 	TDirectory* ggDir = outFile->mkdir("ggNtuplizer","ggNtuplizer");
 	ggDir->cd();
 	TTree* newTree = tree->chain->CloneTree(0);
 	
 	Long64_t nEntr = tree->GetEntries();
 	for(Long64_t entry= 0; entry < nEntr; entry++){
-		
 		if(entry%1000 == 0) {
 			std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
 		}
-		tree->GetEntry(entry);
+		int check = tree->GetEntry(entry);
+		if (check  == 0) continue;
 		selector->process_objects(tree);
-		//std::cout << " after selector " << std::endl;
-		JEC->applyJEC(tree,1);
-		evtPick->process_event(tree,selector);
+		                              
+
 		
+		//JEC->applyJEC(tree,1);
+		evtPick->process_event(tree,selector);
+	
 		// make selection here
-		if( evtPick->passPreSel )
+		if( evtPick->passSkim ){
 			newTree->Fill();
 		
-	        //std::cout << "finished with entry " <<  entry << std::endl;	
+                //	h3->Fill(tree->jetPt_->at(2));
+                //	h3->Draw();
+               	//	c3->SaveAs("third_jet.pdf");
+                }
+		
 	}
 
 	newTree->Write();
@@ -59,7 +69,7 @@ int main(int ac, char** av){
 	std::map<std::string, TH1F*> histMap;
 	// copy histograms
 	for(int fileInd = 2; fileInd < ac; ++fileInd){
-		TFile* tempFile = new TFile(av[fileInd], "READ");
+		TFile* tempFile = TFile::Open(av[fileInd], "READ");
 		TIter next(((TDirectory*)tempFile->Get("ggNtuplizer"))->GetListOfKeys());
 		TObject* obj;
 		while ((obj = next())){

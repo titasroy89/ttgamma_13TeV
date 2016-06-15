@@ -26,8 +26,8 @@ Histogrammer::Histogrammer(std::string titleIn){
 
 	// creating histograms
 	// muons
-	make_hist("mu1Pt","muon 1 Pt",30,0,300,"Muon p_{T} (GeV)","Events / 10 GeV");
-	make_hist("mu1Eta","muon 1 Eta",26,-2.6,2.6,"Muon #eta","Events / 0.2");
+	make_hist("mu1Pt","muon 1 Pt",20,0,300,"Muon p_{T} (GeV)","Events / 15 GeV");
+	make_hist("mu1Eta","muon 1 Eta",12,0,3,"Muon #eta","Events / 0.25");
 	make_hist("mu1RelIso","muon 1 relative isolation",120,0,1.2,"Muon RelIso","Events / 0.01");
 	make_hist("mu2Pt","muon 2 Pt",30,0,300,"p_{T} (GeV)","Events / 10 GeV");
         make_hist("mu2RelIso","muon 2 relative isolation",10,0,0.5,"RelIso","Events / 0.05");
@@ -97,7 +97,7 @@ Histogrammer::Histogrammer(std::string titleIn){
 	make_hist("ele1ele2Mass","Di-electron mass",40,0,200,"M(e,e)(GeV)","Events / 5 GeV");
 	make_hist("mu1mu2Mass","Di-muon mass",40,0,200,"M(mu,mu)(GeV)","Events / 5 GeV");
 	make_hist("Ht","Ht",30,0,1500,"H_{T} (GeV)","Events / 50 GeV");
-	make_hist("MET","Missing Transverse Momentum",40,0,200,"MET (GeV)","Events / 10 GeV");
+	make_hist("MET","Missing Transverse Momentum",10,0,200,"MET (GeV)","Events / 10 GeV");
 	make_hist("MET_low","Missing Transverse Momentum",20,0,20,"MET (GeV)","Events / 10 GeV");
 	make_hist("nVtx","Number of Primary Vertices",50,0.5,50.5,"N_{PV}","Events");
 	make_hist("nJets","number of jets",15,-0.5,14.5,"N_{jets}","Events");
@@ -214,6 +214,8 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		int TauP = 0;
 		int TauM = 0;
 		for( int mcI = 0; mcI < tree->nMC_; ++mcI){
+	//	  std::cout << "starting to loop over nMC " << std::endl;
+		  
 		  if(abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10){
 		    if( tree->mcPID->at(mcI) == 11 )  EleP = 1;
 		    if( tree->mcPID->at(mcI) == -11 ) EleM = 1;
@@ -223,7 +225,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		    if( tree->mcPID->at(mcI) == -15)  TauM = 1;		    
 		  }
 		}
-
+	//	std::cout << " Starting to fill the MC histograms " << std::endl;
 		hists["MCcategory"]->Fill(1.0, weight); // Total
 		int nEle = EleP + EleM;
 		int nMu = MuP + MuM;
@@ -239,6 +241,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		if(nEle==0 && nMu==0 && nTau==1) hists["MCcategory"]->Fill(10.0, weight); // 1 tau
 		if(nEle==0 && nMu==0 && nTau==2) hists["MCcategory"]->Fill(11.0, weight); // 2 tau
 
+		//std::cout << " done filling the MCcategory histograms " << std::endl;
 		//Count the number of electrons and muons for the fiducial cross section measurement
 		int ElePfid = 0;
 		int EleMfid = 0;
@@ -251,6 +254,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		TVector2 tempNu = TVector2(0,0);
 
 		for( int mcI = 0; mcI < tree->nMC_; ++mcI){
+		 // std::cout << "starting to loop over MC again " << std::endl;
 		  if((abs(tree->mcMomPID->at(mcI))==24 && tree->mcParentage->at(mcI)==10) || (abs(tree->mcMomPID->at(mcI))==15 && tree->mcParentage->at(mcI)==26)){		  
 		    if( tree->mcPID->at(mcI) == 11 ) {
 		      if (tree->mcPt->at(mcI) > 35 && (fabs(tree->mcEta->at(mcI)) < 2.5 && !(fabs(tree->mcEta->at(mcI)) > 1.4442 && fabs(tree->mcEta->at(mcI))<1.566))) ElePfid += 1;
@@ -295,7 +299,8 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		    }
 		  }
 		}
-
+		
+		//std::cout << "starting to fill the MC category fiduciary region " << std::endl;
 
 		hists["MCcategoryfid"]->Fill(1.0, weight); // Total
 		if( nElefid + nMufid == 0) hists["MCcategoryfid"]->Fill(2.0, weight); // All Had
@@ -334,19 +339,10 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		    }
 		  }
 		}
+	//	std::cout << " done filling histograms in MCcategoryfid " << std::endl;
 
-		// if(nElefid==1 && nMufid==0 && nJetsfid >=3 && nNufid == 1){
-		//   hists["MCcategoryfid"]->Fill(11.0, weight);
-		//   if (nPhofid > 0) hists["MCcategoryfid"]->Fill(14.0, weight);
-		// }
-		// if(nElefid==0 && nMufid==1 && nJetsfid >=3 && nNufid == 1){
-		//   hists["MCcategoryfid"]->Fill(12.0, weight);
-		//   if (nPhofid > 0) hists["MCcategoryfid"]->Fill(15.0, weight);
-		// }
-
-		//std::cout << "EleP " << EleP << "  EleM " << EleM << "  MuP " << MuP << "  MuM " << MuM << "  TauP " << TauP << "  TauM " << TauM << std::endl;
 	}
-
+	//std::cout << " Done with MC " << std::endl;
 	double MTW = 0.0;
 	// muons
 	if( selEvent->Muons.size() > 0 ){
@@ -368,7 +364,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
                         hists["mu1mu2Mass"]->Fill( (mu1+mu2).M(), weight);
                 }
 
-			
+	//std::cout << " Done filling Muons " << std::endl;	
 	}
 
 	// electrons
@@ -425,14 +421,14 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		}
 		hists["looseEleDrGenPho"]->Fill(mindr, weight);
 	}
-	//std::cout << "here3" << std::endl;
+	//std::cout << "Done filling electrons" << std::endl;
 	// photons
 	hists["nPhotons"]->Fill(selEvent->Photons.size(), weight);
 	if( selEvent->Photons.size() > 0 ){
 		int ind = selEvent->Photons[0];
 		hists["photon1Et"]->Fill( tree->phoEt_->at(ind), weight );
 		hists["photon1Eta"]->Fill( tree->phoEta_->at(ind), weight );
-		hists["photon1IsConv"]->Fill( tree->phoSeedBCE_->at(ind), weight );
+		hists["photon1IsConv"]->Fill( tree->phohasPixelSeed_->at(ind), weight );
 		
 		hists["photon1ChHadIso"]->Fill( selector->Pho03ChHadIso[ind], weight );
 		hists["photon1ChHadSCRIso"]->Fill( selector->Pho03ChHadSCRIso[ind], weight );
@@ -461,35 +457,35 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		hists["photon1SigmaIEtaIEta"]->Fill( tree->phoSigmaIEtaIEta_->at(ind), weight );
 		hists["photon1DrElectron"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Electrons, tree->eleSCEta_, tree->elePhi_), weight );
 		hists["photon1DrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
-
-		if( tree->isData_ == 0 ){
-			if( tree->phoGenIndex_->at(ind) >= 0 ){
-				hists["photon1MotherID"]->Fill( fabs(tree->phoGenMomPID_->at(ind)), weight );
+               // std::cout << "Most of photons done" << std::endl;
+	//	if( tree->isData_ == 0 ){
+			//if( tree->phoGenIndex_->at(ind) >= 0 ){
+			//	hists["photon1MotherID"]->Fill( fabs(tree->phoGenMomPID_->at(ind)), weight );
 				//if( TMath::Abs(tree->phoGenMomPID_->at(ind)) == 22 )
-				hists["photon1GMotherID"]->Fill( fabs(tree->phoGenGMomPID_->at(ind)), weight );
-			}
-			else {
-				hists["photon1MotherID"]->Fill( 0.0, weight );
-			}
+			//	hists["photon1GMotherID"]->Fill( fabs(tree->phoGenGMomPID_->at(ind)), weight );
+		//	}
+		//	else {
+		//		hists["photon1MotherID"]->Fill( 0.0, weight );
+		//	}
 			
 			// find the closest b-jet
-			double mindr = minDrPhoB(ind, tree);
-			int phoGen=-1;
-			for( int mcI = 0; mcI < tree->nMC_; ++mcI){
-				if( tree->mcIndex->at(mcI) == tree->phoGenIndex_->at(ind) ) 
-					phoGen=mcI;
-			}
-			if( phoGen > 0){
-				hists["GenPhotonEt"]->Fill(tree->mcPt->at(phoGen), weight);
-				hists["GenPhotonMinDR"]->Fill(secondMinDr(phoGen, tree), weight);
-			}
-			if(mindr<999) {
-				hists["photon1DrMCbquark"]->Fill( mindr, weight );
-			}
+	//		double mindr = minDrPhoB(ind, tree);
+	//		int phoGen=-1;
+			//for( int mcI = 0; mcI < tree->nMC_; ++mcI){
+			//	if( tree->mcIndex->at(mcI) == tree->phoGenIndex_->at(ind) ) 
+			//		phoGen=mcI;
+		//	}
+	//		if( phoGen > 0){
+	//			hists["GenPhotonEt"]->Fill(tree->mcPt->at(phoGen), weight);
+			//	hists["GenPhotonMinDR"]->Fill(secondMinDr(phoGen, tree), weight);
+	//		}
+	//		if(mindr<999) {
+	//			hists["photon1DrMCbquark"]->Fill( mindr, weight );
+	//		}
 			
-		}
+	//	}
 	}
-	//std::cout << "here4" << std::endl;
+	//std::cout << "almost done " << std::endl;
 	hists["Ht"]->Fill( calc_ht(selEvent, tree), weight );
 	hists["MET"]->Fill( tree->pfMET_, weight );
         hists["MET_low"]->Fill(tree->pfMET_,weight);
@@ -605,7 +601,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		hists["jet4Pt"]->Fill( tree->jetPt_->at(ind), weight );
 		hists["jet4Eta"]->Fill( tree->jetEta_->at(ind), weight );
 	}
-	
+//	std::cout << " Done filling everything " << std::endl;	
 }
 
 int Histogrammer::minDrIndex(double myEta, double myPhi, std::vector<int> Inds, std::vector<float> *etas, std::vector<float> *phis){
@@ -670,7 +666,7 @@ double Histogrammer::calc_ht(EventPick* evtPick, EventTree* tree){
 }
 
 void Histogrammer::make_hist(const char* hname, const char* htitle, int nbins, double xlow, double xhigh, const char* xlabel, const char* ylabel){
-	TH1F* h = new TH1F(hname, htitle, nbins, xlow, xhigh);
+	TH1D* h = new TH1D(hname, htitle, nbins, xlow, xhigh);
 	h->GetXaxis()->SetTitle(xlabel);
 	h->GetYaxis()->SetTitle(ylabel);
 	h->SetDirectory(0);
@@ -679,29 +675,29 @@ void Histogrammer::make_hist(const char* hname, const char* htitle, int nbins, d
 }
 
 void Histogrammer::make_hist2d(const char* hname, const char* htitle, int nxbins, double xlow, double xhigh, int nybins, double ylow, double yhigh){
-	TH2F* h2 = new TH2F(hname, htitle, nxbins, xlow, xhigh, nybins, ylow, yhigh);
+	TH2D* h2 = new TH2D(hname, htitle, nxbins, xlow, xhigh, nybins, ylow, yhigh);
 	h2->SetDirectory(0);
 	hists2d[hname] = h2;
 }
 
-void Histogrammer::write_histograms(std::string folderS, std::vector<TH1F*> histVector){
+void Histogrammer::write_histograms(std::string folderS, std::vector<TH1D*> histVector){
 
 	TFile* outFile = new TFile((folderS+"/hist_"+title+".root").c_str(), "RECREATE");
 
-	for( std::map< std::string, TH1F* >::iterator it = hists.begin(); it != hists.end(); ++it){
+	for( std::map< std::string, TH1D* >::iterator it = hists.begin(); it != hists.end(); ++it){
 	  
 		it->second->SetDirectory(outFile->GetDirectory(""));
 		it->second->Write();
 		it->second->SetDirectory(0);
 	}
 
-	for( std::vector<TH1F*>::iterator it = histVector.begin(); it != histVector.end(); ++it){
+	for( std::vector<TH1D*>::iterator it = histVector.begin(); it != histVector.end(); ++it){
 		(*it)->SetDirectory(outFile->GetDirectory(""));
 		(*it)->Write();
 		(*it)->SetDirectory(0);
 	}
 
-	for( std::map< std::string, TH2F* >::iterator it = hists2d.begin(); it != hists2d.end(); ++it){
+	for( std::map< std::string, TH2D* >::iterator it = hists2d.begin(); it != hists2d.end(); ++it){
 		it->second->SetDirectory(outFile->GetDirectory(""));
 		it->second->Write();
 		it->second->SetDirectory(0);
@@ -709,6 +705,7 @@ void Histogrammer::write_histograms(std::string folderS, std::vector<TH1F*> hist
 
 	outFile->Close();
 }
+
 
 Histogrammer::~Histogrammer(){
 	// do not delete histograms

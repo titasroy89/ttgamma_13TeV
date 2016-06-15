@@ -99,7 +99,7 @@ void HistCollect::fill_histograms(Selector* selector, EventPick* selEvent, Event
 }
 
 void HistCollect::write_histograms(EventPick* selEvent, bool isMC, std::string outDir){
-	std::vector<TH1F*> emptyVec;
+	std::vector<TH1D*> emptyVec;
 	if(fillSum) histnom->write_histograms(outDir,selEvent->histVector);
 	if(fillBarrel) histnom_barrel->write_histograms(outDir,emptyVec);
 	if(fillEndcap) histnom_endcap->write_histograms(outDir,emptyVec);
@@ -112,11 +112,13 @@ void HistCollect::write_histograms(EventPick* selEvent, bool isMC, std::string o
 		}
 		if(fillFE){
 			if(fillMCCategSum) histnom_fe->write_histograms(outDir,selEvent->histVector);
+
 			if(fillBarrel) histnom_barrel_fe->write_histograms(outDir,emptyVec);
 			if(fillEndcap) histnom_endcap_fe->write_histograms(outDir,emptyVec);
 		}
 		if(fillFJRB){
 			if(fillMCCategSum) histnom_fjrb->write_histograms(outDir,selEvent->histVector);
+
 			if(fillBarrel) histnom_barrel_fjrb->write_histograms(outDir,emptyVec);
 			if(fillEndcap) histnom_endcap_fjrb->write_histograms(outDir,emptyVec);
 		}

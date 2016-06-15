@@ -11,7 +11,7 @@ class PUReweight{
 public:
 	PUReweight(int nFiles, char** fileNames, std::string PUfilename);
 	~PUReweight();
-	double getWeight(int nPUInfo, std::vector<int> *puBX, std::vector<int> *nPU);
+	double getWeight(int nPUInfo, std::vector<int> *puBX, std::vector<float> *puTrue);
 	double getAvgWeight();
 	
 private:

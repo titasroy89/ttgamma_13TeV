@@ -27,19 +27,18 @@ public:
 	Float_t  pdf_[7];
 	Float_t  pthat_;
 	Float_t  processID_;
-	Int_t    nHLT_;
-	Int_t    HLT_[maxP];
-	Int_t    HLTIndex_[70];
+	ULong64_t HLTEleMuX_;
+	ULong64_t HLTEleMuXIsPrescaled_;
 	Float_t  bspotPos_[3];
 	Int_t    nVtx_;
 	vector<Float_t>* vtx_x_;
 	vector<Float_t>* vtx_y_;
 	vector<Float_t>* vtx_z_;
-	
+	Int_t bitEleMuX;	
 	vector<int>* vtxNTrk_;
 	vector<float>* vtxNDF_;
 	vector<float>* vtxD0_;
-	Int_t    IsVtxGood_;
+	Int_t    hasGoodVtx_;
 	Int_t    nGoodVtx_;
 	Int_t    nVtxBS_;
 	vector<float>*  vtxbs_x_;
@@ -91,7 +90,8 @@ public:
 	Int_t    nPUInfo_;  
 	vector<int>* nPU_;
 	vector<int>* puBX_;
-	vector<float>* puTrue_;
+	vector<float>* puTrue_;	
+	
 	// Gen & Reco MET
 	Float_t  genMET_;
 	Float_t  genMETPhi_;
@@ -137,7 +137,7 @@ public:
 	vector<int>*    eleCharge_;
 	vector<int>*    eleChargeConsistent_;
 	vector<float>*  eleEn_;
-	vector<float>*  eleEcalEn_;
+	vector<float>*  elecaloEnergy_;
 	vector<float>*  eleSCEn_;
 	vector<float>*  eleESEn_;
 	vector<float>*  eleVtx_x_;
@@ -221,7 +221,7 @@ public:
 	vector<int>*    eleMissHits_;
 	vector<float>*  eleConvDist_;
 	vector<float>*  eleConvDcot_;
-	vector<int>*    eleEtaseedAtVtx_;
+	vector<int>*    eleEcalDrivenSeed_;
 	vector<float>*  eleIP3D_;
 	vector<float>*  eleIP3DErr_;
 	vector<float>*  eleIDMVANonTrg_;
@@ -948,7 +948,7 @@ public:
 	vector<int>*    jetPartonID_;
 	vector<int>*    AK8Jetnconstituents_;
 	vector<float>*  jetpfCombinedInclusiveSecondaryVertexV2BJetTags_; // recommended
-	vector<float>*  jetCombinedSecondaryVtxMVABJetTags_;
+	vector<float>*  jetpfCombinedMVABJetTags_;
 	vector<float>*  jetJetProbabilityBJetTags_;
 	vector<float>*  jetJetBProbabilityBJetTags_;
 	vector<vector<float> >*  jetBetaStar_;

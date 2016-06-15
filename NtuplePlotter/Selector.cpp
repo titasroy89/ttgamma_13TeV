@@ -51,19 +51,12 @@ Selector::Selector(){
 
 void Selector::process_objects(const EventTree* inp_tree){
 	tree = inp_tree;
-//	std::cout << "tree done" << std::endl;
 	clear_vectors();
-//	std::cout << "vectors done " << std::endl;
 	filter_photons();
-//	std::cout << "photons done " << std::endl;
         filter_muons();
-  //      std::cout << "muons done" << std::endl;
-
  	filter_electrons();
-//	std::cout << " electrons done" << std::endl;
-	
 	filter_jets();
-//        std::cout << "jets done" << std::endl;
+
 
 }
 
@@ -110,25 +103,26 @@ void Selector::filter_photons(){
 		// manual spike cleaning (was necessary before)
 		//if (dR(tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd), -1.76, 1.37) < 0.05) continue;
 		//if (dR(tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd),  2.37, 2.69) < 0.05) continue;		
-
+		
 		int region = 0; //barrel
 		if(TMath::Abs( eta )>1.5) region = 1; //endcap
+		
 		bool phoPresel = fidEtaPass( eta ) &&
 						et > pho_Et_cut &&
 						( pho_noPixelSeed_cut || tree->phohasPixelSeed_->at(phoInd) == 0 ) &&
-						( pho_noEleVeto_cut || tree->phoEleVeto_->at(phoInd) == 0 ) &&
-						tree->phoSeedBCE_->at(phoInd) == photonID_IsConv[region][pho_ID_ind] &&
-						tree->phoHoverE_->at(phoInd) < photonID_HoverE[region][pho_ID_ind] &&
-						Pho03NeuHadIso[phoInd] < 
-			(photonID_RhoCorrR03NeuHadIso_0[region][pho_ID_ind] + et * photonID_RhoCorrR03NeuHadIso_1[region][pho_ID_ind]);
-		
+						(tree->phoHoverE_->at(phoInd) < photonID_HoverE[region][pho_ID_ind]) &&
+						(Pho03NeuHadIso[phoInd] < (photonID_RhoCorrR03NeuHadIso_0[region][pho_ID_ind] + et * photonID_RhoCorrR03NeuHadIso_1[region][pho_ID_ind]));
+	
 		if(phoPresel){
 			PhotonsPresel.push_back(phoInd);
 			PhoPassSih.push_back( tree->phoSigmaIEtaIEta_->at(phoInd) < photonID_SigmaIEtaIEta[region][pho_ID_ind] );
 			// substitute ChHadIso cut to loose SC footprint removed ChHadIso cut of 5 GeV in photon selection
 			PhoPassChHadIso.push_back( Pho03ChHadSCRIso[phoInd] < 5 /*photonID_RhoCorrR03ChHadIso[region][pho_ID_ind]*/ );
 			PhoPassPhoIso.push_back( Pho03PhoIso[phoInd] < photonID_RhoCorrR03PhoIso_0[region][pho_ID_ind] + et * photonID_RhoCorrR03PhoIso_1[region][pho_ID_ind] );
+		
 		}
+	
+
 	}
 }
 
@@ -145,37 +139,6 @@ void Selector::filter_electrons(){
 			 std::max(0.0, tree->elePFNeuIso_->at(eleInd) + tree->elePFPhoIso_->at(eleInd) - rho_zero * eleEffArea03(eta))
 			) / pt );
 		
-		//bool Iso_pass = ele_RelIso_range[0] <= Ele03RelIso[eleInd] &&
-			//	Ele03RelIso[eleInd] < ele_RelIso_range[1];
-		//bool MVA_pass = ele_MVA_range[0] < tree->eleIDMVATrig_->at(eleInd) &&
-		//		tree->eleIDMVATrig_->at(eleInd) <= ele_MVA_range[1];
-		//
-	//	std::cout << "eleIDbit " << tree->eleIDbit_->at(eleInd)  << std::endl;
-	
-
-		
-	//	bool cutbasedID = ( tree->eleIDbit_ & 4) >> 2  ; 
-	//	std::cout << "after defining cutbasedID bool" << std::endl;			
-		
-			
-                
-		//bool Iso_MVA_pass;
-		//if(ele_Iso_MVA_invert) Iso_MVA_pass = !Iso_pass || !MVA_pass;
-		//else Iso_MVA_pass = Iso_pass && MVA_pass;
-      		//bool eleSel = fidEtaPass( eta ) &&
-		//				pt > ele_Pt_cut &&
-		//				
-		//				tree->eleEtaseedAtVtx_->at(eleInd) == 0 &&
-		//				TMath::Abs(tree->eleD0_->at(eleInd)) < ele_Dxy_cut &&
-		//				tree->eleMissHits_->at(eleInd) <= ele_MissInnHit_cut;
-		
-	//	std::cout << "len eta " << tree->eleSCEta_->size() << std::endl;
-             	//std::cout << "len eleID " << tree->eleIDbit_->size() << std::endl;
-            //    std::cout << "len mvaID " << tree->eleIDMVATrg_->size() << std::endl;
-              //  std::cout << "len mvaIDNT " << tree->eleIDMVANonTrg_->size() << std::endl;
-                //std::cout << "len pt " << tree->elePt_->size() << std::endl;
-		//if (tree->eleIDbit_->size() > 0 ){
-		//	std::cout << "what is inside eleIDbit_ actually? " << tree->eleIDbit_
 		if (tree->eleIDbit_->size() != tree->elePt_->size()){	
 			std::cout << " vectors are of different length skip to next electron " << std::endl;
 			continue;
@@ -183,22 +146,9 @@ void Selector::filter_electrons(){
 		
 		
                bool cutbasedID = false;
-               //if (tree->eleIDbit_->size() == tree->elePt_->size()){
-                  //std::cout << "cutbasedID bool" << std::endl;
-  //             std::cout << " electron ID bit is " << tree->eleIDbit_->at(eleInd) << std::endl;
                cutbasedID = ( tree->eleIDbit_->at(eleInd) >> 2 & 1)  ;
-	//       if (cutbasedID ) {
-	//		std::cout << " It is passing the ID cut !! " << std::endl;
-		   //continue;
-         //        }
-                //}
-          //     std::cout << "after defining cutbasedID bool" << std::endl;
-//	       std::cout << "eta is " << fabs(eta) << std::endl;
-//	       std::cout << " electron pt is " << pt << std::endl;
-//	       std::cout << " cutbasedID pass : " << cutbasedID << std::endl;
 	       bool eleSel = fabs( eta )  < 2.4 &&
                                                 pt > ele_Pt_cut ;// && 
-                                                //cutbasedID  ;
                                                 //tree->eleEtaseedAtVtx_->at(eleInd) == 0 &&
                                                 //TMath::Abs(tree->eleD0_->at(eleInd)) < ele_Dxy_cut &&
                                                 //tree->eleMissHits_->at(eleInd) <= ele_MissInnHit_cut;
@@ -213,7 +163,6 @@ void Selector::filter_electrons(){
 						Ele03RelIso[eleInd] < ele_RelIsoLoose_cut && 
 						tree->eleIDMVATrg_->at(eleInd) > ele_MVALoose_cut;
 		
-        //       std::cout << "after defining all cuts" << std::endl; 
 		
 		if( eleSel && cutbasedID ){
 			Electrons.push_back(eleInd);
@@ -221,15 +170,14 @@ void Selector::filter_electrons(){
 		else if( looseSel ){ 
 			ElectronsLoose.push_back(eleInd);
 		}
-		//std::cout << " lenght of the vector Electrons " << Electrons.size() << std::endl;
 	}
-//	std::cout << " lenght of the vector Electrons " << Electrons.size() << std::endl;
 }
 void Selector::filter_muons(){
 	for(int muInd = 0; muInd < tree->nMu_; ++muInd){
 		const unsigned int GlobalMuon     =  1<<1;
 		const unsigned int TrackerMuon    =  1<<2;
 		const unsigned int PFMuon =  1<<5;
+		const unsigned int TightMuon = 1 ;
 		bool isGlobalMuon  = tree->muType_->at(muInd) & GlobalMuon;
 		bool isTrackerMuon = tree->muType_->at(muInd) & TrackerMuon;
 		bool isPFMuon      = tree->muType_->at(muInd) & PFMuon;
@@ -241,22 +189,15 @@ void Selector::filter_muons(){
 						0.5*tree->muPFPUIso_->at(muInd)
 					) 
 				     ) / pt;
-	//	bool Iso_pass = mu_RelIso_range[0] <= Mu04RelIso[muInd] &&
-         //                       Mu04RelIso[muInd] < mu_RelIso_range[1];
 
 		double rho_zero = std::max(0.0, (double)tree->rho_);
-		//Mu04RelIso.push_back( 
-		//	(tree->muPFChIso_->at(muInd) +
-		//	 std::max(0.0, tree->muPFNeuIso_->at(muInd) + tree->muPFPhoIso_->at(muInd) - rho_zero * muEffArea04(eta))
-		//	) / pt );
 		Mu04RelIso.push_back( frelIsocorr );
-		// fill Muons vector with indices of muons passing selection
 
 		bool IsoPass = frelIsocorr >= mu_RelIso_range[0] && frelIsocorr <= mu_RelIso_range[1];		
 
 		if (mu_Iso_invert) IsoPass = !IsoPass;
 
-		bool passLoose = pt > 10.0 && TMath::Abs(eta) < 2.4 && frelIsocorr < 0.25 && isPFMuon && ( isGlobalMuon || isTrackerMuon);
+		bool passLoose = pt > 10.0 && TMath::Abs(eta) < 2.5 && frelIsocorr < 0.25 && isPFMuon && ( isGlobalMuon || isTrackerMuon);
 		bool passTight = pt > 26.0 && TMath::Abs(eta) < 2.1 && 
 				frelIsocorr < 0.15 &&
 				tree->muChi2NDF_->at(muInd) < 10 &&
@@ -266,12 +207,9 @@ void Selector::filter_muons(){
 				fabs( tree->muDz_->at(muInd) ) < 0.5 && //check this
 				tree->muPixelHits_->at(muInd) > 0 &&
 				tree->muStations_->at(muInd) > 1 &&
-		                IsoPass &&
+		                IsoPass && 
 				isPFMuon && isGlobalMuon && isTrackerMuon;
 		
-		//bool muSel = TMath::Abs(eta) < 2.5 &&
-		//				pt > mu_PtLoose_cut &&
-		//				Mu04RelIso[muInd] < mu_RelIsoLoose_cut;
 
 		if(passTight){
 		 	Muons.push_back(muInd);
@@ -280,17 +218,7 @@ void Selector::filter_muons(){
 		 	MuonsLoose.push_back(muInd);
 		 }
 
-//		if( passTight && passLoose ){
-//			Muons.push_back(muInd);
-//		}
-//		if ( passTight && !passLoose){
-//			Muons.push_back(muInd);
-//		}
-//		if( passLoose && !passTight ){
-//			MuonsLoose.push_back(muInd);
-//		}
 	}
- //       std::cout << " lenght of the vector Muons " << Muons.size() << std::endl;	
 }
 
 // jet ID is not likely to be altered, so it is hardcoded
@@ -298,29 +226,18 @@ void Selector::filter_jets(){
 	for(int jetInd = 0; jetInd < tree->nJet_; ++jetInd){
 //		std::cout << "starts to iterate with jet number " << jetInd << " out of " << tree->nJet_ << std::endl;
 		bool jetID_pass = false;
-		
-//		std::cout << " length of jet Pt " << tree->jetPt_->size() << std::endl;
-//		std::cout << " length of jetID " << tree->jetPFLooseID_->size() << std::endl;
 		if ( tree->jetPt_->size() == tree->jetPFLooseID_->size() ) {
 			 jetID_pass = ( tree->jetPFLooseID_->at(jetInd) == 1) ; 
 		}
-//		std::cout << " jet ID " <<  tree->jetPFLooseID_ << std::endl;
 		bool jetPresel = TMath::Abs(tree->jetEta_->at(jetInd)) < 2.4 &&
 						 tree->jetPt_->at(jetInd) > 30.0 &&
 						 jetID_pass ;
-						// tree->AK8JetCHF_->at(jetInd) > 0 &&
-						 //tree->AK8JetNHF_->at(jetInd) < 0.99 &&
-						//tree->AK8JetCEF_->at(jetInd) < 0.99 &&
-						//tree->AK8JetNEF_->at(jetInd) < 0.99 &&
-						//tree->AK8JetNCH_->at(jetInd) > 0 &&
-						//tree->AK8Jetnconstituents_->at(jetInd) > 1;
-//		std::cout << "crosses the AK8 stuff " << std::endl;	
 		if( jetPresel){
 			Jets.push_back(jetInd);
 			if(tree->jetpfCombinedInclusiveSecondaryVertexV2BJetTags_->at(jetInd) > btag_cut) bJets.push_back(jetInd);
 		}
+		
 	}
- //    std::cout << " Size of the Jets vector is : " << Jets.size() << std::endl;
 }
 
 bool Selector::fidEtaPass(double Eta){

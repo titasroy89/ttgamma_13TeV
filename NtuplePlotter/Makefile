@@ -1,7 +1,7 @@
 all: makeTemplates makeSkim signalAcceptance
 
-makeTemplates: Histogrammer.o HistCollect.o Selector.o EventPick.o EventTree.o JECvariation.o makeTemplates.cpp OverlapRemove.cpp PUReweight.cpp PUReweight.h  JECvariation.cpp 
-	g++ -o makeTemplates `root-config --libs` -I`root-config --incdir` -std=c++11 EventTree.o Selector.o EventPick.o Histogrammer.o HistCollect.o JECvariation.o makeTemplates.cpp OverlapRemove.cpp PUReweight.cpp JetMETObjects/FactorizedJetCorrector.o JetMETObjects/JetCorrectorParameters.o JetMETObjects/SimpleJetCorrector.o JetMETObjects/JetCorrectionUncertainty.o JetMETObjects/SimpleJetCorrectionUncertainty.o
+makeTemplates: Histogrammer.o HistCollect.o Selector.o EventPick.o EventTree.o JECvariation.o BTagCalibrationStandalone.o makeTemplates.cpp OverlapRemove.cpp PUReweight.cpp PUReweight.h  JECvariation.cpp BTagCalibrationStandalone.cpp 
+	g++ -o makeTemplates `root-config --libs` -I`root-config --incdir` -std=c++11 EventTree.o Selector.o EventPick.o Histogrammer.o HistCollect.o JECvariation.o  BTagCalibrationStandalone.o makeTemplates.cpp OverlapRemove.cpp  BTagCalibrationStandalone.cpp PUReweight.cpp JetMETObjects/FactorizedJetCorrector.o JetMETObjects/JetCorrectorParameters.o JetMETObjects/SimpleJetCorrector.o JetMETObjects/JetCorrectionUncertainty.o JetMETObjects/SimpleJetCorrectionUncertainty.o
 
 makeSkim: Selector.o EventPick.o EventTree.o JECvariation.o makeSkim.cpp OverlapRemove.cpp
 	g++ -o makeSkim `root-config --libs` -I`root-config --incdir` -std=c++11 EventTree.o EventPick.o Selector.o JECvariation.o OverlapRemove.cpp makeSkim.cpp JetMETObjects/FactorizedJetCorrector.o JetMETObjects/JetCorrectorParameters.o JetMETObjects/SimpleJetCorrector.o JetMETObjects/JetCorrectionUncertainty.o JetMETObjects/SimpleJetCorrectionUncertainty.o 
@@ -16,6 +16,9 @@ Selector.o: EventTree.o Selector.cpp Selector.h
 
 JECvariation.o: EventTree.o Selector.o JECvariation.cpp JECvariation.h
 	g++ -c -I`root-config --incdir` -std=c++11 JECvariation.cpp
+
+BTagCalibrationStandalone.o: BTagCalibrationStandalone.cpp BTagCalibrationStandalone.h
+	g++ -c -I`root-config --incdir` -std=c++11 BTagCalibrationStandalone.cpp
 
 EventPick.o: EventPick.cpp EventPick.h
 	g++ -c -I `root-config --incdir` -std=c++11 EventPick.cpp 
