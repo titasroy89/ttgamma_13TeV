@@ -1,6 +1,8 @@
 #ifndef JetCorrectionUncertainty_h
 #define JetCorrectionUncertainty_h
 
+//#include "/uscms_data/d3/troy2012/cmssw/CondFormats/Serialization/interface/Serializable.h"
+
 #include <string>
 #include <vector>
 class SimpleJetCorrectionUncertainty;

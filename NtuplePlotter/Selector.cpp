@@ -46,7 +46,7 @@ Selector::Selector(){
 	mu_Iso_invert = false;
 	mu_Eta_tight = 2.1;
 	mu_Eta_loose = 2.4;
-	mu_Pt_cut = 26;
+	mu_Pt_cut = 30;
 }
 
 void Selector::process_objects(const EventTree* inp_tree){
@@ -63,7 +63,7 @@ void Selector::process_objects(const EventTree* inp_tree){
 //	std::cout << " electrons done" << std::endl;
 	
 	filter_jets();
-//        std::cout << "jets done" << std::endl;
+  //      std::cout << "jets done" << std::endl;
 
 }
 
@@ -96,7 +96,7 @@ void Selector::filter_photons(){
 	for(int phoInd = 0; phoInd < tree->nPho_; ++phoInd){
 		double eta = tree->phoEta_->at(phoInd);
 		double et = tree->phoEt_->at(phoInd);
-
+		//std::cout<< "tree->phohasPixelSeed_->at(phoInd):" <<  tree->phohasPixelSeed_->at(phoInd) <<std::endl;
 		Pho03ChHadIso.push_back( max(0., tree->phoPFChIso_->at(phoInd)   - tree->rho_ * phoEffArea03ChHad(eta) ));
 		Pho03ChHadSCRIso.push_back( max(0., tree->phoPFChIsoFrix7_->at(phoInd)  - tree->rho_ * phoEffArea03ChHad(eta) ));
 		Pho03RandChHadIso.push_back( max(0., tree->phoPFChIsoFrix6_->at(phoInd) - tree->rho_ * phoEffArea03ChHad(eta) ));
@@ -113,17 +113,19 @@ void Selector::filter_photons(){
 
 		int region = 0; //barrel
 		if(TMath::Abs( eta )>1.5) region = 1; //endcap
-		bool phoPresel = fidEtaPass( eta ) &&
-						et > pho_Et_cut &&
-						( pho_noPixelSeed_cut || tree->phohasPixelSeed_->at(phoInd) == 0 ) &&
-						( pho_noEleVeto_cut || tree->phoEleVeto_->at(phoInd) == 0 ) &&
-						tree->phoSeedBCE_->at(phoInd) == photonID_IsConv[region][pho_ID_ind] &&
-						tree->phoHoverE_->at(phoInd) < photonID_HoverE[region][pho_ID_ind] &&
-						Pho03NeuHadIso[phoInd] < 
-			(photonID_RhoCorrR03NeuHadIso_0[region][pho_ID_ind] + et * photonID_RhoCorrR03NeuHadIso_1[region][pho_ID_ind]);
-		
+		//bool phoPresel = fidEtaPass(eta) &&
+		//				et > pho_Et_cut &&
+					//	( pho_noPixelSeed_cut || tree->phohasPixelSeed_->at(phoInd) == 0 ) &&
+					//	( pho_noEleVeto_cut || tree->phoEleVeto_->at(phoInd) == 0 ); //&&
+					//	tree->phoSeedBCE_->at(phoInd) == photonID_IsConv[region][pho_ID_ind] &&
+					//	tree->phoHoverE_->at(phoInd) < photonID_HoverE[region][pho_ID_ind] &&
+					//	Pho03NeuHadIso[phoInd] < 
+//			(photonID_RhoCorrR03NeuHadIso_0[region][pho_ID_ind] + et*photonID_RhoCorrR03NeuHadIso_1[region][pho_ID_ind]);
+		//std::cout<< "the boolean is :" <<  phoPresel <<std::endl;
+		bool phoPresel = true;	
 		if(phoPresel){
 			PhotonsPresel.push_back(phoInd);
+	//		std::cout<< "length of photons presel vector" << PhotonsPresel.size() <<std::endl;
 			PhoPassSih.push_back( tree->phoSigmaIEtaIEta_->at(phoInd) < photonID_SigmaIEtaIEta[region][pho_ID_ind] );
 			// substitute ChHadIso cut to loose SC footprint removed ChHadIso cut of 5 GeV in photon selection
 			PhoPassChHadIso.push_back( Pho03ChHadSCRIso[phoInd] < 5 /*photonID_RhoCorrR03ChHadIso[region][pho_ID_ind]*/ );
@@ -209,9 +211,9 @@ void Selector::filter_electrons(){
 
 	
 		bool looseSel = fabs(eta) < 2.5 && 
-						pt > ele_PtLoose_cut && 
-						Ele03RelIso[eleInd] < ele_RelIsoLoose_cut && 
-						tree->eleIDMVATrg_->at(eleInd) > ele_MVALoose_cut;
+						pt > ele_PtLoose_cut ;//&& 
+						//Ele03RelIso[eleInd] < ele_RelIsoLoose_cut && 
+						//tree->eleIDMVATrg_->at(eleInd) > ele_MVALoose_cut;
 		
         //       std::cout << "after defining all cuts" << std::endl; 
 		
@@ -221,7 +223,7 @@ void Selector::filter_electrons(){
 		else if( looseSel ){ 
 			ElectronsLoose.push_back(eleInd);
 		}
-		//std::cout << " lenght of the vector Electrons " << Electrons.size() << std::endl;
+	//	std::cout << " lenght of the vector Electrons " << ElectronsLoose.size() << std::endl;
 	}
 //	std::cout << " lenght of the vector Electrons " << Electrons.size() << std::endl;
 }
@@ -257,7 +259,7 @@ void Selector::filter_muons(){
 		if (mu_Iso_invert) IsoPass = !IsoPass;
 
 		bool passLoose = pt > 10.0 && TMath::Abs(eta) < 2.4 && frelIsocorr < 0.25 && isPFMuon && ( isGlobalMuon || isTrackerMuon);
-		bool passTight = pt > 26.0 && TMath::Abs(eta) < 2.1 && 
+		bool passTight = pt > 30.0 && TMath::Abs(eta) < 2.1 && 
 				frelIsocorr < 0.15 &&
 				tree->muChi2NDF_->at(muInd) < 10 &&
 				tree->muTrkLayers_->at(muInd) > 5 &&
@@ -276,7 +278,7 @@ void Selector::filter_muons(){
 		if(passTight){
 		 	Muons.push_back(muInd);
 		 }
-		 else if (passLoose){
+		 if (passLoose){
 		 	MuonsLoose.push_back(muInd);
 		 }
 
@@ -298,7 +300,7 @@ void Selector::filter_jets(){
 	for(int jetInd = 0; jetInd < tree->nJet_; ++jetInd){
 //		std::cout << "starts to iterate with jet number " << jetInd << " out of " << tree->nJet_ << std::endl;
 		bool jetID_pass = false;
-		
+//		std::cout<< "leading jet Pt " << tree->jetPt_->at(0) << std::endl;		
 //		std::cout << " length of jet Pt " << tree->jetPt_->size() << std::endl;
 //		std::cout << " length of jetID " << tree->jetPFLooseID_->size() << std::endl;
 		if ( tree->jetPt_->size() == tree->jetPFLooseID_->size() ) {
@@ -319,6 +321,7 @@ void Selector::filter_jets(){
 			Jets.push_back(jetInd);
 			if(tree->jetpfCombinedInclusiveSecondaryVertexV2BJetTags_->at(jetInd) > btag_cut) bJets.push_back(jetInd);
 		}
+		
 	}
  //    std::cout << " Size of the Jets vector is : " << Jets.size() << std::endl;
 }

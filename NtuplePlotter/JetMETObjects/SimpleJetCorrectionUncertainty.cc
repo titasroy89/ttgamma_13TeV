@@ -1,6 +1,6 @@
 #include "SimpleJetCorrectionUncertainty.h"
 #include "JetCorrectorParameters.h"
-//#include "FWCore/Utilities/interface/Exception.h"
+//#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include <vector>
 #include <string>
 
@@ -25,33 +25,29 @@ SimpleJetCorrectionUncertainty::~SimpleJetCorrectionUncertainty ()
   delete mParameters;
 }
 /////////////////////////////////////////////////////////////////////////
-float SimpleJetCorrectionUncertainty::uncertainty(std::vector<float> fX, float fY, bool fDirection) const 
+float SimpleJetCorrectionUncertainty::uncertainty(const std::vector<float>& fX, float fY, bool fDirection) const 
 {
   float result = 1.;
   int bin = mParameters->binIndex(fX);
-  if (bin<0){ 
-    //throw cms::Exception("SimpleJetCorrectionUncertainty")<<" bin variables out of range";
-    std::cout << "SimpleJetCorrectionUncertainty bin variables out of range" << std::endl;
-    return 0;
-  }
-  result = uncertaintyBin((unsigned)bin,fY,fDirection);
+  if (bin<0) {
+    //edm::LogError("SimpleJetCorrectionUncertainty")<<" bin variables out of range";
+    result = -999.0;
+  } else 
+    result = uncertaintyBin((unsigned)bin,fY,fDirection);
   return result;
 }
 /////////////////////////////////////////////////////////////////////////
 float SimpleJetCorrectionUncertainty::uncertaintyBin(unsigned fBin, float fY, bool fDirection) const 
 {
-  if (fBin >= mParameters->size()){ 
-    //throw cms::Exception("SimpleJetCorrectionUncertainty")<<" wrong bin: "<<fBin<<": only "<<mParameters->size()<<" are available";
-    std::cout << "SimpleJetCorrectionUncertainty wrong bin: "<<fBin<<": only "<<mParameters->size()<<" are available" << std::endl;
-    return 0.0;
+  if (fBin >= mParameters->size()) { 
+ //   edm::LogError("SimpleJetCorrectionUncertainty")<<" wrong bin: "<<fBin<<": only "<<mParameters->size()<<" are available";
+    return -999.0;
   }
   const std::vector<float>& p = mParameters->record(fBin).parameters();
-  if ((p.size() % 3) != 0){
-    //throw cms::Exception ("SimpleJetCorrectionUncertainty")<<"wrong # of parameters: multiple of 3 expected, "<<p.size()<< " got";
-    std::cout << "SimpleJetCorrectionUncertainty wrong # of parameters: multiple of 3 expected, "<<p.size()<< " got" << std::endl;
-    return 0.0;
-  }
-  std::vector<float> yGrid,value;
+  //if ((p.size() % 3) != 0)
+   // throw cms::Exception ("SimpleJetCorrectionUncertainty")<<"wrong # of parameters: multiple of 3 expected, "<<p.size()<< " got";
+  std::vector<float> yGrid;
+  std::vector<float>value;
   unsigned int N = p.size()/3;
   float result = -1.0;
   for(unsigned i=0;i<N;i++)
@@ -90,9 +86,9 @@ float SimpleJetCorrectionUncertainty::linearInterpolation(float fZ, const float 
     {
       if (fY[0] == fY[1])
         r = fY[0];
-      else{
-        //throw cms::Exception("SimpleJetCorrectionUncertainty")<<" interpolation error";
-        std::cout << "SimpleJetCorrectionUncertainty interpolation error" << std::endl;
+      else {
+	//edm::LogError("SimpleJetCorrectionUncertainty")<<" interpolation error";
+	return -999.0;
       }
     } 
   else   
@@ -104,7 +100,7 @@ float SimpleJetCorrectionUncertainty::linearInterpolation(float fZ, const float 
   return r;
 }
 /////////////////////////////////////////////////////////////////////////
-int SimpleJetCorrectionUncertainty::findBin(std::vector<float> v, float x) const
+int SimpleJetCorrectionUncertainty::findBin(const std::vector<float>& v, float x) const
 {
   int i;
   int n = v.size()-1;

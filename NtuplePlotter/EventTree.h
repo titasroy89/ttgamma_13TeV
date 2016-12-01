@@ -29,7 +29,7 @@ public:
 	Float_t  processID_;
 	Int_t    nHLT_;
 	Int_t    HLT_[maxP];
-	Int_t    HLTIndex_[70];
+	ULong64_t    HLTEleMuX_;
 	Float_t  bspotPos_[3];
 	Int_t    nVtx_;
 	vector<Float_t>* vtx_x_;
@@ -39,8 +39,9 @@ public:
 	vector<int>* vtxNTrk_;
 	vector<float>* vtxNDF_;
 	vector<float>* vtxD0_;
-	Int_t    IsVtxGood_;
+	Int_t    isPVGood_;
 	Int_t    nGoodVtx_;
+	Bool_t 	 hasGoodVtx_;
 	Int_t    nVtxBS_;
 	vector<float>*  vtxbs_x_;
 	vector<float>*  vtxbs_y_;

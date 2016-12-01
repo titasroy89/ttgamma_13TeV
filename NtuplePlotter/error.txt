@@ -1,0 +1,44 @@
+g++ -o makeTemplates `root-config --libs` -I`root-config --incdir` -std=c++11 EventTree.o Selector.o EventPick.o Histogrammer.o HistCollect.o JECvariation.o  makeTemplates.cpp OverlapRemove.cpp PUReweight.cpp 
+In file included from /uscms_data/d3/troy2012/cmssw/FWCore/MessageLogger/interface/MessageLogger.h:134:0,
+                 from /uscms_data/d3/troy2012/cmssw/CondFormats/JetMETObjects/interface/JetCorrectorParameters.h:17,
+                 from JECvariation.h:10,
+                 from makeTemplates.cpp:13:
+/uscms_data/d3/troy2012/cmssw/FWCore/MessageLogger/interface/MessageDrop.h:110:38: warning: 'cms::thread_safe' scoped attribute directive ignored [-Wattributes]
+   CMS_THREAD_SAFE static std::string jobMode;     // change log 6
+                                      ^
+/uscms_data/d3/troy2012/cmssw/FWCore/MessageLogger/interface/MessageDrop.h:111:40: warning: 'cms::thread_safe' scoped attribute directive ignored [-Wattributes]
+   CMS_THREAD_SAFE static unsigned char messageLoggerScribeIsRunning; // change log 7
+                                        ^
+/uscms_data/d3/troy2012/cmssw/FWCore/MessageLogger/interface/MessageDrop.h:112:31: warning: 'cms::thread_safe' scoped attribute directive ignored [-Wattributes]
+   CMS_THREAD_SAFE static bool debugAlwaysSuppressed;   // change log 9
+                               ^
+/uscms_data/d3/troy2012/cmssw/FWCore/MessageLogger/interface/MessageDrop.h:113:31: warning: 'cms::thread_safe' scoped attribute directive ignored [-Wattributes]
+   CMS_THREAD_SAFE static bool infoAlwaysSuppressed;   // change log 9
+                               ^
+/uscms_data/d3/troy2012/cmssw/FWCore/MessageLogger/interface/MessageDrop.h:114:31: warning: 'cms::thread_safe' scoped attribute directive ignored [-Wattributes]
+   CMS_THREAD_SAFE static bool warningAlwaysSuppressed;   // change log 9
+                               ^
+JECvariation.o: In function `JECvariation::JECvariation(std::string, bool)':
+JECvariation.cpp:(.text+0xa6): undefined reference to `JetCorrectionUncertainty::JetCorrectionUncertainty(std::string const&)'
+JECvariation.cpp:(.text+0x188): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x289): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x38a): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x48b): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x55d): undefined reference to `JetCorrectionUncertainty::JetCorrectionUncertainty(std::string const&)'
+JECvariation.cpp:(.text+0x63f): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x740): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x823): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x8f7): undefined reference to `JetCorrectorParameters::JetCorrectorParameters(std::string const&, std::string const&)'
+JECvariation.cpp:(.text+0x9ee): undefined reference to `FactorizedJetCorrector::FactorizedJetCorrector(std::vector<JetCorrectorParameters, std::allocator<JetCorrectorParameters> > const&)'
+JECvariation.o: In function `JECvariation::applyJEC(EventTree*, int)':
+JECvariation.cpp:(.text+0xfcb): undefined reference to `FactorizedJetCorrector::setJetEta(float)'
+JECvariation.cpp:(.text+0x100d): undefined reference to `FactorizedJetCorrector::setJetPt(float)'
+JECvariation.cpp:(.text+0x104f): undefined reference to `FactorizedJetCorrector::setJetA(float)'
+JECvariation.cpp:(.text+0x107d): undefined reference to `FactorizedJetCorrector::setRho(float)'
+JECvariation.cpp:(.text+0x1090): undefined reference to `FactorizedJetCorrector::getCorrection()'
+JECvariation.cpp:(.text+0x11a7): undefined reference to `JetCorrectionUncertainty::setJetEta(float)'
+JECvariation.cpp:(.text+0x11e8): undefined reference to `JetCorrectionUncertainty::setJetPt(float)'
+JECvariation.cpp:(.text+0x11ff): undefined reference to `JetCorrectionUncertainty::getUncertainty(bool)'
+collect2: error: ld returned 1 exit status
+Makefile:4: recipe for target 'makeTemplates' failed
+make: *** [makeTemplates] Error 1

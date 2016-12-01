@@ -60,6 +60,7 @@ public:
 	int NmediumEleVeto_le;
 	
 	// variables showing passing or failing selections
+	bool passSkim;
 	bool passPreSel; // passed preselection
 	bool passAll; // single flag: event passed all cuts: preselection + photon
 	bool passFirstcut; // pass the sync cut	

@@ -10,7 +10,7 @@
 
 #include"TRandom3.h"
 // temporary solution
-#include"JECvariation.h"
+//#include"JECvariation.h"
 //#include"JECvariationNew.cpp"
 
 //#include"/uscms_data/d2/dnoonan/LHAPDF/local/include/LHAPDF/LHAPDF.h"
@@ -56,13 +56,13 @@ int main(int ac, char** av){
 		std::cout << "usage: ./makeTemplates sampleName outputDir inputFile[s]" << std::endl;
 		return -1;
 	}
-	std::string PUfilename = "Pileup_Observed_69300.root";
+	std::string PUfilename = "MyDataPileupHistogram.root";
 	bool systematics = false;
 	
 	std::string inpFileName(av[3]);
-	if( inpFileName.find("ttjets_1l") != std::string::npos) top_sample_g = 1;
-	if( inpFileName.find("ttjets_2l") != std::string::npos) top_sample_g = 2;
-	if( inpFileName.find("ttjets_had") != std::string::npos) top_sample_g = 3;
+	if( inpFileName.find("ttjets") != std::string::npos) top_sample_g = 1;
+	//if( inpFileName.find("ttjets_2l") != std::string::npos) top_sample_g = 2;
+	//if( inpFileName.find("ttjets_had") != std::string::npos) top_sample_g = 3;
 	std::cout << "top_sample: " << top_sample_g << std::endl;
 	
 	std::string outDirName(av[2]);
@@ -80,8 +80,8 @@ int main(int ac, char** av){
 	if( outDirName.find("pho_down") != std::string::npos) {systematics=true; phosmear012_g = 0;}
 	if( outDirName.find("musmear_up") != std::string::npos) {systematics=true; musmear012_g = 2;}
 	if( outDirName.find("musmear_down") != std::string::npos) {systematics=true; musmear012_g = 0;}
-	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "Pileup_observed_69300_p5.root";}
-	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "Pileup_observed_69300_m5.root";}
+	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram.root";}
+	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram.root";}
 	if( outDirName.find("toppt_up") != std::string::npos) {systematics=true; toppt012_g = 2;}
 	if( outDirName.find("toppt_down") != std::string::npos) {systematics=true; toppt012_g = 0;}	
 	if( outDirName.find("PDF") != std::string::npos) {systematics=true; pdfweight_g=2;}
@@ -101,10 +101,10 @@ int main(int ac, char** av){
 	std::cout << "  PhoSmear: " << phosmear012_g << "  muSmear: " << musmear012_g << "  pileup: " << PUfilename << "  ";
 	std::cout << "  topPt: " << toppt012_g << std::endl;
 	// book HistCollect
-	HistCollect* looseCollect = new HistCollect("1pho",std::string("top_")+av[1]);
+	HistCollect* looseCollect = new HistCollect("PreSel",std::string("top_")+av[1]);
 	//	looseCollect->fillEndcap = false;
 	looseCollect->fillEndcap = true;
-	HistCollect* looseCollectNoMET = new HistCollect("1phoNoMET",std::string("top_")+av[1]);
+	HistCollect* looseCollectNoMET = new HistCollect("PreSelNoMET",std::string("top_")+av[1]);
 	//	looseCollectNoMET->fillEndcap = false;	
 	looseCollectNoMET->fillEndcap = true;	
 	//HistCollect* fourjCollect = new HistCollect("1pho4j",std::string("top4j_")+av[1]);
@@ -147,7 +147,7 @@ int main(int ac, char** av){
 	//selectorTight->pho_ID_ind = 2; // tight ID
 	std::cout << selectorLoose->mu_RelIso_range[0] << std::endl;
 	std::cout << selectorLoose->mu_RelIso_range[1] << std::endl;
-
+	//evtPickLoose->MET_cut = 20.0;
 	evtPickLooseNoMET->MET_cut = -1.0;
 	//evtPickLoose->veto_pho_jet_dR = 0.05;
 	//evtPickLoose->Njet_ge = 4;
@@ -174,16 +174,16 @@ int main(int ac, char** av){
 	if( std::string(av[1]).find("WHIZARD") != std::string::npos) WHIZARD = true;
 
 	bool MGttgamma = false;
-	if( std::string(av[1]).find("TTGamma") != std::string::npos) MGttgamma = true;
+	if( std::string(av[1]).find("ttgamma") != std::string::npos) MGttgamma = true;
 	if (MGttgamma) std::cout << "THIS IS TTGAMMA" << std::endl;
 
 	bool doOverlapRemoval = false;
 	bool doOverlapRemovalWZ = false;
 	bool doInvertedOverlapRemoval = false;
 	bool skipOverlap = false;
-	if( std::string(av[1]).find("TTJets") != std::string::npos) doOverlapRemoval = true;
-	if( std::string(av[1]).find("ZJets") != std::string::npos) doOverlapRemovalWZ = true;
-	if( std::string(av[1]).find("WJets") != std::string::npos) doOverlapRemovalWZ = true;
+	if( std::string(av[1]).find("TTbar_1") != std::string::npos) doOverlapRemoval = true;
+	if( std::string(av[1]).find("DYJets") != std::string::npos) doOverlapRemovalWZ = true;
+	if( std::string(av[1]).find("Wjets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W2Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W3Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W4Jets") != std::string::npos) doOverlapRemovalWZ = true;
@@ -208,8 +208,8 @@ int main(int ac, char** av){
 	
 	tree->GetEntry(0);
 	isMC = !(tree->isData_);
-	JECvariation* jecvar;
-	jecvar = new JECvariation("./Summer15_25nsV6_MC", isMC);
+	//JECvariation* jecvar;
+	//jecvar = new JECvariation("./Spring16_25nsV6_MC", isMC);
 
 	// we don't need systematics variations for Data
 	if(!isMC && systematics) {
@@ -223,21 +223,24 @@ int main(int ac, char** av){
 	//	pdfs = set.mkPDFs();
 
 	// initPDFSet(1, "cteq66.LHgrid");
-
+//	TTree* newTree_pre = tree->chain->CloneTree(0);
 	Long64_t nEntr = tree->GetEntries();
 	for(Long64_t entry=0; entry<nEntr; entry++){
 		if(entry%10000 == 0) std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
 		//if(entry==5000000) break;
 		tree->GetEntry(entry);
+	//	std::cout<<"tree"<< tree <<std::endl;
+	//	isMC = false;
 		isMC = !(tree->isData_);
 		
-		// apply PU reweighting
-		if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->nPU_);
+		//apply PU reweighting
+		if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
+	//	std::cout << "PUweight" << PUweight <<std::endl;
 		
 		if(isMC && !isQCD){
 			// JEC
-			jecvar->applyJEC(tree, jecvar012_g); // 0:down, 1:norm, 2:up
-			// JER smearing 
+		//	jecvar->applyJEC(tree, jecvar012_g); // 0:down, 1:norm, 2:up
+			//JER smearing 
 			doJER(tree);
 			// photon energy smearing
 			doPhoSmearing(tree);
@@ -245,8 +248,8 @@ int main(int ac, char** av){
 			//doEleSmearing(tree);
 			doMuSmearing(tree);
 		}
-		// do overlap removal here: overlapMadGraph(tree) or overlapWHIZARD(tree)
-		if( isMC && doOverlapRemoval){
+		 //do overlap removal here: overlapMadGraph(tree) or overlapWHIZARD(tree)
+	        if( isMC && doOverlapRemoval){
 		  if (!doInvertedOverlapRemoval){
 		    if (overlapMadGraph(tree)){
 		      continue;
@@ -257,15 +260,15 @@ int main(int ac, char** av){
 		      continue;
 		    }
 		  }
-		}
+	}
 		    
 		// if( isMC && doOverlapRemoval && overlapMadGraph(tree)){
 		// 	//std::cout << "overlap!" << std::endl;
 		// 	// overlapping part, not needed
 		// 	continue;
 		// }
-		if( isMC && doOverlapRemovalWZ && overlapISRFSR(tree)){
-			continue;
+         	 if( isMC && doOverlapRemovalWZ && overlapISRFSR(tree)){
+	//		continue;
 		}
 		// this part cuts MadGraph ttgamma phase space to match WHIZARD, for comparison
 		//if( isMC && MGttgamma && doOverlapRemoval && !overlapWHIZARD(tree)){
@@ -281,15 +284,15 @@ int main(int ac, char** av){
 		//evtPickTight->process_event(tree, selectorTight, PUweight);
 		double evtWeight = PUweight;
 		if(isMC && !isQCD){
-			// electron trigger efficiency reweighting
+			//electron trigger efficiency reweighting
 			evtWeight *= getMuEff(tree, evtPickLoose);
 			// b-tag SF reweighting
 			evtWeight *= getBtagSF(tree, evtPickLoose);
 		}
 		//double evtWeight = PUweight;
 		if(isMC){
-			// electron trigger efficiency reweighting
-			//evtWeight *= getEleEff(tree, evtPickLoose);
+			//electron trigger efficiency reweighting
+		//	evtWeight *= getEleEff(tree, evtPickLoose);
 			// b-tag SF reweighting
 			evtWeight *= getBtagSF(tree, evtPickLoose);
 		}
@@ -298,23 +301,32 @@ int main(int ac, char** av){
 			evtWeight *= topPtWeight(tree);
 		}
 
-		// if(isMC && pdfweight_g!=1){
+		//if(isMC && pdfweight_g!=1){
 		  
-		//   double tempWeight = pdfWeight(tree,pdfNum);
-		//   evtWeight *= tempWeight;
+		   //double tempWeight = pdfWeight(tree,pdfNum);
+		  // evtWeight *= tempWeight;
 		//   // cout << tempWeight << endl;
-		// }
+		//}
 
-		if(isMC && MGttgamma){
-		  double tempWeight = WjetsBRreweight(tree);
-		  evtWeight *= tempWeight;
-		}
+	//	if(isMC && MGttgamma){
+	//	 double tempWeight = WjetsBRreweight(tree);
+	//	 evtWeight *= tempWeight;
+	//	}
 
 		// fill the histograms
 		//std::cout << "fill, weight " << evtWeight << "  passPresel " << evtPickLoose->passPreSel << std::endl;
+	//	if (evtPickLoose->passPreSel){
+				//newTree_pre->Fill();
+	//	double evtWeight = 1.0;
+		//std::cout << "PUweight" << evtWeight <<std::endl;
+	///	double PUweight = 1.0;		
+	//	std::cout<<"Stage before filling histogarams"<<std::endl;
 		looseCollectNoMET->fill_histograms(selectorLoose, evtPickLooseNoMET, tree, isMC, evtWeight);
- 
+		//std::cout<<"Stage after NoMET"<<std::endl; 
 		looseCollect->fill_histograms(selectorLoose, evtPickLoose, tree, isMC, evtWeight);
+	//	}
+		//std::cout<<"Stage after filling histogarams"<<std::endl;
+
 		//fourjCollect->fill_histograms(selectorLoose, evtPickLoose4j, tree, isMC, evtWweight);
 	}
 	
@@ -323,14 +335,14 @@ int main(int ac, char** av){
 
 	//fourjCollect->write_histograms(evtPickLoose4j, isMC, av[2]);
 
-	std::cout << "Average PU weight " << PUweighter->getAvgWeight() << std::endl;
+	//std::cout << "Average PU weight " << PUweighter->getAvgWeight() << std::endl;
 	evtPickLoose->print_cutflow();
 	
 	delete tree;
 	return 0;
 }
 
-
+//newTree_pre->Write();
 double muTrigSF(double pt, double eta){
 	static double trigEffSF_PtEta[3][3] = { {0.984, 0.967, 0.991}, {0.999, 0.983, 1.018}, {0.999, 0.988, 0.977} };
 	static double trigEffSFerr_PtEta[3][3] = { {0.002, 0.002, 0.007}, {0.003, 0.002, 0.012}, {0.002, 0.003, 0.015} };

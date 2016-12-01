@@ -1,6 +1,6 @@
-#include"JetMETObjects/JetCorrectorParameters.h"
-#include"JetMETObjects/FactorizedJetCorrector.h"
-#include"JetMETObjects/JetCorrectionUncertainty.h"
+#include"/uscms_data/d3/troy2012/cmssw/CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include"/uscms_data/d3/troy2012/cmssw/CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include"/uscms_data/d3/troy2012/cmssw/CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 #include"JECvariation.h"
 #include<iostream>
 
@@ -41,7 +41,7 @@ void JECvariation::applyJEC(EventTree* tree, int scaleDownNormUp012){
 	tMET.SetPtEtaPhiM(tree->pfMET_,0.0,tree->pfMETPhi_,0.0);
 
 	for(int jetInd = 0; jetInd < tree->nJet_ ; ++jetInd){
-		if(tree->jetPt_->at(jetInd) < 20) continue;
+		if(tree->jetPt_->at(jetInd) < 30) continue;
 		JetCorrector->setJetEta(tree->jetEta_->at(jetInd));
 		JetCorrector->setJetPt(tree->jetRawPt_->at(jetInd));
 		JetCorrector->setJetA(tree->jetArea_->at(jetInd));

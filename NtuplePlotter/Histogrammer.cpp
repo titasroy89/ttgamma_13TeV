@@ -159,52 +159,52 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 	hists["PUweight"]->Fill(weight);
 	// 2d photon candidate histograms
 	//std::cout << "here0" << std::endl;
-	if(selEvent->PhotonsPresel.size()>0){
-		int candArrInd = -1;
-		int candInd = -1;
-		for(int phoItmp = 0; phoItmp < selEvent->PhotonsPresel.size(); phoItmp++){
-			if((int)selEvent->PhoPassChHadIso[phoItmp] + 
-			   (int)selEvent->PhoPassPhoIso[phoItmp]+
-			   (int)selEvent->PhoPassSih[phoItmp] >= 1){
-				// at least 1 cut passed.
-				candArrInd = selEvent->PhotonsPresel[phoItmp];
-				candInd = phoItmp;
-				break;
-			}
-		}
+//	if(selEvent->PhotonsPresel.size()>0){
+//		int candArrInd = -1;
+//		int candInd = -1;
+//		for(int phoItmp = 0; phoItmp < selEvent->PhotonsPresel.size(); phoItmp++){
+//			if((int)selEvent->PhoPassChHadIso[phoItmp] + 
+//			   (int)selEvent->PhoPassPhoIso[phoItmp]+
+//			   (int)selEvent->PhoPassSih[phoItmp] >= 1){
+//				// at least 1 cut passed.
+///				candArrInd = selEvent->PhotonsPresel[phoItmp];
+//				candInd = phoItmp;
+//				break;
+//			}
+//		}
 		//std::cout << "here01" << std::endl;
-		if(candInd >= 0 && selEvent->PhoPassPhoIso[candInd]){
-			hists2d["photon1_Sigma_ChIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadIso[candArrInd], weight);
-			hists2d["photon1_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
-			hists2d["photon1_Sigma_Et"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd), tree->phoEt_->at(candArrInd), weight);
-		        hists2d["photon1_ChSCRIso_Et"]->Fill(selector->Pho03ChHadSCRIso[candArrInd], tree->phoEt_->at(candArrInd), weight);
-			hists2d["photon1_ChSCRIso_Et"]->SetOption("box");
-			hists2d["photon1_Sigma_Et"]->SetOption("box");
-	                
-			double phoEt = tree->phoEt_->at(candArrInd);
-			if(phoEt>=25 && phoEt<35){
-				hists2d["photon1_25_35_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
-			}
-			if(phoEt>=35 && phoEt<45){
-				hists2d["photon1_35_45_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
-			}
-			if(phoEt>=45 && phoEt<60){
-				hists2d["photon1_45_60_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
-			}
-			if(phoEt>=60){
-				hists2d["photon1_60_up_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
-			}
-		}
-		if(candInd >= 0 && selEvent->PhoPassChHadIso[candInd]){
-			hists2d["photon1_Sigma_PhoIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03PhoIso[candArrInd], weight);
-			hists2d["photon1_Sigma_PhoSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03PhoSCRIso[candArrInd], weight);
-		}
+//		if(candInd >= 0 && selEvent->PhoPassPhoIso[candInd]){
+//			hists2d["photon1_Sigma_ChIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadIso[candArrInd], weight);
+//			hists2d["photon1_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
+//			hists2d["photon1_Sigma_Et"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd), tree->phoEt_->at(candArrInd), weight);
+//		        hists2d["photon1_ChSCRIso_Et"]->Fill(selector->Pho03ChHadSCRIso[candArrInd], tree->phoEt_->at(candArrInd), weight);
+//			hists2d["photon1_ChSCRIso_Et"]->SetOption("box");
+//			hists2d["photon1_Sigma_Et"]->SetOption("box");
+//	                
+//			double phoEt = tree->phoEt_->at(candArrInd);
+//			if(phoEt>=25 && phoEt<35){
+//				hists2d["photon1_25_35_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
+//			}
+//			if(phoEt>=35 && phoEt<45){
+//				hists2d["photon1_35_45_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
+//			}
+//			if(phoEt>=45 && phoEt<60){
+//				hists2d["photon1_45_60_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
+//			}
+//			if(phoEt>=60){
+//				hists2d["photon1_60_up_Sigma_ChSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03ChHadSCRIso[candArrInd], weight);
+//			}
+//		}
+///		if(candInd >= 0 && selEvent->PhoPassChHadIso[candInd]){
+//			hists2d["photon1_Sigma_PhoIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03PhoIso[candArrInd], weight);
+//			hists2d["photon1_Sigma_PhoSCRIso"]->Fill(tree->phoSigmaIEtaIEta_->at(candArrInd),selector->Pho03PhoSCRIso[candArrInd], weight);
+//		}
 		
-	}
-	//std::cout << "here1" << std::endl;
+//	}
+	std::cout << "here1" << std::endl;
 	// full event selection histograms
 	if(!selEvent->passAll) return;
-
+	std::cout<<"Crossed photons filling"<<std::endl;
 	// mc category
 	if( tree->isData_ == 0 ){
 		int EleP = 0;
@@ -346,7 +346,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 
 		//std::cout << "EleP " << EleP << "  EleM " << EleM << "  MuP " << MuP << "  MuM " << MuM << "  TauP " << TauP << "  TauM " << TauM << std::endl;
 	}
-
+	//std::cout<<"CrossedMC category" <<std::endl;
 	double MTW = 0.0;
 	// muons
 	if( selEvent->Muons.size() > 0 ){
@@ -370,7 +370,7 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 
 			
 	}
-
+	std::cout<<"Crossed muons category" <<std::endl;
 	// electrons
 	if( selEvent->Electrons.size() > 0 ){
 		int ind = selEvent->Electrons[0];
@@ -425,77 +425,79 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		}
 		hists["looseEleDrGenPho"]->Fill(mindr, weight);
 	}
+	std::cout<<"Crossed electrons category" <<std::endl;
 	//std::cout << "here3" << std::endl;
 	// photons
-	hists["nPhotons"]->Fill(selEvent->Photons.size(), weight);
-	if( selEvent->Photons.size() > 0 ){
-		int ind = selEvent->Photons[0];
-		hists["photon1Et"]->Fill( tree->phoEt_->at(ind), weight );
-		hists["photon1Eta"]->Fill( tree->phoEta_->at(ind), weight );
-		hists["photon1IsConv"]->Fill( tree->phoSeedBCE_->at(ind), weight );
+//	hists["nPhotons"]->Fill(selEvent->Photons.size(), weight);
+//	if( selEvent->Photons.size() > 0 ){
+//		int ind = selEvent->Photons[0];
+//		hists["photon1Et"]->Fill( tree->phoEt_->at(ind), weight );
+//		hists["photon1Eta"]->Fill( tree->phoEta_->at(ind), weight );
+//		hists["photon1IsConv"]->Fill( tree->phoSeedBCE_->at(ind), weight );
 		
-		hists["photon1ChHadIso"]->Fill( selector->Pho03ChHadIso[ind], weight );
-		hists["photon1ChHadSCRIso"]->Fill( selector->Pho03ChHadSCRIso[ind], weight );
-		hists["photon1ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-		double phoEt = tree->phoEt_->at(ind);
-		if(phoEt>=25 && phoEt<35){
-			hists["photon1_25_35_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-		}
-		if(phoEt>=35 && phoEt<45){
-			hists["photon1_35_45_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-		}
-		if(phoEt>=45 && phoEt<60){
-			hists["photon1_45_60_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-		}
-		if(phoEt>=60){
-			hists["photon1_60_up_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-		}
+//		hists["photon1ChHadIso"]->Fill( selector->Pho03ChHadIso[ind], weight );
+//		hists["photon1ChHadSCRIso"]->Fill( selector->Pho03ChHadSCRIso[ind], weight );
+//		hists["photon1ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
+//		double phoEt = tree->phoEt_->at(ind);
+//		if(phoEt>=25 && phoEt<35){
+//			hists["photon1_25_35_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
+//		}
+//		if(phoEt>=35 && phoEt<45){
+//			hists["photon1_35_45_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
+//		}
+//		if(phoEt>=45 && phoEt<60){
+//			hists["photon1_45_60_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
+//		}
+//		if(phoEt>=60){
+//			hists["photon1_60_up_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
+//		}
+//
+//		hists["photon1NeuHadIso"]->Fill( selector->Pho03NeuHadIso[ind], weight );
+//		
+//		hists["photon1PhoIso"]->Fill( selector->Pho03PhoIso[ind], weight );
+//		hists["photon1PhoSCRIso"]->Fill( selector->Pho03PhoSCRIso[ind], weight );
+//		hists["photon1PhoRandIso"]->Fill( selector->Pho03RandPhoIso[ind], weight );
+		
+//		hists["photon1HoverE"]->Fill( tree->phoHoverE_->at(ind), weight );
+///		hists["photon1SigmaIEtaIEta"]->Fill( tree->phoSigmaIEtaIEta_->at(ind), weight );
+//		hists["photon1DrElectron"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Electrons, tree->eleSCEta_, tree->elePhi_), weight );
+//		hists["photon1DrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
 
-		hists["photon1NeuHadIso"]->Fill( selector->Pho03NeuHadIso[ind], weight );
-		
-		hists["photon1PhoIso"]->Fill( selector->Pho03PhoIso[ind], weight );
-		hists["photon1PhoSCRIso"]->Fill( selector->Pho03PhoSCRIso[ind], weight );
-		hists["photon1PhoRandIso"]->Fill( selector->Pho03RandPhoIso[ind], weight );
-		
-		hists["photon1HoverE"]->Fill( tree->phoHoverE_->at(ind), weight );
-		hists["photon1SigmaIEtaIEta"]->Fill( tree->phoSigmaIEtaIEta_->at(ind), weight );
-		hists["photon1DrElectron"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Electrons, tree->eleSCEta_, tree->elePhi_), weight );
-		hists["photon1DrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
-
-		if( tree->isData_ == 0 ){
-			if( tree->phoGenIndex_->at(ind) >= 0 ){
-				hists["photon1MotherID"]->Fill( fabs(tree->phoGenMomPID_->at(ind)), weight );
+//		if( tree->isData_ == 0 ){
+//			if( tree->phoGenIndex_->at(ind) >= 0 ){
+//				hists["photon1MotherID"]->Fill( fabs(tree->phoGenMomPID_->at(ind)), weight );
 				//if( TMath::Abs(tree->phoGenMomPID_->at(ind)) == 22 )
-				hists["photon1GMotherID"]->Fill( fabs(tree->phoGenGMomPID_->at(ind)), weight );
-			}
-			else {
-				hists["photon1MotherID"]->Fill( 0.0, weight );
-			}
+//				hists["photon1GMotherID"]->Fill( fabs(tree->phoGenGMomPID_->at(ind)), weight );
+//			}
+//			else {
+//				hists["photon1MotherID"]->Fill( 0.0, weight );
+//			}
 			
 			// find the closest b-jet
-			double mindr = minDrPhoB(ind, tree);
-			int phoGen=-1;
-			for( int mcI = 0; mcI < tree->nMC_; ++mcI){
-				if( tree->mcIndex->at(mcI) == tree->phoGenIndex_->at(ind) ) 
-					phoGen=mcI;
-			}
-			if( phoGen > 0){
-				hists["GenPhotonEt"]->Fill(tree->mcPt->at(phoGen), weight);
-				hists["GenPhotonMinDR"]->Fill(secondMinDr(phoGen, tree), weight);
-			}
-			if(mindr<999) {
-				hists["photon1DrMCbquark"]->Fill( mindr, weight );
-			}
-			
-		}
-	}
+//			double mindr = minDrPhoB(ind, tree);
+//			int phoGen=-1;
+//			for( int mcI = 0; mcI < tree->nMC_; ++mcI){
+//				if( tree->mcIndex->at(mcI) == tree->phoGenIndex_->at(ind) ) 
+//					phoGen=mcI;
+//			}
+//			if( phoGen > 0){
+//				hists["GenPhotonEt"]->Fill(tree->mcPt->at(phoGen), weight);
+//				hists["GenPhotonMinDR"]->Fill(secondMinDr(phoGen, tree), weight);
+//			}
+//			if(mindr<999) {
+//				hists["photon1DrMCbquark"]->Fill( mindr, weight );
+//			}
+//			
+//		}
+//	}
+//	std::cout<<"skipped photons category" <<std::endl;
 	//std::cout << "here4" << std::endl;
 	hists["Ht"]->Fill( calc_ht(selEvent, tree), weight );
 	hists["MET"]->Fill( tree->pfMET_, weight );
         hists["MET_low"]->Fill(tree->pfMET_,weight);
 	hists["nVtx"]->Fill( tree->nVtx_, weight );
 	hists["nJets"]->Fill( selEvent->Jets.size(), weight );
-	//std::cout << "here5" << std::endl;
+	//std::cout << "done MET" << std::endl;
 
 	// jets
 	if(selEvent->Jets.size()>=3){
@@ -659,8 +661,8 @@ double Histogrammer::calc_ht(EventPick* evtPick, EventTree* tree){
 		ht += tree->elePt_->at(*it);
         for( std::vector<int>::iterator it = evtPick->ElectronsLoose.begin(); it != evtPick->ElectronsLoose.end(); ++it)
                 ht += tree->elePt_->at(*it);
-	//for( std::vector<int>::iterator it = evtPick->Muons.begin(); it != evtPick->Muons.end(); ++it)
-	//	ht += tree->muPt_->at(*it);	
+	for( std::vector<int>::iterator it = evtPick->Muons.begin(); it != evtPick->Muons.end(); ++it)
+		ht += tree->muPt_->at(*it);	
 	for( std::vector<int>::iterator it = evtPick->MuonsLoose.begin(); it != evtPick->MuonsLoose.end(); ++it)
 		ht += tree->muPt_->at(*it);			
 	// photons are now also in jet collection

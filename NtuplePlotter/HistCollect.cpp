@@ -40,6 +40,7 @@ HistCollect::~HistCollect(){
 }
 
 void HistCollect::fill_histograms(Selector* selector, EventPick* selEvent, EventTree* tree, bool isMC, double weight){
+	std::cout<<"at the start"<<std::endl;
 	if(!(selEvent->passPreSel)) return; // event did not pass preselction
 	// find the photon category
 	bool barrel;
@@ -59,11 +60,13 @@ void HistCollect::fill_histograms(Selector* selector, EventPick* selEvent, Event
 			}
 		}
 	}
-	
+	std::cout<<"here"<<std::endl;	
 	bool passAllTemp = selEvent->passAll;
 	// make histograms for pre-selection cuts
 	selEvent->passAll = true;
+	std::cout << "fill Sum"<< fillSum <<std::endl;
 	if(fillSum) histnom->fill(selector, selEvent, tree, weight);
+	//std::cout << "right after fill"<<std::endl;
 	// keep the true value
 	selEvent->passAll = passAllTemp;
 
@@ -77,25 +80,25 @@ void HistCollect::fill_histograms(Selector* selector, EventPick* selEvent, Event
 	if(!isMC) return;
 	
 	// split by photon origin
-	bool rs = false, rb = false, fe = false, fj = false;
-	findPhotonCategory(phoInd, tree, &rs, &rb, &fe, &fj);
+//	bool rs = false, rb = false, fe = false, fj = false;
+//	findPhotonCategory(phoInd, tree, &rs, &rb, &fe, &fj);
 	
 	// filling
-	if(rs && fillRS){
-		if(fillMCCategSum) histnom_rs->fill(selector, selEvent, tree, weight);
-		if(fillBarrel && barrel) histnom_barrel_rs->fill(selector, selEvent,tree, weight);
-		if(fillEndcap && !barrel) histnom_endcap_rs->fill(selector, selEvent ,tree, weight);
-	}
-	if(fe && fillFE){
-		if(fillMCCategSum) histnom_fe->fill(selector, selEvent, tree, weight);
-		if(fillBarrel && barrel) histnom_barrel_fe->fill(selector, selEvent, tree, weight);
-		if(fillEndcap && !barrel) histnom_endcap_fe->fill(selector, selEvent, tree, weight);
-	}
-	if((fj||rb) && fillFJRB){
-		if(fillMCCategSum) histnom_fjrb->fill(selector, selEvent, tree, weight);
-		if(fillBarrel && barrel) histnom_barrel_fjrb->fill(selector, selEvent, tree, weight);
-		if(fillEndcap && !barrel) histnom_endcap_fjrb->fill(selector, selEvent, tree, weight);
-	}
+//	if(rs && fillRS){
+//		if(fillMCCategSum) histnom_rs->fill(selector, selEvent, tree, weight);
+//		if(fillBarrel && barrel) histnom_barrel_rs->fill(selector, selEvent,tree, weight);
+//		if(fillEndcap && !barrel) histnom_endcap_rs->fill(selector, selEvent ,tree, weight);
+//	}
+//	if(fe && fillFE){
+//		if(fillMCCategSum) histnom_fe->fill(selector, selEvent, tree, weight);
+//		if(fillBarrel && barrel) histnom_barrel_fe->fill(selector, selEvent, tree, weight);
+//		if(fillEndcap && !barrel) histnom_endcap_fe->fill(selector, selEvent, tree, weight);
+//	}
+//	if((fj||rb) && fillFJRB){
+//		if(fillMCCategSum) histnom_fjrb->fill(selector, selEvent, tree, weight);
+//		if(fillBarrel && barrel) histnom_barrel_fjrb->fill(selector, selEvent, tree, weight);
+//		if(fillEndcap && !barrel) histnom_endcap_fjrb->fill(selector, selEvent, tree, weight);
+//	}
 }
 
 void HistCollect::write_histograms(EventPick* selEvent, bool isMC, std::string outDir){
@@ -104,23 +107,23 @@ void HistCollect::write_histograms(EventPick* selEvent, bool isMC, std::string o
 	if(fillBarrel) histnom_barrel->write_histograms(outDir,emptyVec);
 	if(fillEndcap) histnom_endcap->write_histograms(outDir,emptyVec);
 	
-	if(isMC){
-		if(fillRS){
-			if(fillMCCategSum) histnom_rs->write_histograms(outDir,selEvent->histVector);
-			if(fillBarrel) histnom_barrel_rs->write_histograms(outDir,emptyVec);
-			if(fillEndcap) histnom_endcap_rs->write_histograms(outDir,emptyVec);
-		}
-		if(fillFE){
-			if(fillMCCategSum) histnom_fe->write_histograms(outDir,selEvent->histVector);
-			if(fillBarrel) histnom_barrel_fe->write_histograms(outDir,emptyVec);
-			if(fillEndcap) histnom_endcap_fe->write_histograms(outDir,emptyVec);
-		}
-		if(fillFJRB){
-			if(fillMCCategSum) histnom_fjrb->write_histograms(outDir,selEvent->histVector);
-			if(fillBarrel) histnom_barrel_fjrb->write_histograms(outDir,emptyVec);
-			if(fillEndcap) histnom_endcap_fjrb->write_histograms(outDir,emptyVec);
-		}
-	}
+//	if(isMC){
+//		if(fillRS){
+//			if(fillMCCategSum) histnom_rs->write_histograms(outDir,selEvent->histVector);
+//			if(fillBarrel) histnom_barrel_rs->write_histograms(outDir,emptyVec);
+//			if(fillEndcap) histnom_endcap_rs->write_histograms(outDir,emptyVec);
+//		}
+//		if(fillFE){
+//			if(fillMCCategSum) histnom_fe->write_histograms(outDir,selEvent->histVector);
+//			if(fillBarrel) histnom_barrel_fe->write_histograms(outDir,emptyVec);
+//			if(fillEndcap) histnom_endcap_fe->write_histograms(outDir,emptyVec);
+//		}
+//		if(fillFJRB){
+//			if(fillMCCategSum) histnom_fjrb->write_histograms(outDir,selEvent->histVector);
+//			if(fillBarrel) histnom_barrel_fjrb->write_histograms(outDir,emptyVec);
+//			if(fillEndcap) histnom_endcap_fjrb->write_histograms(outDir,emptyVec);
+//		}
+//	}
 	
 }
 
