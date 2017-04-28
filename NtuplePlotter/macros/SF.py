@@ -1,14 +1,14 @@
 
-luminosity = 26.8*1000 # check runC lumi!
+luminosity = 12.878*1000 # check runC lumi!
 gSF = luminosity
 # trigger and electron ID SF are included in event weights
 
 #TTJets1l_num        = 24849110 #
 #TTJets2l_num        = 12086717 #
 #TTJetsHad_num       = 31178278
-TTbar_1_num = 88892786
+TTbar_num = 9.31207*10**7
 
-ttgamma_num      =  4842685#
+ttgamma_num      =  9685370#
 
 # /TTGamma_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_RD1_START53_V7N-v1/AODSIM
 #newTTgamma_num   =  832989 # new MG ttgamma sample 
@@ -16,13 +16,13 @@ ttgamma_num      =  4842685#
 #newTTgamma_num = 916500 
 
 
-WJets_num      = 57709905*2 #
+WJets_num      = 9908495 #
 
 #W4Jets_num     = 11742268 # 7026978 # PART of the statistics!
 #W3Jets_num     = 15408303
 #3W2Jets_num     = 33954921
 
-DYJets_num      = 30458871*2 #
+DYJets_num      = 5.7393067*10**7 #
 
 #ZZ_num            = 9799908 #AODSIM inclusive?
 
@@ -61,10 +61,10 @@ DYJets_num      = 30458871*2 #
 ST_tW_antitop_num  =  984995 #
 
 #SingTopT_num      = 3758227
-ST_t_top_num      =  3260695 # small sample
+ST_t_top_num      =  3.260695*10**7 # small sample
 
 #SingTopbarT_num   = 1935072
-ST_t_bar_num   =  984995*3 #
+ST_t_bar_num   =  1682394#
 
 #SingTopS_num      = 259961
 ST_s_num      =  999995#
@@ -79,11 +79,11 @@ WWgamma_xs        = 1.44 #0.528 # PREP
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
 
-TTJets_xs = 239.
+TTbar_xs = 831.76
 #Top_xs            = 239 # new measurement #227 #CMS measurement
-TTJets1l_xs       = 104.7 # 239*0.676*(1-0.676)*2
-TTJets2l_xs       = 25.09 # 239*(1-0.676)*(1-0.676)
-TTJetsHad_xs      = 109.2 # 239*0.676*0.676
+#TTJets1l_xs       = 104.7 # 239*0.676*(1-0.676)*2
+#TTJets2l_xs       = 25.09 # 239*(1-0.676)*(1-0.676)
+#TTJetsHad_xs      = 109.2 # 239*0.676*0.676
 
 #NEWEST TTBAR CX IS 244.9, NOT 239
 # TTJets1l_xs       = 244.9*0.676*(1-0.676)*2
@@ -120,10 +120,10 @@ ZZ_4tau_xs        = 0.07691 # PREP
 #TTW_xs            = 0.232 #
 #TTZ_xs            = 0.208 #
 
-ST_tW_antitop_xs      = 11.1 #
+ST_tW_antitop_xs      = 35.8 #
 #SingTop_xs   = 11.1 #
-ST_t_top_xs       = 56.4 #
-ST_t_bar_xs    = 30.7 #
-ST_s_xs       = 3.79 #
+ST_t_top_xs       = 136.02 #
+ST_t_bar_xs    = 80.95 #
+ST_s_xs       = 6.35#
 #SingTopbarS_xs    = 1.76 #
 

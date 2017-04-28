@@ -56,7 +56,7 @@ int main(int ac, char** av){
 		std::cout << "usage: ./makeTemplates sampleName outputDir inputFile[s]" << std::endl;
 		return -1;
 	}
-	std::string PUfilename = "MyDataPileupHistogram.root";
+	std::string PUfilename = "PU_Reweighting_13TeV.root";
 	bool systematics = false;
 	
 	std::string inpFileName(av[3]);
@@ -80,8 +80,8 @@ int main(int ac, char** av){
 	if( outDirName.find("pho_down") != std::string::npos) {systematics=true; phosmear012_g = 0;}
 	if( outDirName.find("musmear_up") != std::string::npos) {systematics=true; musmear012_g = 2;}
 	if( outDirName.find("musmear_down") != std::string::npos) {systematics=true; musmear012_g = 0;}
-	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram.root";}
-	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram.root";}
+	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "PU_Reweighting_13TeV.root";}
+	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "PU_Reweighting_13TeV.root";}
 	if( outDirName.find("toppt_up") != std::string::npos) {systematics=true; toppt012_g = 2;}
 	if( outDirName.find("toppt_down") != std::string::npos) {systematics=true; toppt012_g = 0;}	
 	if( outDirName.find("PDF") != std::string::npos) {systematics=true; pdfweight_g=2;}
@@ -232,9 +232,9 @@ int main(int ac, char** av){
 	//	std::cout<<"tree"<< tree <<std::endl;
 	//	isMC = false;
 		isMC = !(tree->isData_);
-		
+		//std::cout<< "is it MC?"<< isMC <<std::endl;	
 		//apply PU reweighting
-		if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
+	//	if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
 	//	std::cout << "PUweight" << PUweight <<std::endl;
 		
 		if(isMC && !isQCD){
@@ -242,6 +242,7 @@ int main(int ac, char** av){
 		//	jecvar->applyJEC(tree, jecvar012_g); // 0:down, 1:norm, 2:up
 			//JER smearing 
 			doJER(tree);
+			std::cout << "doing JER"<<std::endl;		
 			// photon energy smearing
 			doPhoSmearing(tree);
 			// electron energy smearing

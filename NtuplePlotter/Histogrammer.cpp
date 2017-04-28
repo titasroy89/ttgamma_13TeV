@@ -157,6 +157,10 @@ Histogrammer::Histogrammer(std::string titleIn){
 void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree, double weight){
 	// sanity check: PU weight
 	hists["PUweight"]->Fill(weight);
+	std::cout << "MET is" << tree->pfMET_ <<std::endl;
+        std::cout <<" weight is"<< weight << std::endl;
+
+        hists["MET"]->Fill( tree->pfMET_, weight );
 	// 2d photon candidate histograms
 	//std::cout << "here0" << std::endl;
 //	if(selEvent->PhotonsPresel.size()>0){
@@ -493,7 +497,10 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 //	std::cout<<"skipped photons category" <<std::endl;
 	//std::cout << "here4" << std::endl;
 	hists["Ht"]->Fill( calc_ht(selEvent, tree), weight );
-	hists["MET"]->Fill( tree->pfMET_, weight );
+//	std::cout << "MET is" << tree->pfMET_ <<std::endl;
+//	std::cout <<" weight is"<< weight << std::endl;
+
+//	hists["MET"]->Fill( tree->pfMET_, weight );
         hists["MET_low"]->Fill(tree->pfMET_,weight);
 	hists["nVtx"]->Fill( tree->nVtx_, weight );
 	hists["nJets"]->Fill( selEvent->Jets.size(), weight );

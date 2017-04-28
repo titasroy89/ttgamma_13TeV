@@ -170,7 +170,7 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 		}
 	}
 	bool Pass_trigger=false;
-	Pass_trigger = (( tree->HLTEleMuX_  >> 24 & 1) || (tree->HLTEleMuX_  >> 25 & 1));
+	Pass_trigger = ( tree->HLTEleMuX_  >> 20 & 1) ;
 	cutFlow->Fill(0.0); // Input events
 	cutFlowWeight->Fill(0.0,weight);
 	passPreSel = true;
@@ -183,9 +183,9 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	else passSkim = false;
 	if(passSkim && Muons.size() >= Nmu_eq) {cutFlow->Fill(3); cutFlowWeight->Fill(3,weight);}
 	else passSkim = false;
-	if(passSkim && selector->MuonsLoose.size() <=  NlooseMuVeto_le ) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
+	if(passSkim && selector->MuonsLoose.size() <=  99. ) {cutFlow->Fill(4); cutFlowWeight->Fill(4,weight);}
 	else passSkim = false;
-	if(passPreSel && selector->Electrons.size() <= NEleVeto_le) {cutFlow->Fill(5); cutFlowWeight->Fill(5,weight);}
+	if(passPreSel && selector->Electrons.size() <= 99.) {cutFlow->Fill(5); cutFlowWeight->Fill(5,weight);}
 	//if(passSkim && selector->Electrons.size() <= NEleVeto_le && selector->Electrons.size() <= NlooseEleVeto_le) {cutFlow->Fill(5); cutFlowWeight->Fill(5,weight);}
 	else passSkim = false;
 	if(passSkim && Jets.size() >= Njet_ge ) {cutFlow->Fill(6); cutFlowWeight->Fill(6,weight);}
@@ -202,7 +202,7 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	else passPreSel = false;
         if (passPreSel && Muons.size()==Nmu_eq) {cutFlow->Fill(12); cutFlowWeight->Fill(12,weight);}
 	else passPreSel = false;
-	if(passPreSel && tree->pfMET_ > MET_cut) {cutFlow->Fill(13); cutFlowWeight->Fill(13,weight);passAll=true;}
+	if(passPreSel && tree->pfMET_ >= MET_cut) {cutFlow->Fill(13); cutFlowWeight->Fill(13,weight);passAll=true;}
 	else passPreSel = false;
 	//if(passPreSel && Photons.size() >= 0) { cutFlow->Fill(14); cutFlowWeight->Fill(14,weight);passAll = true;}
 //	else passAll = false ; 
