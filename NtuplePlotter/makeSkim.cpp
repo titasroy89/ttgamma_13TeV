@@ -62,7 +62,7 @@ int main(int ac, char** av){
 	
 	Long64_t nEntr = tree->GetEntries();
 	for(Long64_t entry= 0; entry < nEntr; entry++){
-	//for(Long64_t entry= 0; entry < 21000; entry++){ 	
+//	for(Long64_t entry= 0; entry < 210000; entry++){ 	
 		if(entry%1000 == 0) {
 			std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
 		}
@@ -71,40 +71,15 @@ int main(int ac, char** av){
 		//std::cout <<"tree->entry : " << check <<std::endl;
 		//if (check == 0) continue;
 		selector->process_objects(tree);
-		//std::cout << " after selector " << std::endl;
-		//std::cout << "leading jet" << tree->jetPt_->at(0) << std::endl;
-		//h->Fill(tree->jetPt_->at(0));
-		//h->Draw();
-		//c1->SaveAs("leading_jet.pdf");
-		                              
-		//h1->Fill(tree->jetPt_->at(1));
-		//h1->Draw();
-		//c2->SaveAs("second_jet.pdf");
-
-		//h2->Fill(tree->jetPt_->at(2));
-		//h2->Draw();
-		//c3->SaveAs("third_jet.pdf");
 		
 		//JEC->applyJEC(tree,1);
 		evtPick->process_event(tree,selector);
-		
 		// make selection here
 		if( evtPick->passSkim ){
 			newTree->Fill();
 		
-		//	h1->Fill(tree->jetPt_->at(0));
-                //	h1->Draw();
-                //	c1->SaveAs("leading_jet.pdf");
-
-                //	h2->Fill(tree->jetPt_->at(1));
-                //	h2->Draw();
-                //	c2->SaveAs("second_jet.pdf");
-                	//h3->Fill(tree->jetPt_->at(2));
-                	//h3->Draw();
-               		//c3->SaveAs("third_jet.pdf");
                 }
 		
-	        //std::cout << "finished with entry " <<  entry << std::endl;	
 	}
 
 	newTree->Write();

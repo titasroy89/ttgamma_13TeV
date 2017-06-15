@@ -29,7 +29,7 @@ public:
 	Float_t  processID_;
 	Int_t    nHLT_;
 	Int_t    HLT_[maxP];
-	ULong64_t    HLTEleMuX_;
+	ULong64_t    HLTEleMuX;
 	Float_t  bspotPos_[3];
 	Int_t    nVtx_;
 	vector<Float_t>* vtx_x_;
@@ -39,9 +39,9 @@ public:
 	vector<int>* vtxNTrk_;
 	vector<float>* vtxNDF_;
 	vector<float>* vtxD0_;
-	Int_t    isPVGood_;
-	Int_t    nGoodVtx_;
-	Bool_t 	 hasGoodVtx_;
+	Bool_t    isPVGood_;
+	Int_t    nGoodVtx;
+//	Bool_t 	 nGoodVtx_;
 	Int_t    nVtxBS_;
 	vector<float>*  vtxbs_x_;
 	vector<float>*  vtxbs_y_;
@@ -84,7 +84,7 @@ public:
 	vector<float>*  mcMomMass;
 	vector<float>*  mcMomEta;
 	vector<float>*  mcMomPhi;
-	vector<int>*    mcIndex;
+	//vector<int>*    mcIndex;
 	vector<int>*    mcDecayType;
 	vector<int>*    mcParentage;
 	vector<int>*    mcStatus;
@@ -170,9 +170,9 @@ public:
 	vector<float>*  eleBrem_;
 	vector<float>*  eledEtaAtVtx_;
 	vector<float>*  eledPhiAtVtx_;
-	vector<float>*  eleSigmaIEtaIEta_;
-	vector<float>*  eleSigmaIEtaIPhi_;
-	vector<float>*  eleSigmaIPhiIPhi_;
+	vector<float>*  eleSigmaIEtaIEtaFull5x5_;
+//	vector<float>*  eleSigmaIEtaIPhi_;
+	vector<float>*  eleSigmaIPhiIPhiFull5x5_;
 	vector<float>*  eleEmax_;
 	vector<float>*  eleE2ndMax_;
 	vector<float>*  eleETop_;
@@ -225,9 +225,9 @@ public:
 	vector<int>*    eleEtaseedAtVtx_;
 	vector<float>*  eleIP3D_;
 	vector<float>*  eleIP3DErr_;
-	vector<float>*  eleIDMVANonTrg_;
+	vector<float>*  eleIDMVAHZZ_;
 	vector<unsigned short>*    eleIDbit_;
-	vector<float>*  eleIDMVATrg_;
+	vector<float>*  eleIDMVA_;
 	vector<int>*    eleID2012_0_;
 	vector<int>*    eleID2012_1_;
 	vector<int>*    eleID2012_2_;
@@ -303,7 +303,7 @@ public:
 	vector<float>*  phoHoverEBCdepth2_;
 	vector<float>*  phoHoverE12_;
 	vector<int>*    phoNClus_;
-	vector<float>*  phoSigmaIEtaIEta_;
+	vector<float>*  phoSigmaIEtaIEtaFull5x5_;
 	vector<float>*  phoSigmaIEtaIPhi_;
 	vector<float>*  phoSigmaIPhiIPhi_;
 	vector<float>*  phoEmax_;
@@ -336,14 +336,14 @@ public:
 	vector<float>*  phoPFChIso_;
 	vector<float>*  phoPFPhoIso_;
 	vector<float>*  phoPFNeuIso_;
-	vector<float>*  phoPFChIsoFrix7_;
-	vector<float>*  phoPFPhoIsoFrix7_;
+//	vector<float>*  phoPFChIsoFrix7_;
+//	vector<float>*  phoPFPhoIso_;
 	vector<float>*  phoSCRNeuIso_;
 	vector<float>*  phoPFChIsoFrix704_;
-	vector<float>*  phoPFPhoIsoFrix704_;
+	vector<float>*  phoPFPhoIso04_;
 	vector<float>*  phoSCRNeuIso04_;
-	vector<float>*  phoPFChIsoFrix6_;
-	vector<float>*  phoPFPhoIsoFrix6_;
+	//vector<float>*  phoPFChIsoFrix6_;
+	//vector<float>*  phoPFPhoIsoFrix6_;
 	vector<float>*  phoRandConeNeuIso_;
 	vector<float>*  phoPFChIsoFrix604_;
 	vector<float>*  phoPFPhoIsoFrix604_;
@@ -417,7 +417,7 @@ public:
 	vector<float>*  phoSCBrem_;
 	vector<int>*    phoOverlap_;
 	vector<int>*    phohasPixelSeed_;
-	vector<int>*    phoSeedBCE_;
+	//vector<int>*    phoSeedBCE_;
 	vector<int>*    phoEleVeto_;
 	Int_t    phoESDetId_[maxP][2];
 	Float_t  phoESHits_[maxP][3][62];
@@ -948,12 +948,12 @@ public:
 	vector<float>*  jetHFEME_;
 	vector<int>*    jetPartonID_;
 	vector<int>*    AK8Jetnconstituents_;
-	vector<float>*  jetpfCombinedInclusiveSecondaryVertexV2BJetTags_; // recommended
-	vector<float>*  jetCombinedSecondaryVtxMVABJetTags_;
+	vector<float>*  jetpfCombinedMVAV2BJetTags_; // recommended
+	vector<float>*  jetCSV2BJetTags_;
 	vector<float>*  jetJetProbabilityBJetTags_;
 	vector<float>*  jetJetBProbabilityBJetTags_;
 	vector<vector<float> >*  jetBetaStar_;
-	vector<int>*    jetGenJetIndex_;
+	//vector<int>*    jetGenJetIndex_;
 	vector<float>*  jetGenJetEn_;
 	vector<float>*  jetGenJetPt_;
 	vector<float>*  jetGenJetEta_;

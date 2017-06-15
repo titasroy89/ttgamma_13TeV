@@ -12,7 +12,7 @@ double dR(double eta1, double phi1, double eta2, double phi2){
 Selector::Selector(){
 	// jets
 	jet_Pt_cut = 30;
-	btag_cut = 0.89;
+	btag_cut = 0.8484;
 
 	// electrons
 	ele_Pt_cut = 30.0;
@@ -38,7 +38,7 @@ Selector::Selector(){
 	pho_noPixelSeed_cut = false;
 	pho_noEleVeto_cut = false;
 	
-	// muons
+	// muons :https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2
 	mu_PtLoose_cut = 10.0;
 	mu_RelIsoLoose_cut = 0.25;
         mu_RelIso_range[0] = 0.0;
@@ -46,14 +46,15 @@ Selector::Selector(){
 	mu_Iso_invert = false;
 	mu_Eta_tight = 2.1;
 	mu_Eta_loose = 2.4;
-	mu_Pt_cut = 30;
+	mu_Pt_cut = 26;
+//	bool passPhoMediumID;
 }
 
 void Selector::process_objects(const EventTree* inp_tree){
 	tree = inp_tree;
-//	std::cout << "tree done" << std::endl;
+	//std::cout << "tree done" << std::endl;
 	clear_vectors();
-//	std::cout << "vectors done " << std::endl;
+	//std::cout << "vectors done " << std::endl;
 	filter_photons();
 //	std::cout << "photons done " << std::endl;
         filter_muons();
@@ -96,40 +97,39 @@ void Selector::filter_photons(){
 	for(int phoInd = 0; phoInd < tree->nPho_; ++phoInd){
 		double eta = tree->phoEta_->at(phoInd);
 		double et = tree->phoEt_->at(phoInd);
-		//std::cout<< "tree->phohasPixelSeed_->at(phoInd):" <<  tree->phohasPixelSeed_->at(phoInd) <<std::endl;
-		Pho03ChHadIso.push_back( max(0., tree->phoPFChIso_->at(phoInd)   - tree->rho_ * phoEffArea03ChHad(eta) ));
-		Pho03ChHadSCRIso.push_back( max(0., tree->phoPFChIsoFrix7_->at(phoInd)  - tree->rho_ * phoEffArea03ChHad(eta) ));
-		Pho03RandChHadIso.push_back( max(0., tree->phoPFChIsoFrix6_->at(phoInd) - tree->rho_ * phoEffArea03ChHad(eta) ));
+
+		// uint photonIDbit = tree->phoIDbit_->at(phoInd);
+		// bool passLoosePhotonID  = photonIDbit >> 0 & 1;
+		// bool passMediumPhotonID = photonIDbit >> 1 & 1;
+		// bool passTightPhotonID  = photonIDbit >> 2 & 1;
+		Pho03ChHadIso.push_back( max(0.,tree->phoPFChIso_->at(phoInd) - phoEffArea03ChHad(eta)*tree->rho_));
+		bool passMediumPhotonID = passPhoMediumID(phoInd);
+
+		bool hasPixelSeed = tree->phohasPixelSeed_->at(phoInd);
 		
-		Pho03NeuHadIso.push_back( max(0., tree->phoPFNeuIso_->at(phoInd) - tree->rho_ * phoEffArea03NeuHad(eta) ));
-		
-		Pho03PhoIso.push_back( max(0., tree->phoPFPhoIso_->at(phoInd)  - tree->rho_ * phoEffArea03Pho(eta) ));
-		Pho03PhoSCRIso.push_back(   max(0., tree->phoPFPhoIsoFrix7_->at(phoInd) - tree->rho_ * phoEffArea03Pho(eta) ));
-		Pho03RandPhoIso.push_back(  max(0., tree->phoPFPhoIsoFrix6_->at(phoInd) - tree->rho_ * phoEffArea03Pho(eta) ));
-		
-		// manual spike cleaning (was necessary before)
-		//if (dR(tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd), -1.76, 1.37) < 0.05) continue;
-		//if (dR(tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd),  2.37, 2.69) < 0.05) continue;		
 
 		int region = 0; //barrel
 		if(TMath::Abs( eta )>1.5) region = 1; //endcap
-		//bool phoPresel = fidEtaPass(eta) &&
-		//				et > pho_Et_cut &&
+		bool phoPresel = (fidEtaPass(eta) &&
+				  et > pho_Et_cut && 
+				  passMediumPhotonID && 
+				  !hasPixelSeed);// &&
 					//	( pho_noPixelSeed_cut || tree->phohasPixelSeed_->at(phoInd) == 0 ) &&
-					//	( pho_noEleVeto_cut || tree->phoEleVeto_->at(phoInd) == 0 ); //&&
+					//	( pho_noEleVeto_cut || tree->phoEleVeto_->at(phoInd) == 0 ) &&
 					//	tree->phoSeedBCE_->at(phoInd) == photonID_IsConv[region][pho_ID_ind] &&
 					//	tree->phoHoverE_->at(phoInd) < photonID_HoverE[region][pho_ID_ind] &&
 					//	Pho03NeuHadIso[phoInd] < 
 //			(photonID_RhoCorrR03NeuHadIso_0[region][pho_ID_ind] + et*photonID_RhoCorrR03NeuHadIso_1[region][pho_ID_ind]);
-		//std::cout<< "the boolean is :" <<  phoPresel <<std::endl;
-		bool phoPresel = true;	
+//		std::cout<< "the boolean is :" <<  phoPresel <<std::endl;
+//		std::cout<<"passing fidEtaPass:"<< fidEtaPass(eta)<<std::endl;
+		//bool phoPresel = true;	
 		if(phoPresel){
 			PhotonsPresel.push_back(phoInd);
-	//		std::cout<< "length of photons presel vector" << PhotonsPresel.size() <<std::endl;
-			PhoPassSih.push_back( tree->phoSigmaIEtaIEta_->at(phoInd) < photonID_SigmaIEtaIEta[region][pho_ID_ind] );
+//			std::cout<< "length of photons presel vector" << PhotonsPresel.size() <<std::endl;
+			PhoPassSih.push_back( tree->phoSigmaIEtaIEtaFull5x5_->at(phoInd) < photonID_SigmaIEtaIEta[region][pho_ID_ind] );
 			// substitute ChHadIso cut to loose SC footprint removed ChHadIso cut of 5 GeV in photon selection
-			PhoPassChHadIso.push_back( Pho03ChHadSCRIso[phoInd] < 5 /*photonID_RhoCorrR03ChHadIso[region][pho_ID_ind]*/ );
-			PhoPassPhoIso.push_back( Pho03PhoIso[phoInd] < photonID_RhoCorrR03PhoIso_0[region][pho_ID_ind] + et * photonID_RhoCorrR03PhoIso_1[region][pho_ID_ind] );
+			//PhoPassChHadIso.push_back( Pho03ChHadSCRIso[phoInd] < 5 /*photonID_RhoCorrR03ChHadIso[region][pho_ID_ind]*/ );
+		//	PhoPassPhoIso.push_back( Pho03PhoIso[phoInd] < photonID_RhoCorrR03PhoIso_0[region][pho_ID_ind] + et * photonID_RhoCorrR03PhoIso_1[region][pho_ID_ind] );
 		}
 	}
 }
@@ -278,7 +278,7 @@ void Selector::filter_muons(){
 		if(passTight){
 		 	Muons.push_back(muInd);
 		 }
-		 if (passLoose){
+		else if (passLoose){
 		 	MuonsLoose.push_back(muInd);
 		 }
 
@@ -319,7 +319,7 @@ void Selector::filter_jets(){
 //		std::cout << "crosses the AK8 stuff " << std::endl;	
 		if( jetPresel){
 			Jets.push_back(jetInd);
-			if(tree->jetpfCombinedInclusiveSecondaryVertexV2BJetTags_->at(jetInd) > btag_cut) bJets.push_back(jetInd);
+			if(tree->jetpfCombinedMVAV2BJetTags_->at(jetInd) > btag_cut) bJets.push_back(jetInd);
 		}
 		
 	}
@@ -362,7 +362,7 @@ double Selector::muEffArea04(double muEta){
 	return area[region];
 }
 
-// https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonID2012#Effective_Areas_for_rho_correcti
+//https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2
 int Selector::phoRegion(double absEta){
 	int region = 0;
 	if( absEta >= 1.0  ) region++;
@@ -388,6 +388,37 @@ double Selector::phoEffArea03Pho(double phoEta){
 	static const double area[7] = {0.148, 0.130, 0.112, 0.216, 0.262, 0.260, 0.266};
 	return area[phoRegion(eta)];
 }
+
+bool Selector::passPhoMediumID(int phoInd){
+  double pt = tree->phoEt_->at(phoInd);  
+  double eta = TMath::Abs(tree->phoEta_->at(phoInd));
+  bool passMediumID = false;
+
+  double rhoCorrPFChIso = tree->phoPFChIso_->at(phoInd) - phoEffArea03ChHad(eta)*tree->rho_;
+  double rhoCorrPFNeuIso = tree->phoPFNeuIso_->at(phoInd) - phoEffArea03NeuHad(eta)*tree->rho_;
+  double rhoCorrPFPhoIso = tree->phoPFPhoIso_->at(phoInd) - phoEffArea03Pho(eta)*tree->rho_;
+  
+
+  if (eta < 1.47){
+    if (tree->phoHoverE_->at(phoInd)                < 0.0396  &&
+	tree->phoSigmaIEtaIEtaFull5x5_->at(phoInd)  < 0.01022 &&
+	rhoCorrPFChIso                             < 0.441 &&
+	rhoCorrPFNeuIso                             < 2.725+0.0148*pt+0.000017*pt*pt &&
+	rhoCorrPFPhoIso                             < 2.571+0.0047*pt){
+      passMediumID = true;
+    }
+  } else {
+    if (tree->phoHoverE_->at(phoInd)                < 0.0219  &&
+	tree->phoSigmaIEtaIEtaFull5x5_->at(phoInd)  < 0.03001 &&
+	rhoCorrPFChIso                             < 0.442 &&
+	rhoCorrPFNeuIso                             < 1.715+0.0163*pt+0.000014*pt*pt &&
+	rhoCorrPFPhoIso                             < 3.863+0.0034*pt){
+      passMediumID = true;
+    }
+  }
+  return passMediumID;
+}
+
 
 Selector::~Selector(){
 }

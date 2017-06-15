@@ -6,7 +6,7 @@
 #include<map>
 #include<string>
 #include<TFile.h>
-#include<TH1F.h>
+#include<TH1D.h>
 #include<TH2F.h>
 #include<TMath.h>
 #include<TLorentzVector.h>
@@ -20,12 +20,13 @@ public:
 	Histogrammer(std::string titleIn);
 	~Histogrammer(void);
 	void fill(Selector* selector, EventPick* evtPick, EventTree* tree, double weight);
-	void write_histograms(std::string folder, std::vector<TH1F*> histVector);
+	void write_histograms(std::string folder, std::vector<TH1D*> histVector);
 	
 private:
 	std::string title;
-	std::map< std::string, TH1F* > hists;
-	std::map< std::string, TH2F* > hists2d;
+	std::map< std::string, TH1D* > hists;
+	//std::map< std::string, TH1D* > hists;
+	std::map< std::string, TH2D* > hists2d;
 	
 	void make_hist(const char* hname, const char* htitle, int nbins, double xlow, double xhigh, const char* xlabel, const char* ylabel);
 	void make_hist2d(const char* hname, const char* htitle, int nxbins, double xlow, double xhigh, int nybins, double ylow, double yhigh);

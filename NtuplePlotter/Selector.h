@@ -105,7 +105,7 @@ private:
 	double phoEffArea03NeuHad(double phoEta);
 	double phoEffArea03Pho(double phoEta);
 	int phoRegion(double absEta);
-	
+	bool passPhoMediumID(int phoInd);
 };
 
 #endif

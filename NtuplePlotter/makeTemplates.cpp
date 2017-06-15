@@ -60,7 +60,7 @@ int main(int ac, char** av){
 	bool systematics = false;
 	
 	std::string inpFileName(av[3]);
-	if( inpFileName.find("ttjets") != std::string::npos) top_sample_g = 1;
+	if( inpFileName.find("TTbar") != std::string::npos) top_sample_g = 1;
 	//if( inpFileName.find("ttjets_2l") != std::string::npos) top_sample_g = 2;
 	//if( inpFileName.find("ttjets_had") != std::string::npos) top_sample_g = 3;
 	std::cout << "top_sample: " << top_sample_g << std::endl;
@@ -80,8 +80,8 @@ int main(int ac, char** av){
 	if( outDirName.find("pho_down") != std::string::npos) {systematics=true; phosmear012_g = 0;}
 	if( outDirName.find("musmear_up") != std::string::npos) {systematics=true; musmear012_g = 2;}
 	if( outDirName.find("musmear_down") != std::string::npos) {systematics=true; musmear012_g = 0;}
-	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram.root";}
-	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram.root";}
+	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "PU_Reweighting_13TeV.root";}
+	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "PU_Reweighting_13TeV.root";}
 	if( outDirName.find("toppt_up") != std::string::npos) {systematics=true; toppt012_g = 2;}
 	if( outDirName.find("toppt_down") != std::string::npos) {systematics=true; toppt012_g = 0;}	
 	if( outDirName.find("PDF") != std::string::npos) {systematics=true; pdfweight_g=2;}
@@ -145,8 +145,8 @@ int main(int ac, char** av){
 	//Selector* selectorTight = new Selector();
 	// set up the parameters for object selectors here
 	//selectorTight->pho_ID_ind = 2; // tight ID
-	std::cout << selectorLoose->mu_RelIso_range[0] << std::endl;
-	std::cout << selectorLoose->mu_RelIso_range[1] << std::endl;
+	//std::cout << selectorLoose->mu_RelIso_range[0] << std::endl;
+	//std::cout << selectorLoose->mu_RelIso_range[1] << std::endl;
 	//evtPickLoose->MET_cut = 20.0;
 	evtPickLooseNoMET->MET_cut = -1.0;
 	//evtPickLoose->veto_pho_jet_dR = 0.05;
@@ -181,9 +181,9 @@ int main(int ac, char** av){
 	bool doOverlapRemovalWZ = false;
 	bool doInvertedOverlapRemoval = false;
 	bool skipOverlap = false;
-	if( std::string(av[1]).find("TTbar_1") != std::string::npos) doOverlapRemoval = true;
+	if( std::string(av[1]).find("TTbar") != std::string::npos) doOverlapRemoval = true;
 	if( std::string(av[1]).find("DYJets") != std::string::npos) doOverlapRemovalWZ = true;
-	if( std::string(av[1]).find("Wjets") != std::string::npos) doOverlapRemovalWZ = true;
+	if( std::string(av[1]).find("W1jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W2Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W3Jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W4Jets") != std::string::npos) doOverlapRemovalWZ = true;
@@ -232,16 +232,17 @@ int main(int ac, char** av){
 	//	std::cout<<"tree"<< tree <<std::endl;
 	//	isMC = false;
 		isMC = !(tree->isData_);
-		
+		//std::cout<< "is it MC?"<< isMC <<std::endl;	
 		//apply PU reweighting
-		if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
-	//	std::cout << "PUweight" << PUweight <<std::endl;
+	//	if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
+	//	std::cout << "PUweight: " << PUweight <<std::endl;
 		
 		if(isMC && !isQCD){
 			// JEC
 		//	jecvar->applyJEC(tree, jecvar012_g); // 0:down, 1:norm, 2:up
 			//JER smearing 
 			doJER(tree);
+		//	std::cout << "doing JER"<<std::endl;		
 			// photon energy smearing
 			doPhoSmearing(tree);
 			// electron energy smearing
@@ -320,12 +321,12 @@ int main(int ac, char** av){
 	//	double evtWeight = 1.0;
 		//std::cout << "PUweight" << evtWeight <<std::endl;
 	///	double PUweight = 1.0;		
-	//	std::cout<<"Stage before filling histogarams"<<std::endl;
+		//std::cout<<"Stage before filling histogarams"<<std::endl;
 		looseCollectNoMET->fill_histograms(selectorLoose, evtPickLooseNoMET, tree, isMC, evtWeight);
-		//std::cout<<"Stage after NoMET"<<std::endl; 
+	//	std::cout<<"Stage after NoMET"<<std::endl; 
 		looseCollect->fill_histograms(selectorLoose, evtPickLoose, tree, isMC, evtWeight);
 	//	}
-		//std::cout<<"Stage after filling histogarams"<<std::endl;
+	//	std::cout<<"Stage after filling histogarams"<<std::endl;
 
 		//fourjCollect->fill_histograms(selectorLoose, evtPickLoose4j, tree, isMC, evtWweight);
 	}
@@ -335,7 +336,7 @@ int main(int ac, char** av){
 
 	//fourjCollect->write_histograms(evtPickLoose4j, isMC, av[2]);
 
-	//std::cout << "Average PU weight " << PUweighter->getAvgWeight() << std::endl;
+//	std::cout << "Average PU weight " << PUweighter->getAvgWeight() << std::endl;
 	evtPickLoose->print_cutflow();
 	
 	delete tree;
@@ -529,18 +530,18 @@ void doJER(EventTree* tree){
 	for(int jetInd = 0; jetInd < tree->nJet_ ; ++jetInd){
 	        // This is changed, previously was 20 GeV (was this from 2011 recommendation?) 
 		if(tree->jetPt_->at(jetInd) < 10) continue;   
-		if(tree->jetGenJetIndex_->at(jetInd)>0){
-			TLorentzVector tjet;
-			tjet.SetPtEtaPhiM(tree->jetPt_->at(jetInd), tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), 0.0);
-			tMET+=tjet;
-			double oldPt = tree->jetPt_->at(jetInd);
-			double genPt = tree->jetGenJetPt_->at(jetInd);
-			double eta = tree->jetEta_->at(jetInd);
-			tree->jetPt_->at(jetInd) = std::max(0.0, genPt + JERcorrection(eta)*(oldPt-genPt));
-			tjet.SetPtEtaPhiM(tree->jetPt_->at(jetInd), tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), 0.0);			
-			tMET-=tjet;
+		//if(tree->jetGenJetIndex_->at(jetInd)>0){
+		//	TLorentzVector tjet;
+		//	tjet.SetPtEtaPhiM(tree->jetPt_->at(jetInd), tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), 0.0);
+		//	tMET+=tjet;
+		//	double oldPt = tree->jetPt_->at(jetInd);
+		//	double genPt = tree->jetGenJetPt_->at(jetInd);
+		//	double eta = tree->jetEta_->at(jetInd);
+		//	tree->jetPt_->at(jetInd) = std::max(0.0, genPt + JERcorrection(eta)*(oldPt-genPt));
+		//	tjet.SetPtEtaPhiM(tree->jetPt_->at(jetInd), tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), 0.0);			
+		//	tMET-=tjet;
 			//std::cout << "old " << oldPt << "  new " << tree->jetPt_->at(jetInd) << std::endl;
-		}
+		//}
 	}
 	// save updated MET values
 	tree->pfMET_ = tMET.Pt();
