@@ -40,7 +40,7 @@ HistCollect::~HistCollect(){
 }
 
 void HistCollect::fill_histograms(Selector* selector, EventPick* selEvent, EventTree* tree, bool isMC, double weight){
-//	std::cout<<"at the start"<<std::endl;
+//	std::cout<<"at the start of filling histo"<<std::endl;
 	if(!(selEvent->passPreSel)) return; // event did not pass preselction
 	// find the photon category
 	bool barrel;
@@ -60,13 +60,13 @@ void HistCollect::fill_histograms(Selector* selector, EventPick* selEvent, Event
 			}
 		}
 	}
-	//std::cout<<"here"<<std::endl;	
+//	std::cout<<"after good photons"<<std::endl;	
 	bool passAllTemp = selEvent->passAll;
 	// make histograms for pre-selection cuts
 	selEvent->passAll = true;
-	//std::cout << "fill Sum"<< fillSum <<std::endl;
+//	std::cout << "before fill Sum"<< fillSum <<std::endl;
 	if(fillSum) histnom->fill(selector, selEvent, tree, weight);
-	//std::cout << "right after fill"<<std::endl;
+//	std::cout << "right after fill"<<std::endl;
 	// keep the true value
 	selEvent->passAll = passAllTemp;
 

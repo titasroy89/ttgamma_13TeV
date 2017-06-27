@@ -150,6 +150,7 @@ public:
 	vector<float>*  eleDzGV_;
 	vector<vector<float> >*  eleD0Vtx_;
 	vector<vector<float> >*  eleDzVtx_;
+	vector<float>*    muEn_;
 	vector<float>*  elePt_;
 	vector<float>*  eleEta_;
 	vector<float>*  elePhi_;
@@ -259,6 +260,7 @@ public:
 	vector<float>*  elePFNeuIso04_;
 	// Photon
 	Int_t    nPho_;
+	vector<unsigned short>* phoIDbit_;
 	vector<ULong_t>* phoTrg_;
 	vector<ULong_t>* phoTrgFilter_;
 	vector<bool>*   phoIsPhoton_;

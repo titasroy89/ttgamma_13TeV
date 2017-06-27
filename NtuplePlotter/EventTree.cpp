@@ -74,6 +74,11 @@ EventTree::EventTree(int nFiles, char** fileNames){
 
 	//chain->SetBranchStatus("eleEta",1);
 	
+
+	eleEn_ = new vector<float>;
+        chain->SetBranchStatus("eleEn",1);
+        chain->SetBranchAddress("eleEn", &eleEn_);	
+
 	elePt_ = new vector<float>;
 	chain->SetBranchStatus("elePt",1);
 	chain->SetBranchAddress("elePt", &elePt_);
@@ -190,7 +195,9 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	muPt_ = new vector<float>;
 	chain->SetBranchStatus("muPt",1);
 	chain->SetBranchAddress("muPt", &muPt_);
-
+	muEn_ = new vector<float>;
+        chain->SetBranchStatus("muEn",1);
+        chain->SetBranchAddress("muEn", &muEn_);
 	muEta_ = new vector<float>;
 	chain->SetBranchStatus("muEta",1);
 	chain->SetBranchAddress("muEta", &muEta_);
@@ -280,9 +287,9 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("jetpfCombinedMVAV2BJetTags",1);
 	chain->SetBranchAddress("jetpfCombinedMVAV2BJetTags", &jetpfCombinedMVAV2BJetTags_);
 	
-	//jetCombinedSecondaryVtxMVABJetTags_ = new vector<float>;
-	//chain->SetBranchStatus("jetCombinedSecondaryVtxMVABJetTags",1);
-	//chain->SetBranchAddress("jetCombinedSecondaryVtxMVABJetTags", &jetCombinedSecondaryVtxMVABJetTags_);
+	jetCSV2BJetTags_ = new vector<float>;
+	chain->SetBranchStatus("jetCSV2BJetTags",1);
+	chain->SetBranchAddress("jetCSV2BJetTags", &jetCSV2BJetTags_);
 
 	jetPartonID_ = new vector<int>;
 	chain->SetBranchStatus("jetPartonID",1);
@@ -317,6 +324,10 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("nPho",1);
 	chain->SetBranchAddress("nPho", &nPho_);
 
+	phoE_ = new vector<float>;
+        chain->SetBranchStatus("phoE",1);
+        chain->SetBranchAddress("phoE", &phoE_);
+
 	phoEt_ = new vector<float>;	
 	chain->SetBranchStatus("phoEt",1);
 	chain->SetBranchAddress("phoEt", &phoEt_);
@@ -332,7 +343,9 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	//phoSeedBCE_ = new vector<int>;
 	//chain->SetBranchStatus("phoSeedBCE",1);
 	//chain->SetBranchAddress("phoSeedBCE", &phoSeedBCE_);
-//	phoIDbit_ = new vector<UShort_t>;
+	phoIDbit_ = new vector<UShort_t>;
+	chain->SetBranchStatus("phoIDbit",1);
+        chain->SetBranchAddress("phoIDbit", &phoIDbit_);
 	
 	phohasPixelSeed_ = new vector<int>;
 	chain->SetBranchStatus("phohasPixelSeed",1);

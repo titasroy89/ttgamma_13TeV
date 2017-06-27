@@ -80,8 +80,8 @@ int main(int ac, char** av){
 	if( outDirName.find("pho_down") != std::string::npos) {systematics=true; phosmear012_g = 0;}
 	if( outDirName.find("musmear_up") != std::string::npos) {systematics=true; musmear012_g = 2;}
 	if( outDirName.find("musmear_down") != std::string::npos) {systematics=true; musmear012_g = 0;}
-	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "PU_Reweighting_13TeV.root";}
-	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "PU_Reweighting_13TeV.root";}
+	if( outDirName.find("PU_up") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram_up.root";}
+	if( outDirName.find("PU_down") != std::string::npos) {systematics=true; PUfilename = "MyDataPileupHistogram_down.root";}
 	if( outDirName.find("toppt_up") != std::string::npos) {systematics=true; toppt012_g = 2;}
 	if( outDirName.find("toppt_down") != std::string::npos) {systematics=true; toppt012_g = 0;}	
 	if( outDirName.find("PDF") != std::string::npos) {systematics=true; pdfweight_g=2;}
@@ -147,7 +147,7 @@ int main(int ac, char** av){
 	//selectorTight->pho_ID_ind = 2; // tight ID
 	//std::cout << selectorLoose->mu_RelIso_range[0] << std::endl;
 	//std::cout << selectorLoose->mu_RelIso_range[1] << std::endl;
-	//evtPickLoose->MET_cut = 20.0;
+	evtPickLoose->MET_cut = 20.0;
 	evtPickLooseNoMET->MET_cut = -1.0;
 	//evtPickLoose->veto_pho_jet_dR = 0.05;
 	//evtPickLoose->Njet_ge = 4;
@@ -184,9 +184,9 @@ int main(int ac, char** av){
 	if( std::string(av[1]).find("TTbar") != std::string::npos) doOverlapRemoval = true;
 	if( std::string(av[1]).find("DYJets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("W1jets") != std::string::npos) doOverlapRemovalWZ = true;
-	if( std::string(av[1]).find("W2Jets") != std::string::npos) doOverlapRemovalWZ = true;
-	if( std::string(av[1]).find("W3Jets") != std::string::npos) doOverlapRemovalWZ = true;
-	if( std::string(av[1]).find("W4Jets") != std::string::npos) doOverlapRemovalWZ = true;
+	if( std::string(av[1]).find("W2jets") != std::string::npos) doOverlapRemovalWZ = true;
+	if( std::string(av[1]).find("W3jets") != std::string::npos) doOverlapRemovalWZ = true;
+	if( std::string(av[1]).find("W4jets") != std::string::npos) doOverlapRemovalWZ = true;
 	if( std::string(av[1]).find("Invert") != std::string::npos) doInvertedOverlapRemoval = true;
 	if( std::string(av[1]).find("SkipOverlap") != std::string::npos) skipOverlap = true;
 
@@ -232,9 +232,9 @@ int main(int ac, char** av){
 	//	std::cout<<"tree"<< tree <<std::endl;
 	//	isMC = false;
 		isMC = !(tree->isData_);
-		//std::cout<< "is it MC?"<< isMC <<std::endl;	
+	//	std::cout<< "apply PU reweighting"<<std::endl;	
 		//apply PU reweighting
-	//	if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
+		if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
 	//	std::cout << "PUweight: " << PUweight <<std::endl;
 		
 		if(isMC && !isQCD){
@@ -321,7 +321,7 @@ int main(int ac, char** av){
 	//	double evtWeight = 1.0;
 		//std::cout << "PUweight" << evtWeight <<std::endl;
 	///	double PUweight = 1.0;		
-		//std::cout<<"Stage before filling histogarams"<<std::endl;
+	//	std::cout<<"Stage before filling histogarams"<<std::endl;
 		looseCollectNoMET->fill_histograms(selectorLoose, evtPickLooseNoMET, tree, isMC, evtWeight);
 	//	std::cout<<"Stage after NoMET"<<std::endl; 
 		looseCollect->fill_histograms(selectorLoose, evtPickLoose, tree, isMC, evtWeight);

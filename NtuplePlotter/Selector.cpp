@@ -33,7 +33,7 @@ Selector::Selector(){
 	ele_Iso_MVA_invert = false;
 
 	// photons
-	pho_Et_cut = 25.0; 
+	pho_Et_cut = 15.0; //check if this works 
 	pho_ID_ind = 0; // 0 - Loose, 1 - Medium, 2 - Tight
 	pho_noPixelSeed_cut = false;
 	pho_noEleVeto_cut = false;
@@ -46,7 +46,7 @@ Selector::Selector(){
 	mu_Iso_invert = false;
 	mu_Eta_tight = 2.1;
 	mu_Eta_loose = 2.4;
-	mu_Pt_cut = 26;
+	mu_Pt_cut = 30;
 //	bool passPhoMediumID;
 }
 
@@ -106,8 +106,9 @@ void Selector::filter_photons(){
 		bool passMediumPhotonID = passPhoMediumID(phoInd);
 
 		bool hasPixelSeed = tree->phohasPixelSeed_->at(phoInd);
-		
-
+	//	bool passMediumPhotonID = false;
+		//implementing photon ID bit for medium cut
+	//	passMediumPhotonID = ( tree->phoIDbit_->at(phoInd) >> 1 & 1)  ;
 		int region = 0; //barrel
 		if(TMath::Abs( eta )>1.5) region = 1; //endcap
 		bool phoPresel = (fidEtaPass(eta) &&
@@ -188,7 +189,8 @@ void Selector::filter_electrons(){
                //if (tree->eleIDbit_->size() == tree->elePt_->size()){
                   //std::cout << "cutbasedID bool" << std::endl;
   //             std::cout << " electron ID bit is " << tree->eleIDbit_->at(eleInd) << std::endl;
-               cutbasedID = ( tree->eleIDbit_->at(eleInd) >> 2 & 1)  ;
+  //           //tight ID cut for electron
+               cutbasedID = ( tree->eleIDbit_->at(eleInd) >> 3 & 1)  ;
 	//       if (cutbasedID ) {
 	//		std::cout << " It is passing the ID cut !! " << std::endl;
 		   //continue;
@@ -265,7 +267,7 @@ void Selector::filter_muons(){
 				tree->muTrkLayers_->at(muInd) > 5 &&
 				tree->muMuonHits_->at(muInd) > 0 &&
 				tree->muD0_->at(muInd) < 0.2 &&
-				fabs( tree->muDz_->at(muInd) ) < 0.5 && //check this
+				fabs( tree->muDz_->at(muInd) ) < 0.5 &&
 				tree->muPixelHits_->at(muInd) > 0 &&
 				tree->muStations_->at(muInd) > 1 &&
 		                IsoPass &&
@@ -319,7 +321,7 @@ void Selector::filter_jets(){
 //		std::cout << "crosses the AK8 stuff " << std::endl;	
 		if( jetPresel){
 			Jets.push_back(jetInd);
-			if(tree->jetpfCombinedMVAV2BJetTags_->at(jetInd) > btag_cut) bJets.push_back(jetInd);
+			if(tree->jetCSV2BJetTags_->at(jetInd) > btag_cut) bJets.push_back(jetInd);
 		}
 		
 	}

@@ -148,16 +148,16 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	for(int phoVi = 0; phoVi < selector->PhotonsPresel.size(); phoVi++){
 		bool goodPhoton = true;
 		 //remove photons close to jets
-	//	for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
-	//		double drjp = dR_jet_pho(jetInd, selector->PhotonsPresel.at(phoVi));
-	//		if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drjp && drjp < veto_pho_jet_dR) goodPhoton = false;
-	//	}
+		for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
+			double drjp = dR_jet_pho(jetInd, selector->PhotonsPresel.at(phoVi));
+			if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drjp && drjp < veto_pho_jet_dR) goodPhoton = false;
+		}
 		// and electrons
 	//	for(std::vector<int>::iterator eleInd = Electrons.begin(); eleInd != Electrons.end(); eleInd++)
 	//		if(dR_ele_pho(*eleInd, selector->PhotonsPresel.at(phoVi)) < veto_pho_lep_dR) goodPhoton = false;
 		// and muons too; 0.3 is dR cut between photon and anything in MadGraph 2 to 7 ttgamma  
-	//	for(std::vector<int>::iterator muInd = Muons.begin(); muInd != Muons.end(); muInd++)
-	//		if(dR_mu_pho(*muInd, selector->PhotonsPresel.at(phoVi)) < 0.3) goodPhoton = false;
+		for(std::vector<int>::iterator muInd = Muons.begin(); muInd != Muons.end(); muInd++)
+			if(dR_mu_pho(*muInd, selector->PhotonsPresel.at(phoVi)) < 0.3) goodPhoton = false;
 
 		if(goodPhoton){
 			PhotonsPresel.push_back(selector->PhotonsPresel.at(phoVi));
