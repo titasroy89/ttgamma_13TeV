@@ -54,7 +54,6 @@ int main(int ac, char** av){
         TH1F *h3 = new TH1F("third jet pt", "jet_pt", 20, 30, 600);
 	
 	
-	//TFile *theFile = TFile::Open("root://cmsxrootd.fnal.gov//store/user/troy2012/rootFile.root");
 	TFile* outFile = TFile::Open( av[1] ,"RECREATE" );
 	TDirectory* ggDir = outFile->mkdir("ggNtuplizer","ggNtuplizer");
 	ggDir->cd();
@@ -62,19 +61,13 @@ int main(int ac, char** av){
 	
 	Long64_t nEntr = tree->GetEntries();
 	for(Long64_t entry= 0; entry < nEntr; entry++){
-//	for(Long64_t entry= 0; entry < 210000; entry++){ 	
 		if(entry%1000 == 0) {
 			std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
 		}
 		tree->GetEntry(entry);
-		//int check = tree->GetEntry(entry);
-		//std::cout <<"tree->entry : " << check <<std::endl;
-		//if (check == 0) continue;
 		selector->process_objects(tree);
 		
-		//JEC->applyJEC(tree,1);
 		evtPick->process_event(tree,selector);
-		// make selection here
 		if( evtPick->passSkim ){
 			newTree->Fill();
 		

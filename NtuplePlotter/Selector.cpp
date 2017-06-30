@@ -15,9 +15,10 @@ Selector::Selector(){
 	btag_cut = 0.8484;
 
 	// electrons
-	ele_Pt_cut = 30.0;
-	ele_Eta = 2.4;
-	ele_PtLoose_cut = 10.0;
+	ele_Pt_cut = 35.0;
+	ele_Eta_tight = 2.1;
+	ele_Eta_loose = 2.1;
+	ele_PtLoose_cut = 15.0;
 	
 	ele_Ptmedium_cut = 20.0;
 	ele_RelIso_range[0] = 0.0;
@@ -39,12 +40,12 @@ Selector::Selector(){
 	pho_noEleVeto_cut = false;
 	
 	// muons :https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2
-	mu_PtLoose_cut = 10.0;
+	mu_PtLoose_cut = 15.0;
 	mu_RelIsoLoose_cut = 0.25;
         mu_RelIso_range[0] = 0.0;
         mu_RelIso_range[1] = 0.15;
 	mu_Iso_invert = false;
-	mu_Eta_tight = 2.1;
+	mu_Eta_tight = 2.4;
 	mu_Eta_loose = 2.4;
 	mu_Pt_cut = 30;
 //	bool passPhoMediumID;
@@ -103,12 +104,12 @@ void Selector::filter_photons(){
 		// bool passMediumPhotonID = photonIDbit >> 1 & 1;
 		// bool passTightPhotonID  = photonIDbit >> 2 & 1;
 		Pho03ChHadIso.push_back( max(0.,tree->phoPFChIso_->at(phoInd) - phoEffArea03ChHad(eta)*tree->rho_));
-		bool passMediumPhotonID = passPhoMediumID(phoInd);
+	//	bool passMediumPhotonID = passPhoMediumID(phoInd);
 
 		bool hasPixelSeed = tree->phohasPixelSeed_->at(phoInd);
-	//	bool passMediumPhotonID = false;
+		bool passMediumPhotonID = false;
 		//implementing photon ID bit for medium cut
-	//	passMediumPhotonID = ( tree->phoIDbit_->at(phoInd) >> 1 & 1)  ;
+		passMediumPhotonID = ( tree->phoIDbit_->at(phoInd) >> 1 & 1)  ;
 		int region = 0; //barrel
 		if(TMath::Abs( eta )>1.5) region = 1; //endcap
 		bool phoPresel = (fidEtaPass(eta) &&
@@ -137,97 +138,48 @@ void Selector::filter_photons(){
 
 void Selector::filter_electrons(){
 	for(int eleInd = 0; eleInd < tree->nEle_; ++eleInd){
-//		std::cout << "start to iterate over electron number " << eleInd << " out of " << tree->nEle_ << std::endl; 
 		double eta = tree->eleSCEta_->at(eleInd);
-		//double eta = tree->eleEta_->at(eleInd);
 		double pt = tree->elePt_->at(eleInd);
-		//std::cout << " pt of the electron " << pt << std::endl;
 		double rho_zero = std::max(0.0, (double)tree->rho_);
 		Ele03RelIso.push_back( 
 			(tree->elePFChIso_->at(eleInd) + 
 			 std::max(0.0, tree->elePFNeuIso_->at(eleInd) + tree->elePFPhoIso_->at(eleInd) - rho_zero * eleEffArea03(eta))
 			) / pt );
 		
-		//bool Iso_pass = ele_RelIso_range[0] <= Ele03RelIso[eleInd] &&
-			//	Ele03RelIso[eleInd] < ele_RelIso_range[1];
-		//bool MVA_pass = ele_MVA_range[0] < tree->eleIDMVATrig_->at(eleInd) &&
-		//		tree->eleIDMVATrig_->at(eleInd) <= ele_MVA_range[1];
-		//
-	//	std::cout << "eleIDbit " << tree->eleIDbit_->at(eleInd)  << std::endl;
+		
+		
+	       bool eleSel = false;
+	       bool looseSel = false;			
+               bool cutbasedtightID = false;
+	       bool cutbasedmediumID = false;
+	       bool cutbasedlooseID = false;
+               //ID cut for electron
+               cutbasedtightID = ( tree->eleIDbit_->at(eleInd) >> 3 & 1)  ;//tight cut
+	       cutbasedmediumID = ( tree->eleIDbit_->at(eleInd) >> 2 & 1)  ;//medium cut	
+	       cutbasedlooseID = ( tree->eleIDbit_->at(eleInd) >> 1 & 1)  ;//loose cut
+	       if (fabs( eta )>1.5){	
+	       		eleSel = fabs( eta )  < ele_Eta_tight &&
+                                                pt > ele_Pt_cut && tree->eleD0_->at(eleInd) <0.10 && tree->eleDz_->at(eleInd) <0.20 ;
+			looseSel = fabs(eta) < ele_Eta_loose &&
+                                                pt > ele_PtLoose_cut && tree->eleD0_->at(eleInd) <0.10 && tree->eleDz_->at(eleInd) <0.20 ;
+			}
+	       else{
+			eleSel = fabs( eta )  < ele_Eta_tight &&
+                                                pt > ele_Pt_cut && tree->eleD0_->at(eleInd) <0.05 && tree->eleDz_->at(eleInd) <0.10 ;
+			looseSel = fabs(eta) < ele_Eta_loose && pt > ele_PtLoose_cut && tree->eleD0_->at(eleInd) < 0.05 && tree->eleDz_->at(eleInd) <0.10;
 	
-
-		
-	//	bool cutbasedID = ( tree->eleIDbit_ & 4) >> 2  ; 
-	//	std::cout << "after defining cutbasedID bool" << std::endl;			
-		
-			
-                
-		//bool Iso_MVA_pass;
-		//if(ele_Iso_MVA_invert) Iso_MVA_pass = !Iso_pass || !MVA_pass;
-		//else Iso_MVA_pass = Iso_pass && MVA_pass;
-      		//bool eleSel = fidEtaPass( eta ) &&
-		//				pt > ele_Pt_cut &&
-		//				
-		//				tree->eleEtaseedAtVtx_->at(eleInd) == 0 &&
-		//				TMath::Abs(tree->eleD0_->at(eleInd)) < ele_Dxy_cut &&
-		//				tree->eleMissHits_->at(eleInd) <= ele_MissInnHit_cut;
-		
-	//	std::cout << "len eta " << tree->eleSCEta_->size() << std::endl;
-             	//std::cout << "len eleID " << tree->eleIDbit_->size() << std::endl;
-            //    std::cout << "len mvaID " << tree->eleIDMVATrg_->size() << std::endl;
-              //  std::cout << "len mvaIDNT " << tree->eleIDMVANonTrg_->size() << std::endl;
-                //std::cout << "len pt " << tree->elePt_->size() << std::endl;
-		//if (tree->eleIDbit_->size() > 0 ){
-		//	std::cout << "what is inside eleIDbit_ actually? " << tree->eleIDbit_
-		if (tree->eleIDbit_->size() != tree->elePt_->size()){	
-			std::cout << " vectors are of different length skip to next electron " << std::endl;
-			continue;
 		}
-		
-		
-               bool cutbasedID = false;
-               //if (tree->eleIDbit_->size() == tree->elePt_->size()){
-                  //std::cout << "cutbasedID bool" << std::endl;
-  //             std::cout << " electron ID bit is " << tree->eleIDbit_->at(eleInd) << std::endl;
-  //           //tight ID cut for electron
-               cutbasedID = ( tree->eleIDbit_->at(eleInd) >> 3 & 1)  ;
-	//       if (cutbasedID ) {
-	//		std::cout << " It is passing the ID cut !! " << std::endl;
-		   //continue;
-         //        }
-                //}
-          //     std::cout << "after defining cutbasedID bool" << std::endl;
-//	       std::cout << "eta is " << fabs(eta) << std::endl;
-//	       std::cout << " electron pt is " << pt << std::endl;
-//	       std::cout << " cutbasedID pass : " << cutbasedID << std::endl;
-	       bool eleSel = fabs( eta )  < 2.4 &&
-                                                pt > ele_Pt_cut ;// && 
-                                                //cutbasedID  ;
-                                                //tree->eleEtaseedAtVtx_->at(eleInd) == 0 &&
-                                                //TMath::Abs(tree->eleD0_->at(eleInd)) < ele_Dxy_cut &&
-                                                //tree->eleMissHits_->at(eleInd) <= ele_MissInnHit_cut;
-
-
-
-
 
 	
-		bool looseSel = fabs(eta) < 2.5 && 
-						pt > ele_PtLoose_cut ;//&& 
-						//Ele03RelIso[eleInd] < ele_RelIsoLoose_cut && 
-						//tree->eleIDMVATrg_->at(eleInd) > ele_MVALoose_cut;
+	       bool passEtaEBEEGap = (fabs( eta ) < 1.4442) || (fabs( eta ) > 1.566);		
 		
-        //       std::cout << "after defining all cuts" << std::endl; 
-		
-		if( eleSel && cutbasedID ){
+	       if( eleSel && cutbasedtightID && passEtaEBEEGap){
 			Electrons.push_back(eleInd);
 		}
-		else if( looseSel ){ 
+		else if( looseSel && cutbasedlooseID && passEtaEBEEGap){ 
 			ElectronsLoose.push_back(eleInd);
 		}
-	//	std::cout << " lenght of the vector Electrons " << ElectronsLoose.size() << std::endl;
 	}
-//	std::cout << " lenght of the vector Electrons " << Electrons.size() << std::endl;
 }
 void Selector::filter_muons(){
 	for(int muInd = 0; muInd < tree->nMu_; ++muInd){
@@ -260,8 +212,8 @@ void Selector::filter_muons(){
 
 		if (mu_Iso_invert) IsoPass = !IsoPass;
 
-		bool passLoose = pt > 10.0 && TMath::Abs(eta) < 2.4 && frelIsocorr < 0.25 && isPFMuon && ( isGlobalMuon || isTrackerMuon);
-		bool passTight = pt > 30.0 && TMath::Abs(eta) < 2.1 && 
+		bool passLoose = pt > mu_PtLoose_cut && TMath::Abs(eta) < 2.4 && frelIsocorr < 0.25 && isPFMuon && ( isGlobalMuon || isTrackerMuon);
+		bool passTight = pt > mu_Pt_cut && TMath::Abs(eta) < 2.4 && 
 				frelIsocorr < 0.15 &&
 				tree->muChi2NDF_->at(muInd) < 10 &&
 				tree->muTrkLayers_->at(muInd) > 5 &&
@@ -273,9 +225,6 @@ void Selector::filter_muons(){
 		                IsoPass &&
 				isPFMuon && isGlobalMuon && isTrackerMuon;
 		
-		//bool muSel = TMath::Abs(eta) < 2.5 &&
-		//				pt > mu_PtLoose_cut &&
-		//				Mu04RelIso[muInd] < mu_RelIsoLoose_cut;
 
 		if(passTight){
 		 	Muons.push_back(muInd);
@@ -284,27 +233,12 @@ void Selector::filter_muons(){
 		 	MuonsLoose.push_back(muInd);
 		 }
 
-//		if( passTight && passLoose ){
-//			Muons.push_back(muInd);
-//		}
-//		if ( passTight && !passLoose){
-//			Muons.push_back(muInd);
-//		}
-//		if( passLoose && !passTight ){
-//			MuonsLoose.push_back(muInd);
-//		}
 	}
- //       std::cout << " lenght of the vector Muons " << Muons.size() << std::endl;	
 }
 
-// jet ID is not likely to be altered, so it is hardcoded
 void Selector::filter_jets(){
 	for(int jetInd = 0; jetInd < tree->nJet_; ++jetInd){
-//		std::cout << "starts to iterate with jet number " << jetInd << " out of " << tree->nJet_ << std::endl;
 		bool jetID_pass = false;
-//		std::cout<< "leading jet Pt " << tree->jetPt_->at(0) << std::endl;		
-//		std::cout << " length of jet Pt " << tree->jetPt_->size() << std::endl;
-//		std::cout << " length of jetID " << tree->jetPFLooseID_->size() << std::endl;
 		if ( tree->jetPt_->size() == tree->jetPFLooseID_->size() ) {
 			 jetID_pass = ( tree->jetPFLooseID_->at(jetInd) == 1) ; 
 		}
@@ -312,20 +246,12 @@ void Selector::filter_jets(){
 		bool jetPresel = TMath::Abs(tree->jetEta_->at(jetInd)) < 2.4 &&
 						 tree->jetPt_->at(jetInd) > 30.0 &&
 						 jetID_pass ;
-						// tree->AK8JetCHF_->at(jetInd) > 0 &&
-						 //tree->AK8JetNHF_->at(jetInd) < 0.99 &&
-						//tree->AK8JetCEF_->at(jetInd) < 0.99 &&
-						//tree->AK8JetNEF_->at(jetInd) < 0.99 &&
-						//tree->AK8JetNCH_->at(jetInd) > 0 &&
-						//tree->AK8Jetnconstituents_->at(jetInd) > 1;
-//		std::cout << "crosses the AK8 stuff " << std::endl;	
 		if( jetPresel){
 			Jets.push_back(jetInd);
 			if(tree->jetCSV2BJetTags_->at(jetInd) > btag_cut) bJets.push_back(jetInd);
 		}
 		
 	}
- //    std::cout << " Size of the Jets vector is : " << Jets.size() << std::endl;
 }
 
 bool Selector::fidEtaPass(double Eta){

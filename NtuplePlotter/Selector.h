@@ -61,7 +61,8 @@ public:
 	// electrons
 	double ele_Pt_cut;
 	double ele_PtLoose_cut;
-	double ele_Eta;
+	double ele_Eta_tight;
+	double ele_Eta_loose;
 	double mu_Eta_loose;
 	double mu_Eta_tight;
 	double mu_Pt_cut;
