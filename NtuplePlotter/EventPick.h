@@ -40,7 +40,8 @@ public:
 	double veto_lep_jet_dR;
 	double veto_pho_jet_dR;
 	double veto_pho_lep_dR;
-	
+	double veto_jet_lep_dR;
+	double veto_jet_pho_dR;
 	// cuts as parameters, to modify easily
 	double MET_cut;
 	bool no_trigger;

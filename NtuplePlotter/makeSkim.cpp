@@ -26,33 +26,16 @@ int main(int ac, char** av){
 //	JECvariation* JEC = new JECvariation("./Spring16_25nsV6_MC/Spring16_25nsV6", isMC);
 	std::string outDirName(av[1]);
 	// antiselection for QCD fit
-	if( outDirName.find("QCD") != std::string::npos){
-		std::cout << "muon antiselection is on" << std::endl;
-		selector->mu_RelIso_range[0] = 0.25; 
-		selector->mu_RelIso_range[1] = 1.;
-		selector->mu_Iso_invert = true;
-	}
+//	if( outDirName.find("QCD") != std::string::npos){
+//		std::cout << "muon antiselection is on" << std::endl;
+//		selector->mu_RelIso_range[0] = 0.25; 
+//		selector->mu_RelIso_range[1] = 1.;
+//		selector->mu_Iso_invert = true;
+//	}
 	
 
 	evtPick->NBjet_ge = 1;
 
-	TCanvas *c1 = new TCanvas("c1","A Simple Graph Example",1000,500);
-        c1->SetFillColor(42);
-        c1->SetGrid();
-
-        TCanvas *c2 = new TCanvas("c2","A Simple Graph Example",1000,500);
-        c2->SetFillColor(42);
-        c2->SetGrid();
-
-
-        TCanvas *c3 = new TCanvas("c3","A Simple Graph Example",1000,500);
-        c3->SetFillColor(42);
-        c3->SetGrid();
-
-        TH1F *h1 = new TH1F("leading jet pt", "jet_pt", 20, 30, 600);
-        TH1F *h2 = new TH1F("second jet pt", "jet_pt", 20, 30, 600);
-        TH1F *h3 = new TH1F("third jet pt", "jet_pt", 20, 30, 600);
-	
 	
 	TFile* outFile = TFile::Open( av[1] ,"RECREATE" );
 	TDirectory* ggDir = outFile->mkdir("ggNtuplizer","ggNtuplizer");
@@ -60,13 +43,17 @@ int main(int ac, char** av){
 	TTree* newTree = tree->chain->CloneTree(0);
 	
 	Long64_t nEntr = tree->GetEntries();
+//	std::cout << tree <<std::endl;
 	for(Long64_t entry= 0; entry < nEntr; entry++){
 		if(entry%1000 == 0) {
 			std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
 		}
+	//	std::cout << "GetEntry"<< std::endl; 	
 		tree->GetEntry(entry);
+	//	std::cout << tree << std::endl; 
+	//	std::cout << "start to select objects"<< std::endl;
 		selector->process_objects(tree);
-		
+	//	std::cout << "start to select events"<< std::endl;
 		evtPick->process_event(tree,selector);
 		if( evtPick->passSkim ){
 			newTree->Fill();

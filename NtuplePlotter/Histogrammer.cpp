@@ -26,7 +26,7 @@ Histogrammer::Histogrammer(std::string titleIn){
 
 	 //creating histograms
 	// muons
-	make_hist("mu1Pt","muon 1 Pt",28,25,305,"Muon p_{T} (GeV)","Events / 10 GeV");
+	make_hist("mu1Pt","muon 1 Pt",30,30,300,"Muon p_{T} (GeV)","Events / 10 GeV"); //change bins
 	make_hist("mu1Eta","muon 1 Eta",26,-2.6,2.6,"Muon #eta","Events / 0.2");
 	make_hist("mu1RelIso","muon 1 relative isolation",40,0,0.2,"Muon RelIso","Events / 0.01");
 	make_hist("mu2Pt","muon 2 Pt",30,0,300,"p_{T} (GeV)","Events / 10 GeV");
@@ -73,14 +73,27 @@ Histogrammer::Histogrammer(std::string titleIn){
 	make_hist("photon1PhoSCRIso","photon 1 Photon SCR Isolation",75,-5,10,"Photon PhoSCRIso","Events / 0.2 GeV");
 	make_hist("photon1PhoRandIso","photon 1 Photon Rand Isolation",125,-5,20,"Photon PhoRandIso","Events / 0.2 GeV");
 	make_hist("photon1DrElectron","dR photon 1 to closest electron",60,0,6,"#DeltaR(#gamma,e)","Events / 0.1");
-        make_hist("photon1fromlepDrMuon","dR photon 1 from lep to closest muon",50,0,5,"#DeltaR(#gamma from lep,#mu)","Events / 0.1");
-	make_hist("photon1fromWDrMuon","dR photon 1 from W to closest muon",50,0,5,"#DeltaR(#gamma from W,#mu)","Events / 0.1");
-	make_hist("photon1fromTopDrMuon","dR photon 1 from Top to closest muon",50,0,5,"#DeltaR(#gamma from Top,#mu)","Events / 0.1");
+        make_hist("genphoton1fromlepDrMuon","dR gen photon 1 from lep to closest muon",50,0,5,"#DeltaR(gen #gamma from lep,#mu)","Events / 0.1");
+	make_hist("genphoton1fromWDrMuon","dR gen photon 1 from W to closest muon",50,0,5,"#DeltaR(gen #gamma from W,#mu)","Events / 0.1");
+	make_hist("genphoton1fromTopDrMuon","dR gen photon 1 from Top to closest muon",50,0,5,"#DeltaR(gen #gamma from Top,#mu)","Events / 0.1");
+	make_hist("photon1DrMuon","dR photon 1 to closest muon",60,0,6,"#DeltaR(#gamma,#mu)","Events / 0.1");	
+	make_hist("photon1DrJet","dR photon 1 to closest jet",60,0,6,"#DeltaR(#gamma,#jet)","Events / 0.1");
+	make_hist("photon1DrbJet","dR photon 1 to closest bjet",60,0,6,"#DeltaR(#gamma,bjet)","Events / 0.1");
+
+	make_hist("genphoton1fromlepDrJet","dR gen photon 1 from lep to closest jet",100,0,3.5,"#DeltaR(gen #gamma from lep,jet)","Events / 0.1");
+	make_hist("genphoton1fromWDrJet","dR gen photon 1 from W to closest jet",100,0,3.5,"#DeltaR(gen #gamma from W,jet)","Events / 0.1");
+	make_hist("genphoton1fromTopDrJet","dR gen photon 1 from Top to closest jet",100,0,3.5,"#DeltaR(gen #gamma from Top,jet)","Events / 0.1");
+	make_hist("genphoton1fromlepDrBJet","dR gen photon 1 from lep to closest Bjet",60,0,6,"#DeltaR(gen #gamma from lep,Bjet)","Events / 0.1");
+        make_hist("genphoton1fromWDrBJet","dR gen photon 1 from W to closest Bjet",60,0,6,"#DeltaR(gen #gamma from W,Bjet)","Events / 0.1");
+        make_hist("genphoton1fromTopDrBJet","dR gen photon 1 from Top to closest Bjet",60,0,6,"#DeltaR(gen #gamma from Top,Bjet)","Events / 0.1");
 	
-	make_hist("photon1fromlepDrJet","dR photon 1 from lep to closest jet",100,0,3.5,"#DeltaR(#gamma from lep,jet)","Events / 0.1");
-	make_hist("photon1fromWDrJet","dR photon 1 from W to closest jet",100,0,3.5,"#DeltaR(#gamma from W,jet)","Events / 0.1");
-	make_hist("photon1fromTopDrJet","dR photon 1 from Top to closest jet",100,0,3.5,"#DeltaR(#gamma from Top,jet)","Events / 0.1");
-	make_hist("photon1fromlepDrBJet","dR photon 1 from lep to closest Bjet",60,0,6,"#DeltaR(#gamma from lep,Bjet)","Events / 0.1");
+	make_hist("photon1fromlepDrMuon","dR photon 1 from lep to closest muon",50,0,5,"#DeltaR(#gamma from lep,#mu)","Events / 0.1");
+        make_hist("photon1fromWDrMuon","dR photon 1 from W to closest muon",50,0,5,"#DeltaR(#gamma from W,#mu)","Events / 0.1");
+        make_hist("photon1fromTopDrMuon","dR photon 1 from Top to closest muon",50,0,5,"#DeltaR(#gamma from Top,#mu)","Events / 0.1");
+        make_hist("photon1fromlepDrJet","dR photon 1 from lep to closest jet",100,0,3.5,"#DeltaR(#gamma from lep,jet)","Events / 0.1");
+        make_hist("photon1fromWDrJet","dR photon 1 from W to closest jet",100,0,3.5,"#DeltaR(#gamma from W,jet)","Events / 0.1");
+        make_hist("photon1fromTopDrJet","dR photon 1 from Top to closest jet",100,0,3.5,"#DeltaR(#gamma from Top,jet)","Events / 0.1");
+        make_hist("photon1fromlepDrBJet","dR photon 1 from lep to closest Bjet",60,0,6,"#DeltaR(#gamma from lep,Bjet)","Events / 0.1");
         make_hist("photon1fromWDrBJet","dR photon 1 from W to closest Bjet",60,0,6,"#DeltaR(#gamma from W,Bjet)","Events / 0.1");
         make_hist("photon1fromTopDrBJet","dR photon 1 from Top to closest Bjet",60,0,6,"#DeltaR(#gamma from Top,Bjet)","Events / 0.1");
 
@@ -173,14 +186,9 @@ Histogrammer::Histogrammer(std::string titleIn){
 }
 
 void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree, double weight){
-	// sanity check: PU weight
 	hists["PUweight"]->Fill(weight);
-	//std::cout << "MET is" << tree->pfMET_ <<std::endl;
-       // std::cout <<" weight is"<< weight << std::endl;
 
         hists["MET"]->Fill( tree->pfMET_, weight );
-	// 2d photon candidate histograms
-	//std::cout << "here0" << std::endl;
 //	if(selEvent->PhotonsPresel.size()>0){
 //		int candArrInd = -1;
 //		int candInd = -1;
@@ -479,134 +487,68 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		hists["photon1Et"]->Fill( tree->phoEt_->at(ind), weight );
 		hists["photon1Eta"]->Fill( tree->phoEta_->at(ind), weight );
 		hists["photon1SigmaIEtaIEta"]->Fill( tree->phoSigmaIEtaIEtaFull5x5_->at(ind), weight );
-//		hists["photon1IsConv"]->Fill( tree->phoSeedBCE_->at(ind), weight );
-		
-		hists["photon1ChHadIso"]->Fill( selector->Pho03ChHadIso[ind], weight );
 		hists["photon1hasPixelSeed"]->Fill(tree->phohasPixelSeed_->at(ind), weight);
-		hists["photon1PFChIso"]->Fill(tree->phoPFChIso_->at(ind), weight);
-		hists["photon1PFPhoIso"]->Fill(tree->phoPFPhoIso_->at(ind), weight);
-		hists["photon1PFNeuIso"]->Fill(tree->phoPFNeuIso_->at(ind), weight);
-//		hists["photon1ChHadSCRIso"]->Fill( selector->Pho03ChHadSCRIso[ind], weight );
-//		hists["photon1ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-//		double phoEt = tree->phoEt_->at(ind);
-//		if(phoEt>=25 && phoEt<35){
-//			hists["photon1_25_35_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-//		}
-//		if(phoEt>=35 && phoEt<45){
-//			hists["photon1_35_45_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-//		}
-//		if(phoEt>=45 && phoEt<60){
-//			hists["photon1_45_60_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-//		}
-//		if(phoEt>=60){
-//			hists["photon1_60_up_ChHadRandIso"]->Fill( selector->Pho03RandChHadIso[ind], weight );
-//		}
-//
-//		hists["photon1NeuHadIso"]->Fill( selector->Pho03NeuHadIso[ind], weight );
-//		
-//		hists["photon1PhoIso"]->Fill( selector->Pho03PhoIso[ind], weight );
-//		hists["photon1PhoSCRIso"]->Fill( selector->Pho03PhoSCRIso[ind], weight );
-//		hists["photon1PhoRandIso"]->Fill( selector->Pho03RandPhoIso[ind], weight );
+		hists["photon1PFChIso"]->Fill(selector->Pho03ChHadIso[ind],weight);
+		hists["photon1PFPhoIso"]->Fill(selector->Pho03NeuHadIso[ind],weight);
+		hists["photon1PFNeuIso"]->Fill(selector->Pho03PhoIso[ind],weight);
 		
 		hists["photon1HoverE"]->Fill( tree->phoHoverE_->at(ind), weight );
 		
-//		hists["photon1DrMuon"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
 
-        	hists["photon1DrElectron"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Electrons, tree->eleSCEta_, tree->elePhi_), weight );
-//		hists["photon1DrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
-		
 		for (int mcI =0; mcI < tree->nMC_; ++mcI){
 			 if (fabs(tree->mcPID->at(mcI) == 22)){
-                                if (tree->mcMomPID->at(mcI) == 11 || tree->mcMomPID->at(mcI) == -11 ||  tree->mcMomPID->at(mcI) == 12 ||  tree->mcMomPID->at(mcI) == -12 ||  tree->mcMomPID->at(mcI) == 13 ||  tree->mcMomPID->at(mcI) == -13 ) {
-                                        hists["photon1fromlepDrMuon"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
-                                        hists["photon1fromlepDrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
-					for(int jetInd = 0; jetInd < tree->nJet_; ++jetInd){
-
-					if (tree->jetCSV2BJetTags_->at(jetInd)){
-						 hists["photon1fromlepDrBJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
+			     if (fabs(minDr(tree->mcEta->at(mcI), tree->mcEta->at(mcI), selEvent->Photons, tree->phoEta_, tree->phoPhi_))>0.1) continue;
+                                if (tree->mcMomPID->at(mcI) == 11 || tree->mcMomPID->at(mcI) == -11 ||  tree->mcMomPID->at(mcI) == 15 ||  tree->mcMomPID->at(mcI) == -15 ||  tree->mcMomPID->at(mcI) == 13 ||  tree->mcMomPID->at(mcI) == -13 ) {
+					hists["photon1fromlepDrMuon"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
 					
+					hists["genphoton1fromlepDrMuon"]->Fill( minDr(tree->mcEta->at(mcI), tree->mcEta->at(mcI), selEvent->Muons, tree->muEta_, tree->muPhi_), weight);
+					
+                                        hists["genphoton1fromlepDrJet"]->Fill( minDr(tree->mcEta->at(mcI), tree->mcEta->at(mcI), selEvent->Jets, tree->jetEta_, tree->jetPhi_), weight);
+					hists["photon1fromlepDrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Jets, tree->jetEta_, tree->jetPhi_), weight );
 					}
-				}	
 
-                                }
+                                
                                 else if (tree->mcMomPID->at(mcI) == 6 || tree->mcMomPID->at(mcI) == -6 ){
-                                        hists["photon1fromTopDrMuon"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
-                                        hists["photon1fromTopDrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Jets, tree->jetEta_, tree->jetPhi_), weight );
-					for(int jetInd = 0; jetInd < tree->nJet_; ++jetInd){
+				             	
+                                       hists["genphoton1fromTopDrMuon"]->Fill( minDr(tree->mcEta->at(mcI), tree->mcPhi->at(mcI), selEvent->Muons, tree->muEta_, tree->muPhi_),weight );
+				       hists["photon1fromTopDrMuon"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
+		
+				       hists["photon1fromTopDrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Jets, tree->jetEta_, tree->jetPhi_), weight );
+                                        
 
-					if (tree->jetCSV2BJetTags_->at(jetInd)){
-                                                 hists["photon1fromTopDrBJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
-					}
-					}
-	
+                                       hists["genphoton1fromTopDrJet"]->Fill( minDr(tree->mcEta->at(mcI), tree->mcPhi->at(mcI), selEvent->Jets, tree->jetEta_, tree->jetPhi_),weight );
+                                       }
+
 
 								
 		
-                                }
+                                
                                 else if (tree->mcMomPID->at(mcI) == 24 || tree->mcMomPID->at(mcI) == -24 ){
-                                        hists["photon1fromWDrMuon"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
-                                        hists["photon1fromWDrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Jets, tree->jetEta_, tree->jetPhi_), weight );
-					for(int jetInd = 0; jetInd < tree->nJet_; ++jetInd){ 
-					if (tree->jetCSV2BJetTags_->at(jetInd)){
-                                                 hists["photon1fromWDrBJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selector->Jets, tree->jetEta_, tree->jetPhi_), weight );
-                                        }
-				}	
-                                }
+                                        hists["genphoton1fromWDrMuon"]->Fill( minDr(tree->mcEta->at(mcI), tree->mcPhi->at(mcI), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
+					hists["photon1fromWDrMuon"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Muons, tree->muEta_, tree->muPhi_), weight );
+                
+
+
+                                        hists["genphoton1fromWDrJet"]->Fill( minDr(tree->mcEta->at(mcI), tree->mcPhi->at(mcI), selEvent->Jets, tree->jetEta_, tree->jetPhi_), weight );
+					hists["photon1fromWDrJet"]->Fill( minDr(tree->phoEta_->at(ind), tree->phoPhi_->at(ind), selEvent->Jets, tree->jetEta_, tree->jetPhi_), weight );
+					}
+				}
+
                      
                  }
-		}
+		
+		
 
 
 
 
-//		if( tree->isData_ == 0){
-		//	std::cout << "the PID is: " <<  TMath::Abs(tree->mcPID->at(ind)) << std::endl;
-//			if(TMath::Abs(tree->mcPID->at(ind)) == 22){
-//				std::cout << "It is a photon!!!" <<std::endl;
-//				hists["GenPhotonEt"]->Fill(tree->mcPt->at(ind),weight);
-//				hists["GenPhotonEta"]->Fill(tree->mcEta->at(ind),weight);
-//				hists["GenPhotonEta"]->Fill(tree->mcPhi->at(ind),weight);
-//				}
-//			}
-
-//			if( tree->phoGenIndex_->at(ind) >= 0 ){
-//				hists["photon1MotherID"]->Fill( fabs(tree->phoGenMomPID_->at(ind)), weight );
-				//if( TMath::Abs(tree->phoGenMomPID_->at(ind)) == 22 )
-//				hists["photon1GMotherID"]->Fill( fabs(tree->phoGenGMomPID_->at(ind)), weight );
-//			}
-//			else {
-//				hists["photon1MotherID"]->Fill( 0.0, weight );
-//			}
-			
-			// find the closest b-jet
-//			double mindr = minDrPhoB(ind, tree);
-//			int phoGen=-1;
-//			for( int mcI = 0; mcI < tree->nMC_; ++mcI){
-//				if( tree->mcIndex->at(mcI) == tree->phoGenIndex_->at(ind) ) 
-//					phoGen=mcI;
-//			}
-//			if( phoGen > 0){
-//				hists["GenPhotonEt"]->Fill(tree->mcPt->at(phoGen), weight);
-//				hists["GenPhotonMinDR"]->Fill(secondMinDr(phoGen, tree), weight);
-//			}
-//			if(mindr<999) {
-//				hists["photon1DrMCbquark"]->Fill( mindr, weight );
-//			}
-//			
-//		}
 	}
-//	std::cout<<"skipped photons category" <<std::endl;
-	//std::cout << "here4" << std::endl;
 	hists["Ht"]->Fill( calc_ht(selEvent, tree), weight );
-	//std::cout << "MET is" << tree->pfMET_ <<std::endl;
-//	std::cout <<" weight is"<< weight << std::endl;
-                //
 	hists["MET"]->Fill( tree->pfMET_, weight );
         hists["MET_low"]->Fill(tree->pfMET_,weight);
 	hists["nVtx"]->Fill( tree->nVtx_, weight );
 	hists["nJets"]->Fill( selEvent->Jets.size(), weight );
 	hists["nbJets"]->Fill(selEvent->bJets.size(),weight );
-//	std::cout << "done MET" << std::endl;
 
 	// jets
 	if(selEvent->Jets.size()>=3){

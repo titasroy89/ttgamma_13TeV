@@ -46,7 +46,8 @@ EventPick::EventPick(std::string titleIn){
 
 	// assign cut values
 	veto_jet_dR = 0.1;
-	veto_lep_jet_dR = 0.4;
+	veto_jet_lep_dR = 0.4;
+	veto_jet_pho_dR = 0.4;
 	veto_pho_jet_dR = 0.7;
 	veto_pho_lep_dR = 0.7;
 	MET_cut = 20.0;
@@ -81,11 +82,14 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 		bool goodJet = true;
 		//remove jets too close to electrons	
 		for(std::vector<int>::const_iterator eleInd = selector->Electrons.begin(); eleInd != selector->Electrons.end(); eleInd++)
-			if(dR_jet_ele(*jetInd, *eleInd) <  veto_lep_jet_dR) goodJet = false;
+			if(dR_jet_ele(*jetInd, *eleInd) <  veto_jet_lep_dR) goodJet = false;
 		//remove jets too close to muons
 		for(std::vector<int>::const_iterator muInd = selector->Muons.begin(); muInd != selector->Muons.end(); muInd++)
-			if(dR_jet_mu(*jetInd, *muInd) <  veto_lep_jet_dR) goodJet = false;
-//		
+			if(dR_jet_mu(*jetInd, *muInd) <  veto_jet_lep_dR) goodJet = false;
+//		// remove jets too close to photons
+		//for(std::vector<int>::const_iterator phoVi = selector->PhotonsPresel.begin(); phoVi != selector->PhotonsPresel.end(); phoVi++)
+                  //      if(dR_jet_pho(*jetInd, *phoVi) <  veto_jet_pho_dR) goodJet = false;
+			
 	//	for(std::vector<int>::const_iterator eleInd = selector->ElectronsLoose.begin(); eleInd != selector->ElectronsLoose.end(); eleInd++)
 	//		if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
 	//	for(std::vector<int>::const_iterator eleInd = selector->ElectronsMedium.begin(); eleInd != selector->ElectronsMedium.end(); eleInd++)
@@ -180,7 +184,7 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	cutFlowWeight->Fill(0.0,weight);
 	passPreSel = false;
 	passSkim = true;
-	//passAll = false;
+	//std::cout <<tree->HLTEleMuX<<std::endl;
 	if( passSkim && Pass_trigger) {cutFlow->Fill(1); cutFlowWeight->Fill(1,weight);passSkim = true;}
 	else passSkim = false;
 	if( passSkim && tree->isPVGood_) {cutFlow->Fill(2); cutFlowWeight->Fill(2,weight);}

@@ -1,6 +1,5 @@
 #include<iostream>
 #include<string>
-
 #include"EventTree.h"
 #include"Selector.h"
 #include"EventPick.h"
@@ -9,17 +8,6 @@
 #include"PUReweight.h"
 
 #include"TRandom3.h"
-// temporary solution
-//#include"JECvariation.h"
-//#include"JECvariationNew.cpp"
-
-//#include"/uscms_data/d2/dnoonan/LHAPDF/local/include/LHAPDF/LHAPDF.h"
-
-
-//#include"LHAPDF/LHAPDF.h"
-
-// using namespace LHAPDF;
-// using namespace std;
 
 int jecvar012_g = 1; // 0:down, 1:norm, 2:up
 int jervar012_g = 1; // 0:down, 1:norm, 2:up
@@ -35,12 +23,11 @@ int top_sample_g = 0; // 0: no ttbar, 1: ttjets_1l, 2: ttjets_2l, 3: ttjets_had
 
 int pdfweight_g = 1; //0:down, 1:norm, 2: up
 
-//vector<LHAPDF::PDF*> pdfs;
-
-double topPtWeight(EventTree* tree);
-double getMuEff(EventTree* tree, EventPick* evt );
+#include "BTagCalibrationStandalone.h"
+double topPtWeight(EventTree* tree); 
+double getMuEff(EventTree* tree, EventPick* evt, int systlevel );
 double getEleEff(EventTree* tree, EventPick* evt);
-double getBtagSF(EventTree* tree, EventPick* evt);
+double getBtagSF(EventTree* tree, EventPick* evt,string sysType, BTagCalibrationReader reader);
 void doMuSmearing(EventTree* tree);
 void doPhoSmearing(EventTree* tree);
 void doJER(EventTree* tree);
@@ -48,7 +35,6 @@ double JERcorrection(double eta);
 bool overlapWHIZARD(EventTree* tree);
 bool overlapMadGraph(EventTree* tree);
 bool overlapISRFSR(EventTree* tree);
-//double pdfWeight(EventTree* tree, int pdfNum);
 double WjetsBRreweight(EventTree* tree);
 
 int main(int ac, char** av){
@@ -118,6 +104,16 @@ int main(int ac, char** av){
 	// create event selectors here
 	EventPick* evtPickLoose = new EventPick("LoosePhotonID");
 	EventPick* evtPickLooseNoMET = new EventPick("LoosePhotonID");
+
+	BTagCalibration calib("csvv2", "CSVv2_Moriond17_B_H.csv");
+
+	BTagCalibrationReader reader(BTagEntry::OP_MEDIUM,"central", {"up", "down"});	
+
+	reader.load(calib, BTagEntry::FLAV_B, "comb");               // measurement type
+
+	reader.load(calib, BTagEntry::FLAV_C, "comb");               // measurement type
+
+	reader.load(calib, BTagEntry::FLAV_UDSG, "comb");               // measurement type
 
 	std::cout << av[2] << std::endl;
 	if(std::string(av[2]).find("QCD") != std::string::npos){
@@ -219,34 +215,19 @@ int main(int ac, char** av){
 	}
 	
 
-	//	LHAPDF::PDFSet set("CT10nnlo");
-	//	pdfs = set.mkPDFs();
 
-	// initPDFSet(1, "cteq66.LHgrid");
-//	TTree* newTree_pre = tree->chain->CloneTree(0);
 	Long64_t nEntr = tree->GetEntries();
 	for(Long64_t entry=0; entry<nEntr; entry++){
 		if(entry%10000 == 0) std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
-		//if(entry==5000000) break;
 		tree->GetEntry(entry);
-	//	std::cout<<"tree"<< tree <<std::endl;
-	//	isMC = false;
+	//	std::cout << "entry is " << entry << std::endl;
+	//	std::cout << "tree is " << tree <<std::endl;
 		isMC = !(tree->isData_);
-	//	std::cout<< "apply PU reweighting"<<std::endl;	
-		//apply PU reweighting
 		if(isMC) PUweight = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
-	//	std::cout << "PUweight: " << PUweight <<std::endl;
 		
 		if(isMC && !isQCD){
-			// JEC
-		//	jecvar->applyJEC(tree, jecvar012_g); // 0:down, 1:norm, 2:up
-			//JER smearing 
 			doJER(tree);
-		//	std::cout << "doing JER"<<std::endl;		
-			// photon energy smearing
 			doPhoSmearing(tree);
-			// electron energy smearing
-			//doEleSmearing(tree);
 			doMuSmearing(tree);
 		}
 		 //do overlap removal here: overlapMadGraph(tree) or overlapWHIZARD(tree)
@@ -263,142 +244,115 @@ int main(int ac, char** av){
 		  }
 	}
 		    
-		// if( isMC && doOverlapRemoval && overlapMadGraph(tree)){
-		// 	//std::cout << "overlap!" << std::endl;
-		// 	// overlapping part, not needed
-		// 	continue;
-		// }
          	 if( isMC && doOverlapRemovalWZ && overlapISRFSR(tree)){
 	//		continue;
 		}
-		// this part cuts MadGraph ttgamma phase space to match WHIZARD, for comparison
-		//if( isMC && MGttgamma && doOverlapRemoval && !overlapWHIZARD(tree)){
-		//	// do not need MadGraph ttgamma events that are outside WHIZARD phase space
-		//	continue;
-		//}		
 
 		selectorLoose->process_objects(tree);
-		//selectorTight->process_objects(tree);
 		evtPickLoose->process_event(tree, selectorLoose, PUweight);
 		evtPickLooseNoMET->process_event(tree, selectorLoose, PUweight);
-		//evtPickLoose4j->process_event(tree, selectorLoose, PUweight);
-		//evtPickTight->process_event(tree, selectorTight, PUweight);
 		double evtWeight = PUweight;
+	//	std::cout << "getting BTag and MuSF "<< std::endl;
 		if(isMC && !isQCD){
-			//electron trigger efficiency reweighting
-			evtWeight *= getMuEff(tree, evtPickLoose);
+			//Muon trigger efficiency reweighting
+			evtWeight *= getMuEff(tree, evtPickLoose, 1);
 			// b-tag SF reweighting
-			evtWeight *= getBtagSF(tree, evtPickLoose);
+			evtWeight *= getBtagSF(tree, evtPickLoose,"central", reader);
 		}
-		//double evtWeight = PUweight;
-		if(isMC){
-			//electron trigger efficiency reweighting
-		//	evtWeight *= getEleEff(tree, evtPickLoose);
-			// b-tag SF reweighting
-			evtWeight *= getBtagSF(tree, evtPickLoose);
-		}
+	//	std::cout << "after BTag"<< std::endl;
 		// top pt reweighting
-		if(isMC){
-			evtWeight *= topPtWeight(tree);
-		}
+//		if(isMC){
+//			evtWeight *= topPtWeight(tree);
+//		}
 
-		//if(isMC && pdfweight_g!=1){
-		  
-		   //double tempWeight = pdfWeight(tree,pdfNum);
-		  // evtWeight *= tempWeight;
-		//   // cout << tempWeight << endl;
-		//}
 
-	//	if(isMC && MGttgamma){
-	//	 double tempWeight = WjetsBRreweight(tree);
-	//	 evtWeight *= tempWeight;
-	//	}
-
-		// fill the histograms
-		//std::cout << "fill, weight " << evtWeight << "  passPresel " << evtPickLoose->passPreSel << std::endl;
-	//	if (evtPickLoose->passPreSel){
-				//newTree_pre->Fill();
-	//	double evtWeight = 1.0;
-		//std::cout << "PUweight" << evtWeight <<std::endl;
-	///	double PUweight = 1.0;		
-	//	std::cout<<"Stage before filling histogarams"<<std::endl;
+//		if(isMC && MGttgamma){
+//		 double tempWeight = WjetsBRreweight(tree);
+//		 evtWeight *= tempWeight;
+/////		}
+	//	std::cout << "start filling histo"<< std::endl;
 		looseCollectNoMET->fill_histograms(selectorLoose, evtPickLooseNoMET, tree, isMC, evtWeight);
-	//	std::cout<<"Stage after NoMET"<<std::endl; 
 		looseCollect->fill_histograms(selectorLoose, evtPickLoose, tree, isMC, evtWeight);
-	//	}
-	//	std::cout<<"Stage after filling histogarams"<<std::endl;
-
-		//fourjCollect->fill_histograms(selectorLoose, evtPickLoose4j, tree, isMC, evtWweight);
 	}
 	
 	looseCollect->write_histograms(evtPickLoose, isMC, av[2]);
 	looseCollectNoMET->write_histograms(evtPickLooseNoMET, isMC, av[2]);
-
-	//fourjCollect->write_histograms(evtPickLoose4j, isMC, av[2]);
-
-//	std::cout << "Average PU weight " << PUweighter->getAvgWeight() << std::endl;
+	//std::cout << "after filling histo"<< std::endl;
 	evtPickLoose->print_cutflow();
 	
 	delete tree;
 	return 0;
 }
 
-//newTree_pre->Write();
-double muTrigSF(double pt, double eta){
-	static double trigEffSF_PtEta[3][3] = { {0.984, 0.967, 0.991}, {0.999, 0.983, 1.018}, {0.999, 0.988, 0.977} };
-	static double trigEffSFerr_PtEta[3][3] = { {0.002, 0.002, 0.007}, {0.003, 0.002, 0.012}, {0.002, 0.003, 0.015} };
-	
-	int etaRegion = 0;
-	if( eta > 0.80) etaRegion++;
-	if( eta > 1.48) etaRegion++;
+//https://twiki.cern.ch/twiki/bin/view/CMS/MuonWorkInProgressAndPagResults
+double muTrigSF[7][4][3]={{{0.979945,0.980956,0.981966}, {0.954675,0.956924,0.959174}, {0.980779,0.982631,0.984484}, {0.903027,0.906908,0.910789}, },
+  			      	{ {0.984395,0.984724,0.985052}, {0.965922,0.966496,0.967069}, {0.994957,0.995577,0.996197}, {0.943534,0.944924,0.946313}, },
+			     	{ {0.985344,0.985599,0.985853}, {0.968089,0.968468,0.968846}, {0.999035,0.999465,0.999894}, {0.956917,0.958023,0.959128}, },
+			     	{ {0.985190,0.985745,0.986299}, {0.968046,0.968827,0.969609}, {0.998521,0.999418,1.000314}, {0.958654,0.961000,0.963346}, },
+			     	{ {0.983833,0.984741,0.985649}, {0.964031,0.965445,0.966858}, {0.997885,0.999318,1.000752}, {0.949569,0.953347,0.957124}, },
+			     	{ {0.971605,0.976515,0.981424}, {0.941747,0.947421,0.953094}, {0.997657,1.005482,1.013308}, {0.946883,0.977561,1.008239}, },
+			     	{ {0.975026,0.984242,0.993459}, {0.934809,0.952092,0.969374}, {0.959526,0.984215,1.008903}, {0.751047,0.919715,1.088383}, } };
 
-	int ptRegion = 0;
-	if( pt > 40 ) ptRegion++;
-	if( pt > 50 ) ptRegion++;
 
-	if(mueff012_g == 1) return trigEffSF_PtEta[ptRegion][etaRegion];
-	if(mueff012_g == 0) return trigEffSF_PtEta[ptRegion][etaRegion] - trigEffSFerr_PtEta[ptRegion][etaRegion];
-	if(mueff012_g == 2) return trigEffSF_PtEta[ptRegion][etaRegion] + trigEffSFerr_PtEta[ptRegion][etaRegion];
-	return 1.0;	
-}
+double muIdIsoSF[6][4][3] = {{{0.982175,0.984434,0.986693}, {0.991846,0.995412,0.998978}, {0.990022,0.991702,0.993382}, {0.981885,0.984787,0.987688}, },
+					{ {0.992057,0.993262,0.994468}, {0.998298,1.000365,1.002432}, {0.995093,0.996092,0.997091}, {0.990776,0.992530,0.994284}, },
+					{ {0.993362,0.993752,0.994143}, {0.998745,0.999447,1.000149}, {0.997677,0.998057,0.998437}, {0.995883,0.996573,0.997263}, },
+					{ {0.995116,0.995289,0.995461}, {0.997599,0.997752,0.997904}, {0.997983,0.998067,0.998150}, {0.998147,0.998495,0.998844}, },
+					{ {0.996429,0.996797,0.997165}, {0.998515,0.999121,0.999726}, {0.998046,0.998386,0.998725}, {0.997953,0.998730,0.999506}, },
+					{ {0.998338,0.998806,0.999274}, {0.998320,0.999103,0.999885}, {0.998777,0.999235,0.999693}, {1.000398,1.001523,1.002648}, } };
 
-double muIDSF(double pt, double eta){
-	static double idEffSF_PtEta[3][3] = { {0.950, 0.957, 0.922}, {0.966, 0.961, 0.941}, {0.961, 0.963, 0.971} };
-	static double idEffSFerr_PtEta[3][3] = { {0.003, 0.002, 0.004}, {0.001, 0.002, 0.007}, {0.002, 0.003, 0.0} };
 
-	int etaRegion = 0;
-	if( eta > 0.80) etaRegion++;
-	if( eta > 1.48) etaRegion++;
 
-	int ptRegion = 0;
-	if( pt > 40 ) ptRegion++;
-	if( pt > 50 ) ptRegion++;
+double muTrackingSF[12][3] = { {0.996924,0.996996,0.997069},
+								{0.997629,0.997712,0.997794},
+								{0.998007,0.998078,0.998149},
+								{0.997729,0.997804,0.997878},
+								{0.997863,0.997971,0.998077},
+								{0.996962,0.997148,0.997334},
+								{0.996047,0.996227,0.996409},
+								{0.995308,0.995479,0.995649},
+								{0.995606,0.995781,0.995958},
+								{0.993657,0.993892,0.994127},
+								{0.992617,0.992943,0.993273},
+								{0.986461,0.987313,0.988173}};
 
-	if(mueff012_g == 1) return idEffSF_PtEta[ptRegion][etaRegion];
-	if(mueff012_g == 0) return idEffSF_PtEta[ptRegion][etaRegion] - idEffSFerr_PtEta[ptRegion][etaRegion];
-	if(mueff012_g == 2) return idEffSF_PtEta[ptRegion][etaRegion] + idEffSFerr_PtEta[ptRegion][etaRegion];	
-	return 1.0;
-}
+
+
 
 // AN2012_438_v10 page9
-double getMuEff(EventTree* tree, EventPick* evt){
+double getMuEff(EventTree* tree, EventPick* evt, int systLevel){
 	if( evt->Muons.size() < 1 ) return 1.0; // no electrons, no weight
 	int muInd = evt->Muons[0];
 	double pt = tree->muPt_->at(muInd);
 	double eta = TMath::Abs(tree->muEta_->at(muInd));
 	
-	double trigSF = muTrigSF(pt, eta);
-	double idSF = muIDSF(pt, eta);
-	if(evt->Muons.size() == 1) return trigSF*idSF;
-	if(evt->Muons.size() == 2){
-		int muInd2 = evt->Muons[1];	
-		double pt2 = tree->muPt_->at(muInd2);
-		double eta2 = TMath::Abs(tree->muEta_->at(muInd2));
-		double trigSF2 = muTrigSF(pt2, eta2);
-		double idSF2 = muIDSF(pt2, eta2);
-		return ( 1.0 - (1.0-trigSF)*(1.0-trigSF2) )*idSF*idSF2;
-	}
-	return 1.0;
+	int muTrackEtaRegion = int(eta/0.2);
+	int muEtaRegion = -1;
+	if (eta < 0.9) {muEtaRegion = 0;}
+	else if (eta < 1.2) {muEtaRegion = 1;}
+	else if (eta < 2.1) {muEtaRegion = 2;}
+	else {muEtaRegion = 3;}
+
+	int muPtRegion_Trigger = -1;
+	if (pt < 30){muPtRegion_Trigger = 0;}
+	else if (pt < 40){muPtRegion_Trigger = 1;}
+	else if (pt < 50){muPtRegion_Trigger = 2;}
+	else if (pt < 60){muPtRegion_Trigger = 3;}
+	else if (pt < 120){muPtRegion_Trigger = 4;}
+	else if (pt < 200){muPtRegion_Trigger = 5;}
+	else {muPtRegion_Trigger = 6;}
+
+	int muPtRegion_IDIso = -1;
+	if (pt < 25){muPtRegion_IDIso = 0;}
+	else if (pt < 30){muPtRegion_IDIso = 1;}
+	else if (pt < 40){muPtRegion_IDIso = 2;}
+	else if (pt < 50){muPtRegion_IDIso = 3;}
+	else if (pt < 60){muPtRegion_IDIso = 4;}
+	else {muPtRegion_IDIso = 5;}
+	
+	double muEffSF = muTrackingSF[muTrackEtaRegion][systLevel] * muIdIsoSF[muPtRegion_IDIso][muEtaRegion][systLevel] * muTrigSF[muPtRegion_Trigger][muEtaRegion][systLevel];
+	
+	return muEffSF;
 }
 
 
@@ -478,18 +432,9 @@ double topPtWeight(EventTree* tree){
 	if(toppt > 0.001 && antitoppt > 0.001)
 		weight = sqrt( SFtop(toppt) * SFtop(antitoppt) );
 	
-	// if(toppt012_g == 1) return weight;
-	// if(toppt012_g == 0) return 1.0;
-	// if(toppt012_g == 2) return weight*weight;
-
-	//This has been changed, the new prescription is to not use the top pt reweighting, and the syst is using it
-	if(toppt012_g == 1) return 1.0;
-	if(toppt012_g == 0) return weight;
-	if(toppt012_g == 2) return weight;
 
 
-	// should not get here
-	return 1.0;
+	return  weight;
 }
 
 void doMuSmearing(EventTree* tree){
@@ -574,79 +519,8 @@ double JERcorrection(double JetEta){
 	return 1.0;
 }
 
-// https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods
-// https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_NOttbar_payload_EPS13.txt
-// weight for >=1 btag :  1 - prod(1-SFi) over all b-tagged jets
 
-double lfJetCSVM(double x, double jeteta){
-	if(jeteta < 0.8) return ((1.07541+(0.00231827*x))+(-4.74249e-06*(x*x)))+(2.70862e-09*(x*(x*x)));
-	if(jeteta < 1.6) return ((1.05613+(0.00114031*x))+(-2.56066e-06*(x*x)))+(1.67792e-09*(x*(x*x)));
-	return ((1.05625+(0.000487231*x))+(-2.22792e-06*(x*x)))+(1.70262e-09*(x*(x*x))); 
-}
-
-double lfJetCSVMmin(double x, double jeteta){
-	if(jeteta < 0.8) return ((0.964527+(0.00149055*x))+(-2.78338e-06*(x*x)))+(1.51771e-09*(x*(x*x)));
-	if(jeteta < 1.6) return ((0.946051+(0.000759584*x))+(-1.52491e-06*(x*x)))+(9.65822e-10*(x*(x*x)));
-	return ((0.956736+(0.000280197*x))+(-1.42739e-06*(x*x)))+(1.0085e-09*(x*(x*x)));
-}
-
-double lfJetCSVMmax(double x, double jeteta){
-	if(jeteta < 0.8) return ((1.18638+(0.00314148*x))+(-6.68993e-06*(x*x)))+(3.89288e-09*(x*(x*x)));
-	if(jeteta < 1.6) return ((1.16624+(0.00151884*x))+(-3.59041e-06*(x*x)))+(2.38681e-09*(x*(x*x)));
-	return ((1.15575+(0.000693344*x))+(-3.02661e-06*(x*x)))+(2.39752e-09*(x*(x*x)));
-}
-
-double lfJetSF(double jetpt, double jeteta){
-	bool pthigh = false;
-	if(jeteta < 1.6 && jetpt > 1000.0) {jetpt = 1000.0; pthigh = true;}
-	if(jeteta >= 1.6 && jetpt > 650.0) {jetpt = 650.0; pthigh = true;}
-	
-	if(!pthigh){
-		if( btagvar012_g == 1 ) return lfJetCSVM(jetpt, jeteta);
-		if( btagvar012_g == 0 ) return lfJetCSVMmin(jetpt, jeteta);
-		if( btagvar012_g == 2 ) return lfJetCSVMmax(jetpt, jeteta);
-	} else{ // in case jetpt is too high:
-		if( btagvar012_g == 1 ) return lfJetCSVM(jetpt, jeteta);
-		if( btagvar012_g == 0 ) return 2.0*lfJetCSVMmin(jetpt, jeteta) - lfJetCSVM(jetpt, jeteta);
-		if( btagvar012_g == 2 ) return 2.0*lfJetCSVMmax(jetpt, jeteta) - lfJetCSVM(jetpt, jeteta);
-	}
-	std::cout << "should not be here!" << std::endl;
-	return 1.0;
-}
-
-double bSFerr(double jetpt){
-	//Tagger: CSVM within 20 < pt < 800 GeV, abs(eta) < 2.4, x = pt
-	static double ptmax[16] = {30, 40, 50, 60, 
-				70, 80, 100, 120, 
-				160, 210, 260, 320, 
-				400, 500, 600, 800};
-	static double SFb_error[17] = {0.0415694, 0.023429, 0.0261074, 0.0239251, 
-				0.0232416, 0.0197251, 0.0217319, 0.0198108, 
-				0.0193, 0.0276144, 0.020583, 0.026915, 
-				0.0312739, 0.0415054, 0.074056, 0.0598311, 
-				0.0598311*2};
-
-	int ptInd = 0;
-	if( btagvar012_g == 1) return 0.0;
-
-	for(int ipt=0; ipt<16; ipt++) 
-		if(jetpt > ptmax[ipt]) ptInd++;
-	
-	if( btagvar012_g == 0 ) return -1.0*SFb_error[ptInd];
-	if( btagvar012_g == 2 ) return  SFb_error[ptInd];
-
-	return 0.0;
-}
-
-double bJetSF(double jetpt){
-	return (0.939158+(0.000158694*jetpt))+(-2.53962e-07*(jetpt*jetpt)) + bSFerr(jetpt);
-}
-
-double cjetSF(double jetpt){
-	return (0.939158+(0.000158694*jetpt))+(-2.53962e-07*(jetpt*jetpt)) + 2.0*bSFerr(jetpt);
-}
-
-double getBtagSF(EventTree* tree, EventPick* evt){
+double getBtagSF(EventTree* tree, EventPick* evt,string sysType, BTagCalibrationReader reader){
 	
 	double prod = 1.0;
 	double jetpt;
@@ -661,59 +535,14 @@ double getBtagSF(EventTree* tree, EventPick* evt){
 		jeteta = fabs(tree->jetEta_->at(*bjetInd));
 		jetflavor = abs(tree->jetPartonID_->at(*bjetInd));
 		
-		if(jetflavor == 5) SFb = bJetSF(jetpt);
-		else if( jetflavor == 4) SFb = cjetSF(jetpt);
-		else SFb = lfJetSF(jetpt, jeteta);
+		if(jetflavor == 5) SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_B, jeteta, jetpt); 
+		else if( jetflavor == 4) SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_C, jeteta, jetpt); 
+		else SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_UDSG, jeteta, jetpt); 
 	
 		prod *= 1.0 - SFb;
 	}
 	return 1.0 - prod;
 }
-
-// double pdfWeight(EventTree* tree, int pdfNum){
-//   if( pdfweight_g==1){ return 1.;  } 
-//   if (pdfNum >= pdfs.size() || pdfNum < 1){return 1.;}
-
-//   double id1 = tree->pdf_[0];
-//   double id2 = tree->pdf_[1];
-//   double x1  = tree->pdf_[2];
-//   double x2  = tree->pdf_[3];
-//   double q   = tree->pdf_[6];
-
-//   double pdfweightMin = 999.;
-//   double pdfweightMax = 0.;
-
-//   double xpdf1 = pdfs[0]->xfxQ(id1, x1, q);
-//   double xpdf2 = pdfs[0]->xfxQ(id2, x2, q);
-
-//   // LHAPDF::usePDFMember(1,0);
-//   // double xpdf1 = LHAPDF::xfx(1, x1, q, id1);
-//   // double xpdf2 = LHAPDF::xfx(1, x2, q, id2);
-//   double w0 = xpdf1 * xpdf2;
-
-//   double xpdf1_new = pdfs[pdfNum]->xfxQ(id1, x1, q);
-//   double xpdf2_new = pdfs[pdfNum]->xfxQ(id2, x2, q);
-//   // LHAPDF::usePDFMember(1,0);
-//   // double xpdf1_new = LHAPDF::xfx(1, x1, q, id1);
-//   // double xpdf2_new = LHAPDF::xfx(1, x2, q, id2);
-//   double weight = xpdf1_new * xpdf2_new / w0;
-//   return weight;
-
-//   // for(int i=1; i < pdfs.size(); ++i){
-//   //   double xpdf1_new = pdfs[i]->xfxQ(id1, x1, q);
-//   //   double xpdf2_new = pdfs[i]->xfxQ(id2, x2, q);
-//   //   // LHAPDF::usePDFMember(1,0);
-//   //   // double xpdf1_new = LHAPDF::xfx(1, x1, q, id1);
-//   //   // double xpdf2_new = LHAPDF::xfx(1, x2, q, id2);
-//   //   double weight = xpdf1_new * xpdf2_new / w0;
-//   //   if(weight > pdfweightMax) pdfweightMax=weight;
-//   //   if(weight < pdfweightMin) pdfweightMin=weight;
-//   // }
-
-//   // if( pdfweight_g==0){ return pdfweightMin;}
-//   // if( pdfweight_g==2){ return pdfweightMax;}
-// }
-
 
 double WjetsBRreweight(EventTree* tree){
 

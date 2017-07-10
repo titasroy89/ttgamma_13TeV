@@ -1000,6 +1000,7 @@ public:
 	vector<float>* jetNNeutrals_;
 	vector<float>* jetNCharged_;
 	vector<bool>*  jetPFLooseId_;
+	vector<int>*  jetID_;
 	// b-jet regression variables
 	vector<float>* jetMt_;
 	vector<float>* jetJECUnc_;

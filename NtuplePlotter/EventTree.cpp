@@ -251,6 +251,10 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	chain->SetBranchStatus("jetEn",1);
 	chain->SetBranchAddress("jetEn", &jetEn_);
 	
+	jetID_ = new vector<int>;
+        chain->SetBranchStatus("jetID",1);
+        chain->SetBranchAddress("jetID", &jetID_);
+	
 	jetPFLooseID_ = new vector<bool>;
 	chain->SetBranchStatus("jetPFLooseId",1);
         chain->SetBranchAddress("jetPFLooseId", &jetPFLooseID_);
