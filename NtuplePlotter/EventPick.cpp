@@ -205,9 +205,9 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
         else passSkim = false;
 	if(passPreSel && Jets.size() >= Njet_ge+3) {cutFlow->Fill(10); cutFlowWeight->Fill(10,weight);}
 	else passPreSel = false;	
-        if ( passPreSel &&bJets.size() >= NBjet_ge+1 ) {cutFlow->Fill(11); cutFlowWeight->Fill(11,weight);}
+        if ( passPreSel &&bJets.size() >= NBjet_ge +1 ) {cutFlow->Fill(11); cutFlowWeight->Fill(11,weight);}
         else passPreSel = false;
-	if(passPreSel && Photons.size() >= Npho_ge) { cutFlow->Fill(12); cutFlowWeight->Fill(12,weight);passAll = true;}
+	if(passPreSel && Photons.size() >= Npho_ge) { cutFlow->Fill(12); cutFlowWeight->Fill(12,weight);passAll = true;} //change this later
 	else passAll = false ; 
 	
 	// require >=1 photon
@@ -349,10 +349,10 @@ void EventPick::print_cutflow(){
 	std::cout << "Events with >= " << Njet_ge << " jets        " << cutFlow->GetBinContent(7) << std::endl;
 	std::cout << "Events with >= " << Njet_ge+1 << " jets        " << cutFlow->GetBinContent(8) << std::endl;
  	std::cout << "Events with >= " << Njet_ge+2 << " jets     " << cutFlow->GetBinContent(9) << std::endl;
-	std::cout << "Events with >= " << NBjet_ge << " bjets     " << cutFlow->GetBinContent(10) << std::endl;
+	std::cout << "Events with >= " << NBjet_ge << " 1bjets     " << cutFlow->GetBinContent(10) << std::endl;
 	std::cout << "Events with >= " << Njet_ge+3 << " jets "<< cutFlow->GetBinContent(11) << std::endl;
-        std::cout << "Events with >= " << NBjet_ge+1 <<     " bjets "<< cutFlow->GetBinContent(12) << std::endl;
-	std::cout << "Events with >= 1 photon      " << cutFlow->GetBinContent(13) << std::endl;
+        std::cout << "Events with >= " << NBjet_ge+1 <<     " 2bjets "<< cutFlow->GetBinContent(12) << std::endl;
+	std::cout << "Events with >= 1 photon      " << cutFlow->GetBinContent(13) << std::endl; //change this later
 	std::cout << std::endl;
 }
 
@@ -369,7 +369,7 @@ void EventPick::set_cutflow_labels(TH1D* hist){
 	hist->GetXaxis()->SetBinLabel(10,">=1 btags");
 	hist->GetXaxis()->SetBinLabel(11,">=4jets");
 	hist->GetXaxis()->SetBinLabel(12,">=2 btags");
-	hist->GetXaxis()->SetBinLabel(13,">=1 Photon");
+	hist->GetXaxis()->SetBinLabel(13,">=1 Photon"); //change this later
 	hist->GetXaxis()->SetBinLabel(1,"");
 }
 

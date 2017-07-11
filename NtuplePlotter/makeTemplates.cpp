@@ -113,7 +113,7 @@ int main(int ac, char** av){
 
 	reader.load(calib, BTagEntry::FLAV_C, "comb");               // measurement type
 
-	reader.load(calib, BTagEntry::FLAV_UDSG, "comb");               // measurement type
+	reader.load(calib, BTagEntry::FLAV_UDSG, "incl");               // measurement type
 
 	std::cout << av[2] << std::endl;
 	if(std::string(av[2]).find("QCD") != std::string::npos){
@@ -258,6 +258,7 @@ int main(int ac, char** av){
 			evtWeight *= getMuEff(tree, evtPickLoose, 1);
 			// b-tag SF reweighting
 			evtWeight *= getBtagSF(tree, evtPickLoose,"central", reader);
+	//		std::cout << "After BTag:"<<  evtWeight <<std::endl;
 		}
 	//	std::cout << "after BTag"<< std::endl;
 		// top pt reweighting
@@ -521,15 +522,23 @@ double JERcorrection(double JetEta){
 
 
 double getBtagSF(EventTree* tree, EventPick* evt,string sysType, BTagCalibrationReader reader){
-	
+  //      EventPick* evtPickLoose = new EventPick("LoosePhotonID");	
 	double prod = 1.0;
 	double jetpt;
 	double jeteta;
 	int jetflavor;
 	double SFb;
-
-	if(evt->bJets.size() == 0) return 1.0;
-
+	double prod1 = 1.0;
+        double jetpt1;
+        double jeteta1;
+        int jetflavor1;
+        double SFb1;
+	double weight1=1.0;
+	double weight=1.0;
+	//std::cout <<"BTags required"<<evtPickLoose->NBjet_ge<<std::endl;
+//	if(evtPickLoose->NBjet_ge == 0) return 1.0;
+	if ( evt->NBjet_ge == 0) return 1.0; 
+	if (evt->NBjet_ge  == 1) {
 	for(std::vector<int>::const_iterator bjetInd = evt->bJets.begin(); bjetInd != evt->bJets.end(); bjetInd++){
 		jetpt = tree->jetPt_->at(*bjetInd);
 		jeteta = fabs(tree->jetEta_->at(*bjetInd));
@@ -539,9 +548,31 @@ double getBtagSF(EventTree* tree, EventPick* evt,string sysType, BTagCalibration
 		else if( jetflavor == 4) SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_C, jeteta, jetpt); 
 		else SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_UDSG, jeteta, jetpt); 
 	
-		prod *= 1.0 - SFb;
+		weight1*= 1.0 - SFb;
 	}
-	return 1.0 - prod;
+	return 1.0 - weight1;
+       }
+	if (evt->NBjet_ge >= 2) {
+		std::vector<int>::const_iterator bjetInd = evt->bJets.begin();
+		jetpt = tree->jetPt_->at(*bjetInd);
+                jeteta = fabs(tree->jetEta_->at(*bjetInd));
+                jetflavor = abs(tree->jetPartonID_->at(*bjetInd));
+
+                if(jetflavor == 5) SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_B, jeteta, jetpt);
+                else if( jetflavor == 4) SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_C, jeteta, jetpt);
+                else SFb = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_UDSG, jeteta, jetpt);
+
+                jetpt1 = tree->jetPt_->at(*bjetInd+1);
+                jeteta1 = fabs(tree->jetEta_->at(*bjetInd+1));
+                jetflavor1 = abs(tree->jetPartonID_->at(*bjetInd+1));
+                
+                if(jetflavor1 == 5) SFb1 = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_B, jeteta1, jetpt1);
+                else if( jetflavor1 == 4) SFb1 = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_C, jeteta1, jetpt1);
+                else SFb1 = reader.eval_auto_bounds(sysType, BTagEntry::FLAV_UDSG, jeteta1, jetpt1);
+		weight *= 1 - (1-SFb)*(1-SFb1) - (1-SFb)*SFb1 - SFb*(1-SFb1);
+  			}
+                return weight;
+
 }
 
 double WjetsBRreweight(EventTree* tree){
