@@ -496,15 +496,15 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 def loadDataTemplate(varlist, inputDir, prefix):
 	templPrefix = inputDir+prefix
 	DataTempl = distribution('Data', 'Data', [
-		(templPrefix+'data_mu_b.root', 1),
-		(templPrefix+'data_mu_c.root', 1),
-		(templPrefix+'data_mu_d.root', 1),
-		(templPrefix+'data_mu_e.root', 1),
-		(templPrefix+'data_mu_f1.root', 1),
-		(templPrefix+'data_mu_f2.root', 1),
-		(templPrefix+'data_mu_g.root', 1),
-		(templPrefix+'data_mu_h1.root', 1),
-		(templPrefix+'data_mu_h2.root', 1),
+		(templPrefix+'Data_mu_b.root', 1),
+		(templPrefix+'Data_mu_c.root', 1),
+		(templPrefix+'Data_mu_d.root', 1),
+		(templPrefix+'Data_mu_e.root', 1),
+		(templPrefix+'Data_mu_f1.root', 1),
+		(templPrefix+'Data_mu_f2.root', 1),
+		(templPrefix+'Data_mu_g.root', 1),
+		(templPrefix+'Data_mu_h1.root', 1),
+		(templPrefix+'Data_mu_h2.root', 1),
 		], varlist)
 	return DataTempl
 
@@ -544,8 +544,9 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	
 	MCtemplates['TTgamma'] = distribution('ttgamma'+titleSuffix, 't#bar{t}+#gamma', [
 		(templPrefix+'ttgamma_hadronic.root', gSF*ttG_hadronic_xs/ttG_hadronic_num),
-		(templPrefix+'ttgamma_semilept.root', gSF*ttG_semilept_xs/ttG_semilept_num),
-		(templPrefix+'ttgamma_dilept.root', gSF*ttG_semilept_xs/ttG_dilept_num),
+		(templPrefix+'ttgamma_semileptfromT.root', gSF*ttG_semileptT_xs/ttG_semileptT_num),
+		(templPrefix+'ttgamma_dilept.root', gSF*ttG_dilept_xs/ttG_dilept_num),
+		(templPrefix+'ttgamma_semileptfromTbar.root', gSF*ttG_semileptTbar_xs/ttG_semileptTbar_num),
 		], varList, ROOT.kRed +1, fillStyle)
 	
 	#MCtemplates['TTbar'] = distribution('TTbar'+titleSuffix, [ ##Changed the name
@@ -558,26 +559,10 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	nonWJetsSF = 1.0
         
 
- #   	MCtemplates['Wjets'] = distribution('Wjets'+titleSuffix, 'W+jets', [ 
-  #      (templPrefix+'W1jets.root', gSF*W1jets_xs/W1jets_num),
-   #     (templPrefix+'W2jets.root', gSF*W2jets_xs/W2jets_num),
-    #    (templPrefix+'W3jets.root', gSF*W3jets_xs/W3jets_num),
-#	(templPrefix+'W4jets.root', gSF*W4jets_xs/W4jets_num),
- #       ], varList, ROOT.kGreen-3, fillStyle)
-
-#	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, 'V+#gamma', [
- #       (templPrefix+'Zgamma.root', otherMCSF*gSF*Zgamma_xs/Zgamma_num),
-#	 (templPrefix+'Wgamma.root', otherMCSF*gSF*Wgamma_xs/Wgamma_num),
-  #      ], varList, ROOT.kAzure+3, fillStyle)
-
-#	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, [
-#	MCtemplates['Wgamma'] = distribution('Wgamma'+titleSuffix, 'W+#gamma', [
- #       (templPrefix+'Wgamma.root', otherMCSF*WgammaSF*gSF*Wgamma_xs/Wgamma_num),
-  #      ], varList, ROOT.kGray, fillStyle)
 
 	MCtemplates['TTV'] = distribution('TTV'+titleSuffix, 't#bar{t}+V', [
 		(templPrefix+'TTW.root',      otherMCSF*gSF*TTW_xs/TTW_num),
-#		(templPrefix+'TTZ.root',      otherMCSF*gSF*TTZ_xs/TTZ_num),
+		(templPrefix+'TTZ.root',      otherMCSF*gSF*TTZ_xs/TTZ_num),
 		], varList, ROOT.kOrange, fillStyle)
 	
 	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, 'Single Top', [
@@ -587,24 +572,34 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 		(templPrefix+'ST_t_tWbar.root', gSF*ST_tW_antitop_xs/ST_tW_antitop_num),
 	        (templPrefix+'ST_tW.root',  gSF*ST_tW_xs/ST_tW_num),
 		], varList, ROOT.kMagenta, fillStyle)
-#	MCtemplates['ST_t'] = distribution('ST_t'+titleSuffix, 'ST_t', [
- #               (templPrefix+'ST_t.root',  gSF*ST_t_top_xs/ST_t_top_num),
-#		(templPrefix+'ST_t_bar.root',   ST_t_bar_xs/ST_t_bar_num),
- #               ], varList, ROOT.kMagenta -7, fillStyle)
-#	MCtemplates['ST_tW'] = distribution('ST_tW'+titleSuffix, 'ST_tW', [
-#		(templPrefix+'ST_t_tWbar.root', gSF*ST_tW_antitop_xs/ST_tW_antitop_num),
- #               (templPrefix+'ST_tW.root',  gSF*ST_tW_xs/ST_tW_num),
-#		 ], varList, ROOT.kMagenta, fillStyle)
+	MCtemplates['QCD'] = distribution('QCD'+titleSuffix, 'QCD', [
+                (templPrefix+'QCD_20to30Mu.root',  gSF*QCD_20to30Mu_xs/QCD_20to30Mu_num),
+		(templPrefix+'QCD_30to50Mu.root',   gSF*QCD_30to50Mu_xs/QCD_30to50Mu_num),
+		(templPrefix+'QCD_50to80Mu.root',   gSF*QCD_50to80Mu_xs/QCD_50to80Mu_num),
+		(templPrefix+'QCD_80to120Mu.root',   gSF*QCD_80to120Mu_xs/QCD_80to120Mu_num),
+		(templPrefix+'QCD_120to170Mu.root',   gSF*QCD_120to170Mu_xs/QCD_120to170Mu_num),
+		(templPrefix+'QCD_170to300Mu.root',  gSF*QCD_170to300Mu_xs/QCD_170to300Mu_num),
+                (templPrefix+'QCD_300to470Mu.root',   gSF*QCD_300to470Mu_xs/QCD_300to470Mu_num),
+                (templPrefix+'QCD_470to600Mu.root',   gSF*QCD_600to800Mu_xs/QCD_600to800Mu_num),
+    #            (templPrefix+'QCD_600to800Mu.root',   gSF*QCD_800to1000Mu_xs/QCD_800to1000Mu_num),
+                #(templPrefix+'QCD_800toInfMu.root',   gSF*QCD_1000toInfMu_xs/QCD_1000toInfMu_num),
+                ], varList, ROOT.kGray, fillStyle)
+	MCtemplates['Vgamma'] = distribution('Vgamma'+titleSuffix, 'V+#gamma', [
+		(templPrefix+'zgamma.root', gSF*zgamma_xs/zgamma_num),
+                (templPrefix+'wgamma.root',  gSF*wgamma_xs/wgamma_num),
+		 ], varList, ROOT.kGreen+3, fillStyle)
 
 	MCtemplates['WJets'] = distribution('WJets'+titleSuffix, 'W+jets', [
-		(templPrefix+'W3jets.root', gSF*W3jets_xs/W4jets_num),
-		(templPrefix+'W4jets.root', gSF*W4jets_xs/W4jets_num),
-		], varList, ROOT.kGreen -3, fillStyle)
+		(templPrefix+'W1jets.root', gSF*W1jets_xs/W1jets_num),
+		(templPrefix+'W2jets.root', gSF*W2jets_xs/W2jets_num),
+		(templPrefix+'W3jets.root', gSF*W3jets_xs/W3jets_num),
+                (templPrefix+'W4jets.root', gSF*W4jets_xs/W4jets_num),
+		], varList, ROOT.kAzure-9, fillStyle)
 
 	######## Added back in the ZJetsSF scaling ######## 
 #	MCtemplates['ZJets'] = distribution('ZJets'+titleSuffix, [
 	MCtemplates['ZJets'] = distribution('ZJets'+titleSuffix, 'Z+jets', [
-		(templPrefix+'DYJets.root',gSF*ZJets_xs/DYJets_num)], varList, ROOT.kAzure-2, fillStyle)
+		(templPrefix+'DYJets.root',gSF*ZJets_xs/DYJets_num)], varList, ROOT.kAzure-1, fillStyle)
 	return MCtemplates
 
 def saveAccTemplates(inputDir, outFileName):
@@ -685,6 +680,8 @@ def savePreselTemplates(inputDir, qcdDir, inputData, outFileName):
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
+	MCTempl.append(MCTemplDict['QCD'])
+	MCTempl.append(MCTemplDict['Vgamma'])
 	if QCDSF > 0.0001:
 		MCTempl.append(QCDTempl)
 	saveTemplatesToFile([DataTempl] + MCTempl, varList, outFileName)
@@ -721,6 +718,8 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
+	MCTempl.append(MCTemplDict['QCD'])
+	MCTempl.append(MCTemplDict['Vgamma'])
 	print "loaded MC"
 #	if QCDSF > 0.0001:
 #		MCTempl.append(QCDTempl)
@@ -757,6 +756,8 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 	MCTempl_b.append(MCTemplDict_b['SingleTop'])
 	MCTempl_b.append(MCTemplDict_b['WJets'])
 	MCTempl_b.append(MCTemplDict_b['ZJets'])
+	MCTempl_b.append(MCTemplDict_b['QCD'])
+	MCTempl_b.append(MCTemplDict_b['Vgamma'])
 #	if QCDSF > 0.0001:
 #		MCTempl_b.append(QCDTempl_b)
 	
@@ -824,7 +825,7 @@ def makePhotonSelectionPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 varList_all = ['MET','nVtx','MCcategory',
 			'Ht','WtransMass','M3', 
 			'mu1Pt','mu1Eta','mu1RelIso',
-			'cut_flow',
+			'cut_flow','nbJets',
 			'nJets', 'GenPhotonEt', 'GenPhotonEta',
 			'jet1Pt','jet2Pt','jet3Pt','jet4Pt','jet1Eta','jet2Eta','jet3Eta','jet4Eta',
 			'photon1hasPixelSeed', 'photon1PFChIso','photon1PFNeuIso','photon1PFPhoIso',
@@ -848,9 +849,9 @@ if isMuon:
 # #	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/QCD_bins/'
 # 	QCDHist =   '/eos/uscms/store/user/dnoonan/EleHists/QCD_bins/'
 # 	DataHist =  '/eos/uscms/store/user/dnoonan/EleHists_looseVeto/hist_bins/'
-	InputHist = '/uscms_data/d3/troy2012/CMSSW_8_0_26_patch1/src/TTGammaSemiLep/hist_June14'+outSuffix+'/'
-	QCDHist =   '/uscms_data/d3/troy2012/CMSSW_8_0_26_patch1/src/TTGammaSemiLep/hist_June14/'
-	DataHist =  '/uscms_data/d3/troy2012/CMSSW_8_0_26_patch1/src/TTGammaSemiLep/hist_June14/'
+	InputHist = '/uscms_data/d3/troy2012/CMSSW_8_0_26_patch1/src/TTGammaSemiLep/hist_3jet1tag'+outSuffix+'/'
+	QCDHist =   '/uscms_data/d3/troy2012/CMSSW_8_0_26_patch1/src/TTGammaSemiLep/hist_3jet1tag/'
+	DataHist =  '/uscms_data/d3/troy2012/CMSSW_8_0_26_patch1/src/TTGammaSemiLep/hist_3jet1tag/'
 if isElectron:
 # 	InputHist = '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/hist_bins'+outSuffix+'/'
 # #	QCDHist =   '/eos/uscms/store/user/dnoonan/MuHists_looseVeto/QCD_bins/'
