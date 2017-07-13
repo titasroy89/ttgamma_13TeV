@@ -87,8 +87,8 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 		for(std::vector<int>::const_iterator muInd = selector->Muons.begin(); muInd != selector->Muons.end(); muInd++)
 			if(dR_jet_mu(*jetInd, *muInd) <  veto_jet_lep_dR) goodJet = false;
 //		// remove jets too close to photons
-		//for(std::vector<int>::const_iterator phoVi = selector->PhotonsPresel.begin(); phoVi != selector->PhotonsPresel.end(); phoVi++)
-                  //      if(dR_jet_pho(*jetInd, *phoVi) <  veto_jet_pho_dR) goodJet = false;
+		for(std::vector<int>::const_iterator phoVi = selector->PhotonsPresel.begin(); phoVi != selector->PhotonsPresel.end(); phoVi++)
+                        if(dR_jet_pho(*jetInd, *phoVi) <  veto_jet_pho_dR) goodJet = false;
 			
 	//	for(std::vector<int>::const_iterator eleInd = selector->ElectronsLoose.begin(); eleInd != selector->ElectronsLoose.end(); eleInd++)
 	//		if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
