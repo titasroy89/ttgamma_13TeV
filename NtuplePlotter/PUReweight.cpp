@@ -9,9 +9,9 @@ PUReweight::PUReweight(int nFiles, char** fileNames, std::string PUfilename){
 	PUweightHist->SetDirectory(0);
 	pileupFile->Close();
 	TH1D* PUbackup;
-	if(PUweightHist->GetNbinsX() != 1000){
+	if(PUweightHist->GetNbinsX() != 200){
 		std::cout << "Wrong number of bins in the pileup histogram" << std::endl;
-		PUbackup = new TH1D("pileup_new","pileup_new",1000,0,200);
+		PUbackup = new TH1D("pileup_new","pileup_new",200,0,200);
 		for(int ibin=1; ibin <= PUweightHist->GetNbinsX(); ibin++){
 			PUbackup->SetBinContent(ibin, PUweightHist->GetBinContent(ibin));
 			// assuming the same scale
@@ -34,14 +34,15 @@ PUReweight::PUReweight(int nFiles, char** fileNames, std::string PUfilename){
 		mcPU->SetDirectory(0);
 		mcFile->Close();
 	}
-	TCanvas *c1 = new TCanvas("c1","A Simple Graph Example",1000,500);
-        c1->SetFillColor(0);
-        c1->SetGrid();
+	if (mcPU->GetNbinsX()!=PUweightHist->GetNbinsX()){
+		if (mcPU->GetNbinsX()>PUweightHist->GetNbinsX()){
+			mcPU->Rebin(mcPU->GetNbinsX()/PUweightHist->GetNbinsX());
+		}
+	}
 	mcPU->Scale(1.0/mcPU->Integral());
 	PUweightHist->Divide(mcPU);
 	PUweightHist->Scale(1.0/PUweightInt);
 	PUweightHist->Draw();
-	c1->SaveAs("PUReweight.png");	
 	delete mcPU;
 }
 

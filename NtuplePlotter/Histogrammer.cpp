@@ -395,16 +395,16 @@ void Histogrammer::fill(Selector* selector, EventPick* selEvent, EventTree* tree
 		MTW = TMath::Sqrt(2*(tree->muPt_->at(ind))*(tree->pfMET_)*( 1.0 - TMath::Cos(dR(0.0,tree->muPhi_->at(ind),0.0,tree->pfMETPhi_)) ));
 
 		hists["WtransMass"]->Fill( MTW, weight );
-//		if (selEvent->Muons.size() > 1) {
-//			int ind2 = selEvent->Muons[1];
-//			hists["mu2Pt"]->Fill( tree->muPt_->at(ind2), weight );
-  //                      hists["mu2RelIso"]->Fill( selector->Mu04RelIso[ind2], weight );
-    //                    TLorentzVector mu1;
-      //                  TLorentzVector mu2;
-        //                mu1.SetPtEtaPhiM(tree->muPt_->at(ind), tree->muEta_->at(ind), tree->muPhi_->at(ind), tree->muEn_->at(ind));
-          //              mu2.SetPtEtaPhiM(tree->muPt_->at(ind2), tree->muEta_->at(ind2), tree->muPhi_->at(ind2),tree->muEn_->at(ind2));
-            ///            hists["mu1mu2Mass"]->Fill( (mu1+mu2).M(), weight);
-
+		if (selEvent->Muons.size() > 1) {
+			int ind2 = selEvent->Muons[1];
+			hists["mu2Pt"]->Fill( tree->muPt_->at(ind2), weight );
+                        hists["mu2RelIso"]->Fill( selector->Mu04RelIso[ind2], weight );
+                        TLorentzVector mu1;
+                        TLorentzVector mu2;
+                        mu1.SetPtEtaPhiM(tree->muPt_->at(ind), tree->muEta_->at(ind), tree->muPhi_->at(ind), tree->muEn_->at(ind));
+                        mu2.SetPtEtaPhiM(tree->muPt_->at(ind2), tree->muEta_->at(ind2), tree->muPhi_->at(ind2),tree->muEn_->at(ind2));
+                        hists["mu1mu2Mass"]->Fill( (mu1+mu2).M(), weight);
+		}	
 		if(selEvent->Photons.size() > 0){
                 
                         TLorentzVector pho;
