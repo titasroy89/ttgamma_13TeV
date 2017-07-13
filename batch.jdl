@@ -1,0 +1,17 @@
+universe = vanilla
+Executable =  run_skimmer.sh
+
+should_transfer_files = YES
+WhenTOTransferOutput  = ON_EXIT
+notification = never
+Transfer_input_files = CMSSW_8_0_26_patch1.tar.gz 
+ 
+Output = condor/batch_$(cluster)_$(process).stdout
+Error  = condor/batch_$(cluster)_$(process).stderr
+Log    = condor/batch_$(cluster)_$(process).condor
+Requirements          = (Memory >= 499 && OpSys == "LINUX" && (Arch != "DUMMY"))
+Arguments = $(process)
+#use_x509userproxy = true
+x509userproxy = $ENV(X509_USER_PROXY)
+# important, number of instances (jobs) of script
+Queue 46
