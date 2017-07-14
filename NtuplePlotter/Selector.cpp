@@ -17,7 +17,7 @@ Selector::Selector(){
 	// electrons
 	ele_Pt_cut = 35.0;
 	ele_Eta_tight = 2.1;
-	ele_Eta_loose = 2.1;
+	ele_Eta_loose = 2.5;
 	ele_PtLoose_cut = 15.0;
 	
 	ele_Ptmedium_cut = 20.0;
@@ -190,23 +190,29 @@ void Selector::filter_muons(){
 					) 
 				     ) / pt;
 		Mu04RelIso.push_back( frelIsocorr );
+		//muon ID cut
+	        bool MuontightID = false;
+		bool MuonlooseID = false;
+		MuontightID = ( tree->muIDbit_->at(muInd) >> 2 & 1); 
+		MuonlooseID = ( tree->muIDbit_->at(muInd) >> 0 & 1);
 
 		bool IsoPass = frelIsocorr >= mu_RelIso_range[0] && frelIsocorr <= mu_RelIso_range[1];		
 
-		if (mu_Iso_invert) IsoPass = !IsoPass;
+	//	if (mu_Iso_invert) IsoPass = !IsoPass;
 
-		bool passLoose = pt > mu_PtLoose_cut && TMath::Abs(eta) < 2.4 && frelIsocorr < 0.25 && isPFMuon && ( isGlobalMuon || isTrackerMuon);
+		bool passLoose = pt > mu_PtLoose_cut && TMath::Abs(eta) < 2.4 && frelIsocorr < 0.25 &&  MuonlooseID;//isPFMuon && ( isGlobalMuon || isTrackerMuon);
+	
 		bool passTight = pt > mu_Pt_cut && TMath::Abs(eta) < 2.4 && 
-				frelIsocorr < 0.15 &&
-				tree->muChi2NDF_->at(muInd) < 10 &&
-				tree->muTrkLayers_->at(muInd) > 5 &&
-				tree->muMuonHits_->at(muInd) > 0 &&
-				tree->muD0_->at(muInd) < 0.2 &&
-				fabs( tree->muDz_->at(muInd) ) < 0.5 &&
-				tree->muPixelHits_->at(muInd) > 0 &&
-				tree->muStations_->at(muInd) > 1 &&
-		                IsoPass &&
-				isPFMuon && isGlobalMuon && isTrackerMuon;
+				frelIsocorr < 0.15 &&  MuontightID;
+	//			tree->muChi2NDF_->at(muInd) < 10 &&
+	//			tree->muTrkLayers_->at(muInd) > 5 &&
+	//			tree->muMuonHits_->at(muInd) > 0 &&
+	//			fabs(tree->muD0_->at(muInd)) < 0.2 && // use absolute values
+	//			fabs( tree->muDz_->at(muInd) ) < 0.5 &&
+	//			tree->muPixelHits_->at(muInd) > 0 &&
+	//			tree->muStations_->at(muInd) > 1 &&
+	//	                IsoPass &&
+	//			isPFMuon && isGlobalMuon && isTrackerMuon;
 		
 
 		if(passTight){
