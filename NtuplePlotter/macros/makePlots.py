@@ -391,11 +391,8 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
 		if not isSyst:
 			canvas.Update();
 			canvas.RedrawAxis();
-#			canvas.GetFrame().Draw();
 
 			canvas.Print(outDirName+'/'+var+".pdf",".pdf");
-			#canvas.Print(outDirName+'/'+var+".png",".png");
-#			canvas.SaveAs(outDirName+'/'+var+'.png')
 		
 
 		####RATIO PLOT
@@ -487,11 +484,9 @@ def plotTemplates(dataTemplate, MCTemplateList, SignalTemplateZoomList, varlist,
         #			canvas.GetFrame().Draw();
         
         			canvasRatio.Print(outDirName+'/'+var+"_ratio.pdf",".pdf");
-        			#canvasRatio.Print(outDirName+'/'+var+"_ratio.png",".png");
-        #			canvas.SaveAs(outDirName+'/'+var+'.png')
 
-			# pad1.Clear()
-			# pad2.Clear()
+			pad1.Clear()
+			pad2.Clear()
 
 def loadDataTemplate(varlist, inputDir, prefix):
 	templPrefix = inputDir+prefix
@@ -503,8 +498,8 @@ def loadDataTemplate(varlist, inputDir, prefix):
 		(templPrefix+'Data_mu_f1.root', 1),
 		(templPrefix+'Data_mu_f2.root', 1),
 		(templPrefix+'Data_mu_g.root', 1),
-		(templPrefix+'Data_mu_h1.root', 1),
-		(templPrefix+'Data_mu_h2.root', 1),
+		(templPrefix+'Data_mu_hv2.root', 1),
+		(templPrefix+'Data_mu_hv3.root', 1),
 		], varlist)
 	return DataTempl
 
@@ -561,26 +556,26 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 
 
 	MCtemplates['TTV'] = distribution('TTV'+titleSuffix, 't#bar{t}+V', [
-		(templPrefix+'TTW.root',      otherMCSF*gSF*TTW_xs/TTW_num),
-		(templPrefix+'TTZ.root',      otherMCSF*gSF*TTZ_xs/TTZ_num),
+		(templPrefix+'TTW.root', gSF*TTW_xs/TTW_num),
+		(templPrefix+'TTZ.root', gSF*TTZ_xs/TTZ_num),
 		], varList, ROOT.kOrange, fillStyle)
 	
 	MCtemplates['SingleTop'] = distribution('SingleTop'+titleSuffix, 'Single Top', [
 		(templPrefix+'ST_s.root', gSF*ST_s_xs/ST_s_num),
 		(templPrefix+'ST_t.root',  gSF*ST_t_top_xs/ST_t_top_num),
-		(templPrefix+'ST_t_bar.root',   ST_t_bar_xs/ST_t_bar_num),
+		(templPrefix+'ST_tbar.root',   ST_t_bar_xs/ST_t_bar_num),
 		(templPrefix+'ST_t_tWbar.root', gSF*ST_tW_antitop_xs/ST_tW_antitop_num),
-	        (templPrefix+'ST_tW.root',  gSF*ST_tW_xs/ST_tW_num),
+	        (templPrefix+'ST_tW_top.root',  gSF*ST_tW_xs/ST_tW_num),
 		], varList, ROOT.kMagenta, fillStyle)
 	MCtemplates['QCD'] = distribution('QCD'+titleSuffix, 'QCD', [
-                (templPrefix+'QCD_20to30Mu.root',  gSF*QCD_20to30Mu_xs/QCD_20to30Mu_num),
-		(templPrefix+'QCD_30to50Mu.root',   gSF*QCD_30to50Mu_xs/QCD_30to50Mu_num),
-		(templPrefix+'QCD_50to80Mu.root',   gSF*QCD_50to80Mu_xs/QCD_50to80Mu_num),
-		(templPrefix+'QCD_80to120Mu.root',   gSF*QCD_80to120Mu_xs/QCD_80to120Mu_num),
-		(templPrefix+'QCD_120to170Mu.root',   gSF*QCD_120to170Mu_xs/QCD_120to170Mu_num),
-		(templPrefix+'QCD_170to300Mu.root',  gSF*QCD_170to300Mu_xs/QCD_170to300Mu_num),
-                (templPrefix+'QCD_300to470Mu.root',   gSF*QCD_300to470Mu_xs/QCD_300to470Mu_num),
-                (templPrefix+'QCD_470to600Mu.root',   gSF*QCD_600to800Mu_xs/QCD_600to800Mu_num),
+                (templPrefix+'QCD_20to30Mu.root',gSF*QCD_20to30Mu_xs/QCD_20to30Mu_num),
+		(templPrefix+'QCD_30to50Mu.root',gSF*QCD_30to50Mu_xs/QCD_30to50Mu_num),
+		(templPrefix+'QCD_50to80Mu.root',gSF*QCD_50to80Mu_xs/QCD_50to80Mu_num),
+		(templPrefix+'QCD_80to120Mu.root',gSF*QCD_80to120Mu_xs/QCD_80to120Mu_num),
+		(templPrefix+'QCD_120to170Mu.root',gSF*QCD_120to170Mu_xs/QCD_120to170Mu_num),
+		(templPrefix+'QCD_170to300Mu.root',gSF*QCD_170to300Mu_xs/QCD_170to300Mu_num),
+                (templPrefix+'QCD_300to470Mu.root',gSF*QCD_300to470Mu_xs/QCD_300to470Mu_num),
+                (templPrefix+'QCD_470to600Mu.root',gSF*QCD_600to800Mu_xs/QCD_600to800Mu_num),
     #            (templPrefix+'QCD_600to800Mu.root',   gSF*QCD_800to1000Mu_xs/QCD_800to1000Mu_num),
                 #(templPrefix+'QCD_800toInfMu.root',   gSF*QCD_1000toInfMu_xs/QCD_1000toInfMu_num),
                 ], varList, ROOT.kGray, fillStyle)
@@ -659,14 +654,14 @@ def saveBarrelFitTemplates(inputDir, inputData,  outFileName):
 	
 	saveTemplatesToFile([DataTempl_b] +  MCTempl_b.values() + MCTempl_rs_b.values() + MCTempl_fe_b.values() + MCTempl_fjrb_b.values(), varList, outFileName)
 
-def savePreselTemplates(inputDir, qcdDir, inputData, outFileName):
+def savePreselTemplates(inputDir, inputData, varList_all, outFileName):
 	if WJetsSF != 1.0 or TopSF != 1.0:
 		print 'We want to save templates for M3 fit, but the SFs are not 1.0'
 		print 'exiting'
 		return
+	varList = varList_all
 	
-	varList = ['M3']
-	DataTempl = loadDataTemplate(varList, inputData, 'hist_PreSelNoMET_top_')#change
+	DataTempl = loadDataTemplate(varList, inputData, 'hist_PreSel_top_')#change
 #	if QCDSF > 0.0001:
 #		QCDTempl = loadQCDTemplate(varList, qcdDir, 'hist_PreSel_top_') #change
 	#else:
@@ -682,8 +677,8 @@ def savePreselTemplates(inputDir, qcdDir, inputData, outFileName):
 	MCTempl.append(MCTemplDict['ZJets'])
 	MCTempl.append(MCTemplDict['QCD'])
 	MCTempl.append(MCTemplDict['Vgamma'])
-	if QCDSF > 0.0001:
-		MCTempl.append(QCDTempl)
+#	if QCDSF > 0.0001:
+#		MCTempl.append(QCDTempl)
 	saveTemplatesToFile([DataTempl] + MCTempl, varList, outFileName)
 
 def makeQCDPlots(varList,qcdDir,outDir):
@@ -708,8 +703,6 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 	# load templates PreSel	
 	DataTempl = loadDataTemplate(varList, dataDir, 'hist_PreSel_top_') #NoMET change
 	print "loaded data"
-	#if QCDSF > 0.0001:
-	#	QCDTempl = loadQCDTemplate(varList, qcdDir, 'hist_PreSel_top_') #NoMET change
 	MCTemplDict = loadMCTemplates(varList, inputDir, 'hist_PreSel_top_','',1001) #NoMET change
 	MCTempl = []
 	MCTempl.append(MCTemplDict['TTgamma'])
@@ -721,14 +714,12 @@ def makeAllPlots(varList, inputDir, dataDir, outDirName):
 	MCTempl.append(MCTemplDict['QCD'])
 	MCTempl.append(MCTemplDict['Vgamma'])
 	print "loaded MC"
-#	if QCDSF > 0.0001:
-#		MCTempl.append(QCDTempl)
 	
-        if WJetsSF == 1.0 and TopSF == 1.0:
-		pass
-	else:	
+       # if WJetsSF == 1.0 and TopSF == 1.0:
+	#	pass
+	#else:	
 	# save final templates, exactly as they are on the plots
-		saveTemplatesToFile([DataTempl] + MCTempl, ['M3','genPhoRegionWeight','MCcategory'], 'templates_presel_scaled.root')
+	saveTemplatesToFile([DataTempl] + MCTempl, varList_all, 'templates_presel_scaled.root')
  	print "SF used :", "Top=", TopSF ,"WJets=",WJetsSF, "QCD=",QCDSF, "OtherMC=",otherMCSF	
 #	MCTempl.remove(MCTemplDict['Vgamma'])	
 	plotTemplates( DataTempl, MCTempl, [], varList, outDirName+'/presel')
@@ -822,13 +813,16 @@ def makePhotonSelectionPlots(varList, inputDir, qcdDir, dataDir, outDirName):
 	############################
 
 
-varList_all = ['MET','nVtx','MCcategory',
+varList_all = ['MET','nVtx','MCcategory','GenPhotonEt', 'GenPhotonEta', 'GenPhotonMinDR',
 			'Ht','WtransMass','M3', 
-			'mu1Pt','mu1Eta','mu1RelIso',
+			'mu1Pt','mu1Eta','mu1RelIso','mu1pho1Mass',
 			'cut_flow','nbJets',
-			'nJets', 'GenPhotonEt', 'GenPhotonEta',
+			'nJets', 
 			'jet1Pt','jet2Pt','jet3Pt','jet4Pt','jet1Eta','jet2Eta','jet3Eta','jet4Eta',
 			'photon1hasPixelSeed', 'photon1PFChIso','photon1PFNeuIso','photon1PFPhoIso',
+			'genphoton1fromlepDrMuon','genphoton1fromWDrMuon','genphoton1fromTopDrMuon','genphoton1fromlepDrJet','genphoton1fromWDrJet','genphoton1fromTopDrJet',
+			'genphoton1fromlepDrBJet','genphoton1fromWDrBJet','genphoton1fromTopDrBJet','photon1fromlepDrMuon','photon1fromWDrMuon','photon1fromTopDrMuon',
+			'photon1fromlepDrJet','photon1fromWDrJet','photon1fromTopDrJet','photon1fromlepDrBJet','photon1fromWDrBJet','photon1fromTopDrBJet',
 			'photon1Et','photon1Eta','photon1SigmaIEtaIEta'
 			]#,
 		#	'photon1DrElectron','photon1DrJet',
@@ -935,12 +929,12 @@ if skipAfterMET:
 	exit()
 
 # for systematics of QCD fit
-if systematic == 'QCD_up':
-	QCDSF *= 1.5
-if systematic == 'QCD_down':
-	QCDSF *= 0.5
+#if systematic == 'QCD_up':
+#	QCDSF *= 1.5
+#if systematic == 'QCD_down':
+#	QCDSF *= 0.5
 # save templates for M3 fit
-#savePreselTemplates(InputHist, QCDHist, DataHist, 'templates_presel.root')
+savePreselTemplates(InputHist,DataHist, varList_all,'templates_presel.root')
 
 # do M3 fit, update SF for Top and WJets
 #qcd_fit.M3file = 'templates_presel.root'
