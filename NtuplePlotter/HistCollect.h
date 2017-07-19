@@ -29,15 +29,19 @@ private:
 	Histogrammer* histnom;
 	Histogrammer* histnom_barrel;
 	Histogrammer* histnom_endcap;
+	Histogrammer* histnom_photonsel;
 	Histogrammer* histnom_rs;
 	Histogrammer* histnom_barrel_rs;
 	Histogrammer* histnom_endcap_rs;
+	Histogrammer* histnom_photonsel_rs;
 	Histogrammer* histnom_fe;
 	Histogrammer* histnom_barrel_fe;
 	Histogrammer* histnom_endcap_fe;
+	Histogrammer* histnom_photonsel_fe;
 	Histogrammer* histnom_fjrb;
 	Histogrammer* histnom_barrel_fjrb;
 	Histogrammer* histnom_endcap_fjrb;
+	Histogrammer* histnom_photonsel_fjrb;
 	
 };
 #endif

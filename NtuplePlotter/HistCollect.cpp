@@ -8,23 +8,23 @@ HistCollect::HistCollect(std::string namePrefix, std::string nameSuffix){
 	histnom = new Histogrammer(namePrefix+"_"+nameSuffix);
 	histnom_barrel = new Histogrammer(namePrefix+"_barrel_"+nameSuffix);
 	histnom_endcap = new Histogrammer(namePrefix+"_endcap_"+nameSuffix);
-	
+	histnom_photonsel = new Histogrammer(namePrefix+"_photonsel_"+nameSuffix);	
 	// MC only: photon is:  real signal / real background / fake from e / fake from jet 
 	// photon is real signal
 	histnom_rs = new Histogrammer(namePrefix+"_rs_"+nameSuffix);
 	histnom_barrel_rs = new Histogrammer(namePrefix+"_rs_barrel_"+nameSuffix);
 	histnom_endcap_rs = new Histogrammer(namePrefix+"_rs_endcap_"+nameSuffix);
-	
+	histnom_photonsel_rs = new Histogrammer(namePrefix+"_rs_photonsel_"+nameSuffix);
 	// photon is fake from e
 	histnom_fe = new Histogrammer(namePrefix+"_fe_"+nameSuffix);
 	histnom_barrel_fe = new Histogrammer(namePrefix+"_fe_barrel_"+nameSuffix);
 	histnom_endcap_fe = new Histogrammer(namePrefix+"_fe_endcap_"+nameSuffix);
-	
+	histnom_photonsel_fe = new Histogrammer(namePrefix+"_fe_photonsel_"+nameSuffix);
 	// combination of fake jets and background photons
 	histnom_fjrb = new Histogrammer(namePrefix+"_fjrb_"+nameSuffix);
 	histnom_barrel_fjrb = new Histogrammer(namePrefix+"_fjrb_barrel_"+nameSuffix);
 	histnom_endcap_fjrb = new Histogrammer(namePrefix+"_fjrb_endcap_"+nameSuffix);
-	
+	histnom_photonsel_fjrb = new Histogrammer(namePrefix+"_fjrb_photonsel_"+nameSuffix);
 	// set default flag values
 	fillSum = true;
 	fillMCCategSum = true;
@@ -75,7 +75,7 @@ void HistCollect::fill_histograms(Selector* selector, EventPick* selEvent, Event
 	
 	if(fillBarrel && barrel) histnom_barrel->fill(selector, selEvent, tree, weight);
 	if(fillEndcap && !barrel) histnom_endcap->fill(selector, selEvent, tree, weight);
-	
+	if((fillBarrel && barrel)||(fillEndcap && !barrel)) histnom_photonsel->fill(selector, selEvent, tree, weight);	
 	// the following applies to MC only
 	if(!isMC) return;
 	

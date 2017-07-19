@@ -90,17 +90,6 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 		for(std::vector<int>::const_iterator phoVi = selector->PhotonsPresel.begin(); phoVi != selector->PhotonsPresel.end(); phoVi++)
                         if(dR_jet_pho(*jetInd, *phoVi) <  veto_jet_pho_dR) goodJet = false;
 			
-	//	for(std::vector<int>::const_iterator eleInd = selector->ElectronsLoose.begin(); eleInd != selector->ElectronsLoose.end(); eleInd++)
-	//		if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
-	//	for(std::vector<int>::const_iterator eleInd = selector->ElectronsMedium.begin(); eleInd != selector->ElectronsMedium.end(); eleInd++)
-          //              if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_dR) goodJet = false;
-		//for(int phoVi = 0; phoVi < selector->PhotonsPresel.size(); phoVi++){
-		//	if(selector->PhoPassChHadIso.at(phoVi) && 
-		//	selector->PhoPassPhoIso.at(phoVi) &&
-		//	selector->PhoPassSih.at(phoVi) &&
-		//	dR_jet_pho(*jetInd, selector->PhotonsPresel.at(phoVi)) < 0.1)
-		//		goodJet = false;
-		//}
 		
 				
 		if(goodJet) Jets.push_back(*jetInd);
@@ -201,7 +190,7 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	else passSkim = false;
 	if(passSkim && Jets.size() >= Njet_ge+1 ) {cutFlow->Fill(7); cutFlowWeight->Fill(7,weight);}
         else passSkim = false;
-	if(passSkim && Jets.size() >= Njet_ge+2 ) {cutFlow->Fill(8); cutFlowWeight->Fill(8,weight);std::cout <<"Event which passes 3jet level sel:"<<tree->event_ <<std::endl;}
+	if(passSkim && Jets.size() >= Njet_ge+2 ) {cutFlow->Fill(8); cutFlowWeight->Fill(8,weight);}//std::cout << tree->event_ <<std::endl;}
         else passSkim = false;
 	if ( passSkim &&bJets.size() >= NBjet_ge) {cutFlow->Fill(9); cutFlowWeight->Fill(9,weight);passPreSel=true;}
         else passSkim = false;
