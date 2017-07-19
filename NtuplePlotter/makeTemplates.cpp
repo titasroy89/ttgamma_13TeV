@@ -215,10 +215,11 @@ int main(int ac, char** av){
 	}
 	
 
-
+	int count_overlapTTbar=0;
+        int count_overlapVJets=0;
 	Long64_t nEntr = tree->GetEntries();
 	for(Long64_t entry=0; entry<nEntr; entry++){
-		if(entry%10000 == 0) std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
+//		if(entry%10000 == 0) std::cout << "processing entry " << entry << " out of " << nEntr << std::endl;
 		tree->GetEntry(entry);
 	//	std::cout << "entry is " << entry << std::endl;
 	//	std::cout << "tree is " << tree <<std::endl;
@@ -232,21 +233,20 @@ int main(int ac, char** av){
 		}
 		 //do overlap removal here: overlapMadGraph(tree) or overlapWHIZARD(tree)
 	        if( isMC && doOverlapRemoval){
-		  if (!doInvertedOverlapRemoval){
+		
 		    if (overlapMadGraph(tree)){
+		      count_overlapTTbar++;
 		      continue;
 		    }
-		  }
-		  if (doInvertedOverlapRemoval){
-		    if (!overlapMadGraph(tree)){
-		      continue;
-		    }
-		  }
-	}
-		    
-         	 if( isMC && doOverlapRemovalWZ && overlapISRFSR(tree)){
-	//		continue;
+		  
 		}
+		    
+         	 if( isMC && doOverlapRemovalWZ){ 
+		     if(overlapISRFSR(tree)){
+			count_overlapVJets++;
+			continue;
+			}
+		 }
 
 		selectorLoose->process_objects(tree);
 		evtPickLoose->process_event(tree, selectorLoose, PUweight);
@@ -275,6 +275,8 @@ int main(int ac, char** av){
 		looseCollectNoMET->fill_histograms(selectorLoose, evtPickLooseNoMET, tree, isMC, evtWeight);
 		looseCollect->fill_histograms(selectorLoose, evtPickLoose, tree, isMC, evtWeight);
 	}
+	//std::cout << "Total number of events Removed from TTbar:"<< count_overlapTTbar <<std::endl;
+        //std::cout << "Total number of events Removed from W/ZJets:"<< count_overlapVJets <<std::endl;
 	
 	looseCollect->write_histograms(evtPickLoose, isMC, av[2]);
 	looseCollectNoMET->write_histograms(evtPickLooseNoMET, isMC, av[2]);

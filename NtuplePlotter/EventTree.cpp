@@ -71,8 +71,11 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	
 	chain->SetBranchStatus("nEle",1);
 	chain->SetBranchAddress("nEle", &nEle_);
+	
+	eleEta_ = new vector<float>;
+        chain->SetBranchStatus("eleEta",1);
+        chain->SetBranchAddress("eleEta", &eleEta_);
 
-	//chain->SetBranchStatus("eleEta",1);
 	
 
 	eleEn_ = new vector<float>;
@@ -161,6 +164,11 @@ EventTree::EventTree(int nFiles, char** fileNames){
 
 	// muons
 	// keep some branches in the skim
+	//
+	muIDbit_ = new vector<unsigned short>;
+        chain->SetBranchStatus("muIDbit",1);
+        chain->SetBranchAddress("muIDbit", &muIDbit_);
+
 	muChi2NDF_ = new vector<float>;
 	chain->SetBranchStatus("muChi2NDF", 1);
 	chain->SetBranchAddress("muChi2NDF",&muChi2NDF_);
@@ -347,6 +355,51 @@ EventTree::EventTree(int nFiles, char** fileNames){
 	//phoSeedBCE_ = new vector<int>;
 	//chain->SetBranchStatus("phoSeedBCE",1);
 	//chain->SetBranchAddress("phoSeedBCE", &phoSeedBCE_);
+	
+	// phoSCE_ = new vector<float>;
+        //chain->SetBranchStatus("phoSCE",1);
+        //chain->SetBranchAddress("phoSCE", &phoSCE_);
+
+        phoSCEta_ = new vector<float>;
+        chain->SetBranchStatus("phoSCEta",1);
+        chain->SetBranchAddress("phoSCEta", &phoSCEta_);
+
+        //phoESEn_ = new vector<float>;
+        //chain->SetBranchStatus("phoESEn",1);
+       // chain->SetBranchAddress("phoESEn", &phoESEn_);
+
+        //phoSCPhi_ = new vector<float>;
+        //chain->SetBranchStatus("phoSCPhi",1);
+        //chain->SetBranchAddress("phoSCPhi", &phoSCPhi_);
+
+        //phoESEnP1_ =  new vector<float>;
+        //chain->SetBranchStatus("phoESEnP1",1);
+        //chain->SetBranchAddress("phoESEnP1", &phoESEnP1_);
+
+       // phoESEnP2_ =  new vector<float>;
+       // chain->SetBranchStatus("phoESEnP2",1);
+       // chain->SetBranchAddress("phoESEnP2", &phoESEnP2_);
+
+        //phoSCEtaWidth_ = new vector<float>;
+        //chain->SetBranchStatus("phoSCEtaWidth",1);
+       // chain->SetBranchAddress("phoSCEtaWidth",&phoSCEtaWidth_);
+
+       // phoSCPhiWidth_ = new vector<float>;
+      //  chain->SetBranchStatus("phoSCPhiWidth",1);
+       // chain->SetBranchAddress("phoSCPhiWidth",&phoSCPhiWidth_);
+
+       // phoR9_= new vector<float>;
+       // chain->SetBranchStatus("phoR9",1);
+       // chain->SetBranchAddress("phoR9", &phoR9_);
+
+      //  phoSCBrem_ = new vector<float>;
+       // chain->SetBranchStatus("phoSCBrem",1);
+        //chain->SetBranchAddress("phoSCBrem", &phoSCBrem_);
+
+       // phoSCRawE_= new vector<float>;
+       // chain->SetBranchStatus("phoSCRawE",1);
+       // chain->SetBranchAddress("phoSCRawE",&phoSCRawE_);
+
 	phoIDbit_ = new vector<UShort_t>;
 	chain->SetBranchStatus("phoIDbit",1);
         chain->SetBranchAddress("phoIDbit", &phoIDbit_);

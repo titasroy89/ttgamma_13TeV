@@ -260,6 +260,18 @@ public:
 	vector<float>*  elePFNeuIso04_;
 	// Photon
 	Int_t    nPho_;
+	 vector<float>*  phoSCE_;
+        vector<float>*  phoSCRawE_;
+        vector<float>*  phoESEn_;
+        vector<float>*  phoESEnP1_;
+        vector<float>*  phoESEnP2_;
+        vector<float>*  phoSCEta_;
+        vector<float>*  phoSCPhi_;
+        vector<float>*  phoSCEtaWidth_;
+        vector<float>*  phoSCPhiWidth_;
+        vector<float>*  phoSCBrem_;
+        vector<int>*    phohasPixelSeed_;
+
 	vector<unsigned short>* phoIDbit_;
 	vector<ULong_t>* phoTrg_;
 	vector<ULong_t>* phoTrgFilter_;
@@ -408,17 +420,7 @@ public:
 	vector<int>*    phoGenGMomPID_;
 	vector<int>*    phoGenMomPID_;
 	vector<float>*  phoGenMomPt_;
-	vector<float>*  phoSCE_;
-	vector<float>*  phoSCRawE_;
-	vector<float>*  phoESEn_;
-	vector<float>*  phoSCEt_;
-	vector<float>*  phoSCEta_;
-	vector<float>*  phoSCPhi_;
-	vector<float>*  phoSCEtaWidth_;
-	vector<float>*  phoSCPhiWidth_;
-	vector<float>*  phoSCBrem_;
 	vector<int>*    phoOverlap_;
-	vector<int>*    phohasPixelSeed_;
 	//vector<int>*    phoSeedBCE_;
 	vector<int>*    phoEleVeto_;
 	Int_t    phoESDetId_[maxP][2];
@@ -518,6 +520,7 @@ public:
 	vector<float>*  muEta_;
 	vector<float>*  muPhi_;
 	vector<int>*    muCharge_;
+	vector<unsigned short>* muIDbit_;
 	vector<float>*  muPt_;
 	vector<float>*  muPz_;
 	vector<float>*  muVtx_x_;

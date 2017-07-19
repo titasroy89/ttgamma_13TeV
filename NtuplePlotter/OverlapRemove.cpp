@@ -81,7 +81,7 @@ bool overlapMadGraph(EventTree* tree){
 	const double Eta_cut = 3.0;
 	bool haveOverlap = false;
 	for(int mcInd=0; mcInd<tree->nMC_; ++mcInd){
-		if(tree->mcIndex->at(mcInd) > 100) break;
+		//if(tree->mcIndex->at(mcInd) > 100) break;
 		if(tree->mcPID->at(mcInd)==22 &&
 		tree->mcPt->at(mcInd) > Et_cut &&
 		fabs(tree->mcEta->at(mcInd)) < Eta_cut &&

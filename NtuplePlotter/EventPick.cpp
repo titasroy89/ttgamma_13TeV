@@ -47,9 +47,9 @@ EventPick::EventPick(std::string titleIn){
 	// assign cut values
 	veto_jet_dR = 0.1;
 	veto_jet_lep_dR = 0.4;
-	veto_jet_pho_dR = 0.4;
-	veto_pho_jet_dR = 0.7;
-	veto_pho_lep_dR = 0.7;
+	veto_jet_pho_dR = 0.1;
+	veto_pho_jet_dR = 0.4;
+	veto_pho_lep_dR = 0.4;
 	MET_cut = 20.0;
 	no_trigger = false;
 	Jet_Pt_cut_1 = 30; // change this to 25.
@@ -82,10 +82,10 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 		bool goodJet = true;
 		//remove jets too close to electrons	
 		for(std::vector<int>::const_iterator eleInd = selector->Electrons.begin(); eleInd != selector->Electrons.end(); eleInd++)
-			if(dR_jet_ele(*jetInd, *eleInd) <  veto_jet_lep_dR) goodJet = false;
+			if(dR_jet_ele(*jetInd, *eleInd) < veto_jet_lep_dR) goodJet = false;
 		//remove jets too close to muons
 		for(std::vector<int>::const_iterator muInd = selector->Muons.begin(); muInd != selector->Muons.end(); muInd++)
-			if(dR_jet_mu(*jetInd, *muInd) <  veto_jet_lep_dR) goodJet = false;
+			if(dR_jet_mu(*jetInd, *muInd) < veto_jet_lep_dR) goodJet = false;
 //		// remove jets too close to photons
 		for(std::vector<int>::const_iterator phoVi = selector->PhotonsPresel.begin(); phoVi != selector->PhotonsPresel.end(); phoVi++)
                         if(dR_jet_pho(*jetInd, *phoVi) <  veto_jet_pho_dR) goodJet = false;
@@ -152,19 +152,21 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 //	for(int phoVi = 0; phoVi < selector->PhotonsPresel.size(); phoVi++){
 	for(std::vector<int>::const_iterator phoVi = selector->PhotonsPresel.begin();phoVi != selector->PhotonsPresel.end(); phoVi++){
 		bool goodPhoton = true;
+		for(std::vector<int>::const_iterator jetInd = Jets.begin();jetInd != Jets.end(); jetInd++){
 		 //remove photons close to jets
 	//	for(int jetInd = 0; jetInd < tree->nJet_; jetInd++){
 		//	double drjp = dR_jet_pho(jetInd, selector->PhotonsPresel.at(phoVi));
-		//	double drjp = dR_jet_pho(jetInd, *phoVi);
+			double drjp = dR_jet_pho(*jetInd, *phoVi);
 		//	if(tree->jetPt_->at(jetInd) > 20 && veto_jet_dR <= drjp && drjp < veto_pho_jet_dR) goodPhoton = false;
-		//	if (drjp < veto_pho_jet_dR) goodPhoton = false;
-	//	}
+			if (drjp < veto_pho_jet_dR) goodPhoton = false;
+		}
+		
 		// and electrons
 	//	for(std::vector<int>::iterator eleInd = Electrons.begin(); eleInd != Electrons.end(); eleInd++)
 	//		if(dR_ele_pho(*eleInd, selector->PhotonsPresel.at(phoVi)) < veto_pho_lep_dR) goodPhoton = false;
 		// and muons too; 0.3 is dR cut between photon and anything in MadGraph 2 to 7 ttgamma  
-	//	for(std::vector<int>::iterator muInd = Muons.begin(); muInd != Muons.end(); muInd++)
-	//		if(dR_mu_pho(*muInd, selector->PhotonsPresel.at(phoVi)) < 0.3) goodPhoton = false;
+		for(std::vector<int>::iterator muInd = Muons.begin(); muInd != Muons.end(); muInd++)
+			if(dR_mu_pho(*muInd, *phoVi) < veto_pho_lep_dR) goodPhoton = false;
 
 		if(goodPhoton){
 		//	PhotonsPresel.push_back(selector->PhotonsPresel.at(phoVi));
@@ -199,7 +201,7 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	else passSkim = false;
 	if(passSkim && Jets.size() >= Njet_ge+1 ) {cutFlow->Fill(7); cutFlowWeight->Fill(7,weight);}
         else passSkim = false;
-	if(passSkim && Jets.size() >= Njet_ge+2 ) {cutFlow->Fill(8); cutFlowWeight->Fill(8,weight);}
+	if(passSkim && Jets.size() >= Njet_ge+2 ) {cutFlow->Fill(8); cutFlowWeight->Fill(8,weight);std::cout <<"Event which passes 3jet level sel:"<<tree->event_ <<std::endl;}
         else passSkim = false;
 	if ( passSkim &&bJets.size() >= NBjet_ge) {cutFlow->Fill(9); cutFlowWeight->Fill(9,weight);passPreSel=true;}
         else passSkim = false;
@@ -207,7 +209,8 @@ void EventPick::process_event(const EventTree* inp_tree, const Selector* inp_sel
 	else passPreSel = false;	
         if ( passPreSel &&bJets.size() >= NBjet_ge +1 ) {cutFlow->Fill(11); cutFlowWeight->Fill(11,weight);}
         else passPreSel = false;
-	if(passPreSel && Photons.size() >= Npho_ge) { cutFlow->Fill(12); cutFlowWeight->Fill(12,weight);passAll = true;} //change this later
+	if(passPreSel && Photons.size() >= Npho_ge) { cutFlow->Fill(12); cutFlowWeight->Fill(12,weight);passAll = true;}// std::cout <<"Event which passes photon sel:"<<tree->event_ <<std::endl;}
+	
 	else passAll = false ; 
 	
 	// require >=1 photon
@@ -346,13 +349,13 @@ void EventPick::print_cutflow(){
 	std::cout << "Events with = " << Nmu_eq << " muon     " << cutFlow->GetBinContent(4) << std::endl;
 	std::cout << "Events with <= " << NlooseMuVeto_le << " loose muons " << cutFlow->GetBinContent(5) << std::endl;
 	std::cout << "Events with <= " << NEleVeto_le << " electrons " << cutFlow->GetBinContent(6) << std::endl;
-	std::cout << "Events with >= " << Njet_ge << " jets        " << cutFlow->GetBinContent(7) << std::endl;
-	std::cout << "Events with >= " << Njet_ge+1 << " jets        " << cutFlow->GetBinContent(8) << std::endl;
- 	std::cout << "Events with >= " << Njet_ge+2 << " jets     " << cutFlow->GetBinContent(9) << std::endl;
-	std::cout << "Events with >= " << NBjet_ge << " 1bjets     " << cutFlow->GetBinContent(10) << std::endl;
+	std::cout << "Events with >= " << Njet_ge << " jets   " << cutFlow->GetBinContent(7) << std::endl;
+	std::cout << "Events with >= " << Njet_ge+1 << " jets " << cutFlow->GetBinContent(8) << std::endl;
+ 	std::cout << "Events with >= " << Njet_ge+2 << " jets " << cutFlow->GetBinContent(9) << std::endl;
+	std::cout << "Events with >= " << NBjet_ge << " bjets " << cutFlow->GetBinContent(10) << std::endl;
 	std::cout << "Events with >= " << Njet_ge+3 << " jets "<< cutFlow->GetBinContent(11) << std::endl;
-        std::cout << "Events with >= " << NBjet_ge+1 <<     " 2bjets "<< cutFlow->GetBinContent(12) << std::endl;
-	std::cout << "Events with >= 1 photon      " << cutFlow->GetBinContent(13) << std::endl; //change this later
+        std::cout << "Events with >= " << NBjet_ge+1 << " bjets "<< cutFlow->GetBinContent(12) << std::endl;
+	std::cout << "Events with >= 1 photon " << cutFlow->GetBinContent(13) << std::endl; //change this later
 	std::cout << std::endl;
 }
 
@@ -389,7 +392,7 @@ void EventPick::clear_vectors(){
 }
 
 double EventPick::dR_jet_ele(int jetInd, int eleInd){
-	return dR(tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), tree->eleSCEta_->at(eleInd), tree->elePhi_->at(eleInd));
+	return dR(tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), tree->eleEta_->at(eleInd), tree->elePhi_->at(eleInd));
 }
 double EventPick::dR_jet_mu(int jetInd, int muInd){
 	return dR(tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd));
@@ -398,7 +401,7 @@ double EventPick::dR_jet_pho(int jetInd, int phoInd){
 	return dR(tree->jetEta_->at(jetInd), tree->jetPhi_->at(jetInd), tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd));
 }
 double EventPick::dR_ele_pho(int eleInd, int phoInd){
-	return dR(tree->eleSCEta_->at(eleInd), tree->elePhi_->at(eleInd), tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd));
+	return dR(tree->eleEta_->at(eleInd), tree->elePhi_->at(eleInd), tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd));
 }
 double EventPick::dR_mu_pho(int muInd, int phoInd){
 	return dR(tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->phoEta_->at(phoInd), tree->phoPhi_->at(phoInd));
