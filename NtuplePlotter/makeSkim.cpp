@@ -64,6 +64,7 @@ int main(int ac, char** av){
 
 	newTree->Write();
 	evtPick->print_cutflow();
+	evtPick->cutFlow->Write();
 	std::map<std::string, TH1F*> histMap;
 	// copy histograms
 	for(int fileInd = 2; fileInd < ac; ++fileInd){
