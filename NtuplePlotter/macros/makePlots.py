@@ -548,6 +548,18 @@ def loadMCTemplates(varList, inputDir, prefix, titleSuffix, fillStyle):
 	MCtemplates['TTbar'] = distribution('TTbar'+titleSuffix, 't#bar{t}+jets', [
 		(templPrefix+'TTbar.root', gSF*TTbar_xs/TTbar_num),
 		], varList ,ROOT.kRed -7, fillStyle)
+
+
+
+	MCtemplates['TTbar_signal'] = distribution('TTbar_signal'+titleSuffix, 't#bar{t} signal', [
+		   (templPrefix+'ttgamma_hadronic.root', gSF*ttG_hadronic_xs/ttG_hadronic_num),
+		   (templPrefix+'ttgamma_semileptfromT.root', gSF*ttG_semileptT_xs/ttG_semileptT_num),
+		   (templPrefix+'ttgamma_dilept.root', gSF*ttG_dilept_xs/ttG_dilept_num),
+		   (templPrefix+'ttgamma_semileptfromTbar.root', gSF*ttG_semileptTbar_xs/ttG_semileptTbar_num),
+		   (templPrefix+'TTbar.root', gSF*TTbar_xs/TTbar_num),
+		   ], varList ,ROOT.kRed, fillStyle)
+
+
 	###################################
 	#return MCtemplates
 	###################################
@@ -655,30 +667,20 @@ def saveBarrelFitTemplates(inputDir, inputData,  outFileName):
 	saveTemplatesToFile([DataTempl_b] +  MCTempl_b.values() + MCTempl_rs_b.values() + MCTempl_fe_b.values() + MCTempl_fjrb_b.values(), varList, outFileName)
 
 def savePreselTemplates(inputDir, inputData, varList_all, outFileName):
-	if WJetsSF != 1.0 or TopSF != 1.0:
-		print 'We want to save templates for M3 fit, but the SFs are not 1.0'
-		print 'exiting'
-		return
 	varList = varList_all
 	
 	DataTempl = loadDataTemplate(varList, inputData, 'hist_PreSel_top_')#change
-#	if QCDSF > 0.0001:
-#		QCDTempl = loadQCDTemplate(varList, qcdDir, 'hist_PreSel_top_') #change
-	#else:
-	#	print 'The purpose of this function is to save templates for M3 fit, without QCD it is useless'
 	
 	MCTemplDict = loadMCTemplates(varList, inputDir, 'hist_PreSel_top_','',1001) #change
 	MCTempl = []
-	MCTempl.append(MCTemplDict['TTgamma'])
+	MCTempl.append(MCTemplDict['TTbar_signal'])
 	MCTempl.append(MCTemplDict['TTV'])
-	MCTempl.append(MCTemplDict['TTbar'])
+#	MCTempl.append(MCTemplDict['TTbar'])
 	MCTempl.append(MCTemplDict['SingleTop'])
 	MCTempl.append(MCTemplDict['WJets'])
 	MCTempl.append(MCTemplDict['ZJets'])
 	MCTempl.append(MCTemplDict['QCD'])
 	MCTempl.append(MCTemplDict['Vgamma'])
-#	if QCDSF > 0.0001:
-#		MCTempl.append(QCDTempl)
 	saveTemplatesToFile([DataTempl] + MCTempl, varList, outFileName)
 
 def makeQCDPlots(varList,qcdDir,outDir):
@@ -934,7 +936,7 @@ if skipAfterMET:
 #if systematic == 'QCD_down':
 #	QCDSF *= 0.5
 # save templates for M3 fit
-savePreselTemplates(InputHist,DataHist, varList_all,'templates_presel.root')
+savePreselTemplates(InputHist,DataHist, ['M3'],'templates_presel.root')
 
 # do M3 fit, update SF for Top and WJets
 #qcd_fit.M3file = 'templates_presel.root'

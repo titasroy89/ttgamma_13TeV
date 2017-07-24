@@ -30,7 +30,7 @@ public:
 	std::vector<int> bJets;
 	// indices and selection cuts for photons
 	std::vector<int> Photons;
-	std::vector<int> PhotonsPresel;
+	std::vector<int> PhotonSel;
 	std::vector<bool> PhoPassChHadIso;
 	std::vector<bool> PhoPassPhoIso;
 	std::vector<bool> PhoPassSih;
@@ -48,6 +48,7 @@ public:
 	
 	int Njet_ge;
 	int NBjet_ge;
+	int NBjet_tag;
 	int Jet_Pt_cut_1;
 	int Jet_Pt_cut_2;
 	int Jet_Pt_cut_3;	
